@@ -35,6 +35,8 @@ describe('Phase 0 foundation', () => {
     expect(history.events.map((event) => event.type)).toEqual(['collapse', 'return']);
     expect(history.development.adaptation).toBeGreaterThan(0);
     expect(history.development.sheltering).toBeGreaterThan(0);
+    expect(history.development.returnAwareness).toBeGreaterThan(0);
+    expect(history.development.corridorStrength).toBeGreaterThan(0);
     recordDistrictDamage(history, -20);
     expect(history.development.westSafety).toBeLessThan(history.development.eastSafety);
     expect(history.development.eastTransit).toBeGreaterThan(history.development.westTransit);

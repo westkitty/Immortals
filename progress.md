@@ -41,3 +41,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added objective/public history separation, evidence-strength decay into disputed memory, `A` archaeology recovery, and inspector output for both accounts.
 - Added material relic lineage: collapse events mint relics, returns can reuse buried material in foundations, and the full lineage is persisted and exposed in text state.
 - Added `src/deepTime.ts`: deterministic non-rendering projection to Year 100,000 with population, technology, memory, stratigraphy, succession count, and replay hash; `T` exposes it in the 3D runtime.
+- Added return-aware development metrics: recurrence awareness and protective corridor strength grow from repeated collapse/return cycles and persist in the campaign state.
