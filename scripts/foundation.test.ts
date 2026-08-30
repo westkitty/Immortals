@@ -32,5 +32,7 @@ describe('Phase 0 foundation', () => {
     advanceHistory(history);
     expect(history.year).toBe(100);
     expect(history.events.map((event) => event.type)).toEqual(['collapse', 'return']);
+    expect(history.development.adaptation).toBeGreaterThan(0);
+    expect(history.development.sheltering).toBeGreaterThan(0);
   });
 });
