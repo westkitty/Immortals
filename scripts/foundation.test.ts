@@ -66,4 +66,14 @@ describe('Phase 0 foundation', () => {
     expect(html).toContain('id="history-map"');
     expect(readFileSync(join(root, 'src/main.ts'), 'utf8')).toContain('historyViewYear');
   });
+
+  it('exposes Phase 9 accessibility and performance boundaries', () => {
+    const html = readFileSync(join(root, 'index.html'), 'utf8');
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain('aria-label="Keyboard controls"');
+    const source = readFileSync(join(root, 'src/main.ts'), 'utf8');
+    expect(source).toContain('renderer.getPixelRatio()');
+    expect(source).toContain('drawCalls');
+    expect(readFileSync(join(root, 'src/style.css'), 'utf8')).toContain('prefers-reduced-motion');
+  });
 });

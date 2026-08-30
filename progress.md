@@ -49,3 +49,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added a compact historical map strip to anchor the three recurring impact landmarks visually.
 - Added a focused regression check for the scrubber, year output, and map contract.
 - TODO: complete the accessibility, presentation, and performance instrumentation pass; browser protocol startup remains blocked on this host.
+
+## Phase 9 implementation
+
+- Added live status announcements, labeled keyboard controls, labeled history controls, and visible keyboard focus states.
+- Added reduced-motion CSS and a responsive mobile HUD/history layout.
+- Added render pixel-ratio and draw-call fields to the deterministic text observation payload.
+- TODO: perform final integrated acceptance in Phase 10; browser protocol startup remains blocked on this host.
