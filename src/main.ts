@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { advanceHistory, archaeologyRecover, createHistory, recordDistrictDamage, recordEvent, type CampaignHistory } from './history';
+import { simulateDeepTime, type DeepTimeState } from './deepTime';
 
 type Building = { mesh: THREE.Mesh; x: number; z: number; width: number; depth: number; height: number };
 type Scar = { x: number; z: number; year: number; radius: number; mesh: THREE.Mesh };
@@ -24,7 +25,7 @@ const landmark = new THREE.Mesh(new THREE.CylinderGeometry(10, 13, 28, 8), new T
 const player = new THREE.Mesh(new THREE.CapsuleGeometry(1.1, 2.2, 6, 12), new THREE.MeshStandardMaterial({ color: '#eaf8ff', emissive: '#2e7f99', emissiveIntensity: .8 })); player.position.set(0, 2.2, 35); player.castShadow = true; scene.add(player);
 const rival = new THREE.Mesh(new THREE.CapsuleGeometry(1.2, 2.4, 6, 12), new THREE.MeshStandardMaterial({ color: '#ff7187', emissive: '#721d3b', emissiveIntensity: .65 })); rival.position.set(35, 2.4, 12); rival.castShadow = true; scene.add(rival);
 const velocity = new THREE.Vector3(); const grappleLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: '#84e4f3' })); grappleLine.visible = false; scene.add(grappleLine);
-let started = false, paused = false, wallRun = false, dashTimer = 0, grappleTarget: THREE.Vector3 | null = null, rivalHealth = 100, rivalVelocity = new THREE.Vector3(), history: CampaignHistory = createHistory(), last = performance.now();
+let started = false, paused = false, wallRun = false, dashTimer = 0, grappleTarget: THREE.Vector3 | null = null, rivalHealth = 100, rivalVelocity = new THREE.Vector3(), history: CampaignHistory = createHistory(), deepTime: DeepTimeState | null = null, last = performance.now();
 const SAVE_KEY = 'immortals-3d-history-v1';
 function saveState() { localStorage.setItem(SAVE_KEY, JSON.stringify({ history, rivalHealth, player: player.position.toArray(), buildings: buildings.map((b) => ({ height: b.height, visible: b.mesh.visible })), scars: scars.map(({ x, z, year: scarYear, radius }) => ({ x, z, year: scarYear, radius })) })); showStatus('HISTORY SAVED LOCALLY'); }
 function createScar(x: number, z: number, scarYear: number, radius = 7) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 1.2, .12, 32), new THREE.MeshStandardMaterial({ color: '#10161b', emissive: '#402116', emissiveIntensity: .4 })); mesh.position.set(x, .08, z); scene.add(mesh); const scar = { x, z, year: scarYear, radius, mesh }; scars.push(scar); return scar; }
@@ -49,3 +50,6 @@ addEventListener('keydown', (event) => { const key = event.key.toLowerCase(); if
 document.querySelector('#enter')?.addEventListener('click', () => { loadState(); started = true; document.querySelector('#title')?.classList.add('hidden'); document.querySelector('#hud')?.classList.remove('hidden'); document.querySelector('#help')?.classList.remove('hidden'); showStatus(history.year ? `YEAR ${history.year} // RETURNED TO THE CITY` : 'TRAVERSAL ONLINE'); }); camera.position.set(0, 17, 62); camera.lookAt(player.position);
 window.render_game_to_text = () => JSON.stringify({ coordinateSystem: 'Three.js world: x east, y up, z south', mode: paused ? 'paused' : started ? 'explore' : 'title', year: history.year, development: history.development, player: { x: +player.position.x.toFixed(2), y: +player.position.y.toFixed(2), z: +player.position.z.toFixed(2), vx: +velocity.x.toFixed(2), vy: +velocity.y.toFixed(2), vz: +velocity.z.toFixed(2) }, rival: { x: +rival.position.x.toFixed(2), z: +rival.position.z.toFixed(2), health: rivalHealth }, history: history.events.slice(-12), relics: history.relics, scars: scars.map(({ x, z, year: scarYear, radius }) => ({ x, z, year: scarYear, radius })), wallRun, grapple: !!grappleTarget, dashCooldown: Math.max(0, +dashTimer.toFixed(2)), buildings: buildings.map((b) => ({ x: b.x, z: b.z, height: b.height, visible: b.mesh.visible })) });
 window.advanceTime = (ms: number) => { const steps = Math.max(1, Math.round(ms / (1000 / 60))); for (let i = 0; i < steps; i += 1) update(1 / 60); renderer.render(scene, camera); }; requestAnimationFrame(frame);
+addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 't' && started) { deepTime = simulateDeepTime(1701); showStatus('DEEP TIME // YEAR 100,000 REACHED'); } });
+const baseRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => { const payload = JSON.parse(baseRenderGameToText()); payload.deepTime = deepTime; return JSON.stringify(payload); };

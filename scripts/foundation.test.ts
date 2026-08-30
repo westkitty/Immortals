@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { advanceHistory, archaeologyRecover, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
+import { simulateDeepTime } from '../src/deepTime';
 
 const root = join(import.meta.dirname, '..');
 
@@ -46,5 +47,13 @@ describe('Phase 0 foundation', () => {
 
   it('produces different infrastructure futures for west versus east damage', () => {
     expect(counterfactualDivergence().differs).toBe(true);
+  });
+
+  it('reaches Year 100,000 deterministically without rendering each battle', () => {
+    const first = simulateDeepTime(1701);
+    expect(first.year).toBe(100000);
+    expect(first.successions).toBe(10);
+    expect(simulateDeepTime(1701).hash).toBe(first.hash);
+    expect(simulateDeepTime(1702).hash).not.toBe(first.hash);
   });
 });
