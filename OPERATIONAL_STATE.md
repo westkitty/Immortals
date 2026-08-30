@@ -4,9 +4,9 @@ CURRENT PHASE: Phase 1 partial.
 
 REMOTE: `origin` configured as `git@github.com:westkitty/Immortals.git`; remote was empty at initialization probe.
 
-CORE LOOP: Existing canvas prototype supports battle, damage, local history, century transition, changed world rendering, and return inspection. The full 3D contract is not yet complete.
+CORE LOOP: The package entry now launches a real Three.js/WebGL 3D city traversal slice. The preserved canvas prototype still supports battle, damage, local history, century transition, changed world rendering, and return inspection. Combat-to-history is not yet connected to the 3D slice.
 
-CURRENT CAPABILITIES: `century1.html` is the selected runtime; three original HTML prototypes remain preserved; package/build/typecheck/test scripts are established; the 2D runtime has sprint, jump/glide, wall traversal, dash, grapple, rebound, dive, shockwave, collision, camera, resize, and touch paths.
+CURRENT CAPABILITIES: `src/main.ts` is the package runtime with procedural 3D city geometry, camera, sprint, jump/glide-style descent, wall traversal, dash, grapple, shockwave launch, pause, resize, and text/time hooks. Three original HTML prototypes remain preserved.
 
 LAST VALIDATION: `npm run build`, `npm run typecheck`, and `npm test` pass. Playwright captured a post-start city screenshot before the host's browser protocol process began hanging; no console-error artifact was emitted.
 

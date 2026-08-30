@@ -6,7 +6,7 @@ Every fight is followed by a century. Physical damage is not reset: it enters a 
 
 ## Current playable slice
 
-`century1.html` is the current runtime. It provides a canvas-based city, player movement, immortal combat, structural damage, craters, century transition, local save/load, historical inspection, and a west/east divergence proof.
+The package entry `src/main.ts` now provides a Three.js/WebGL 3D traversal slice with a procedural city, third-person camera, sprint, jump, wall traversal, dash, grapple, shockwave launch, resize, pause, and deterministic observation hooks. `century1.html` remains the richer 2D combat/history prototype and is preserved as a fallback.
 
 ## Protected requirements
 

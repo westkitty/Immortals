@@ -6,7 +6,17 @@
     <title>Every Fight Is Followed By A Century</title>
   </head>
   <body>
-    <p>Loading the local game…</p>
-    <script>location.replace('./century1.html');</script>
+    <main id="app" aria-label="Every Fight Is Followed By A Century 3D traversal slice">
+      <div id="title" class="panel">
+        <p class="eyebrow">RETURN CYCLE 000 // PLAYABLE CITY</p>
+        <h1>EVERY FIGHT IS<br />FOLLOWED BY A CENTURY</h1>
+        <p>You are immortal. The city is not. Enter the first battlefield and learn how to move through it.</p>
+        <button id="enter">ENTER THE CITY</button>
+      </div>
+      <div id="hud" class="hud hidden"><div><span class="label">YEAR</span><strong id="year">0</strong></div><div><span class="label">DISTRICT</span><strong id="district">WESTERN QUARTER</strong></div><div><span class="label">VELOCITY</span><strong id="velocity">0</strong></div><div id="status">TRAVERSAL ONLINE</div></div>
+      <div id="help" class="help hidden">WASD move · SHIFT sprint · SPACE jump / wall climb · Q air dash · E grapple · R shockwave · ESC pause</div>
+      <div id="pause" class="panel pause hidden"><p class="eyebrow">CITY PAUSED</p><h2>THE CENTURY WAITS</h2><p>Press Escape to resume.</p></div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

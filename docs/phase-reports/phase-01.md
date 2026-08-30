@@ -8,20 +8,23 @@ Create a genuinely playable city traversal slice with superhuman movement and a 
 
 # Implemented
 
-The preserved `century1.html` runtime already contains a playable canvas city and source paths for sprint, jump, glide, wall contact/run/climb, air dash, grapple, rebound, dive, shockwave launch, collision, camera tracking, resize, and touch controls.
+- Added a real Three.js/WebGL procedural 3D city entry in `src/main.ts`.
+- Added a player and third-person camera with sprint, jump, wall traversal, air dash, grapple, shockwave launch, pause, resize, and deterministic observation hooks.
+- Preserved the existing `century1.html` combat/history runtime and other prototypes.
 
 # Files changed
 
-Phase-state documentation only. The existing runtime was not rewritten because the required 3D renderer is not present and the browser validation lane is blocked.
+The package entry and architecture metadata now point to the new 3D traversal runtime. Existing prototypes remain unchanged.
 
 # Architecture changes
 
-None. The architecture remains the truthful Canvas 2D boundary recorded in Phase 0.
+The package renderer is now Three.js/WebGL with procedural geometry. Rigid-body physics, combat, and historical persistence remain deferred to later phases.
 
 # Tests executed
 
 - Source inspection of traversal and input paths — PASS.
 - Phase 0 build/typecheck/unit checks remain passing.
+- Three.js entry build and hook regression test — PASS.
 - Browser journey — BLOCKED by Playwright protocol startup hang.
 
 # Browser evidence

@@ -17,7 +17,7 @@ const actions = JSON.stringify({ steps: [
   { buttons: ['space'], frames: 4 },
   { buttons: [], frames: 12 },
 ] });
-const result = spawn(process.execPath, [client, '--url', 'http://127.0.0.1:4173', '--click-selector', '#newGame', '--actions-json', actions, '--iterations', '2', '--pause-ms', '250'], { cwd: root, stdio: 'inherit' });
+const result = spawn(process.execPath, [client, '--url', 'http://127.0.0.1:4173', '--click-selector', '#enter', '--actions-json', actions, '--iterations', '2', '--pause-ms', '250'], { cwd: root, stdio: 'inherit' });
 const exitCode = await new Promise((resolve) => result.once('exit', (code) => resolve(code ?? 1)));
 server.kill('SIGTERM');
 if (exitCode !== 0) process.exit(exitCode);
