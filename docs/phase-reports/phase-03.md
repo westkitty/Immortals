@@ -11,6 +11,7 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 - Added local save/load for player position, rival state, year, and building collapse state.
 - Added a 100-year `C` transition after the rival is defeated.
 - Preserved collapsed structures across the return and exposed state through the deterministic text hook.
+- Added typed `HistoryEvent` records for strikes, collapses, and returns; saved history is restored with the campaign.
 
 # Files changed
 
@@ -18,7 +19,7 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 
 # Architecture changes
 
-The 3D runtime now owns a minimal persistent return envelope. The mature `century1.html` event/history engine remains separate until the canonical bridge is implemented.
+The 3D runtime now owns a typed causal event ledger and persistent return envelope. The mature `century1.html` event/history engine remains separate until the shared inspector bridge is implemented.
 
 # Tests executed
 

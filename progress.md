@@ -32,3 +32,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added `C` century advance after defeating the rival; collapsed structures remain absent after return.
 - Added load-on-enter and exposed year/history state through `render_game_to_text`.
 - TODO: replace the minimal local envelope with the canonical battle/history event bridge and richer historical inspection.
+- Added `src/history.ts` with typed `HistoryEvent` records and a 100-year return clock; 3D strike, collapse, and return actions now emit events into the saved history ledger.

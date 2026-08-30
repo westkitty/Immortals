@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { advanceHistory, createHistory, recordEvent } from '../src/history';
 
 const root = join(import.meta.dirname, '..');
 
@@ -23,5 +24,13 @@ describe('Phase 0 foundation', () => {
     expect(source).toContain('window.render_game_to_text');
     expect(source).toContain('window.advanceTime');
     expect(readFileSync(join(root, 'index.html'), 'utf8')).toContain('id="enter"');
+  });
+
+  it('records causal events and advances the return clock', () => {
+    const history = createHistory();
+    recordEvent(history, { year: 0, type: 'collapse', siteId: 'bridge-west', consequence: 'Bridge becomes inherited ruin.' });
+    advanceHistory(history);
+    expect(history.year).toBe(100);
+    expect(history.events.map((event) => event.type)).toEqual(['collapse', 'return']);
   });
 });
