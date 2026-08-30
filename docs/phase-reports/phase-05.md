@@ -41,7 +41,7 @@ Not measured.
 
 # Known limitations
 
-Archaeology currently recovers the first weakened event; site selection, multiple independent evidence carriers, and a dedicated visual inspector panel are not yet modeled. The current H inspector is represented through runtime status and deterministic text observation.
+Archaeology currently recovers the first weakened event; site selection and multiple independent evidence carriers are not yet modeled. The visible H inspector is browser-covered with objective consequence, public account, evidence percentage, and archive controls.
 
 # Completion status
 
