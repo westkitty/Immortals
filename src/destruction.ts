@@ -25,3 +25,12 @@ export function applyStructureImpact(structure: StructureState, force: number): 
   structure.collapsed = structure.integrity <= structure.maxIntegrity * .18 || structure.support <= .12;
   return { damage, integrity: structure.integrity, collapsed: structure.collapsed, supportFailure: structure.support <= .12 };
 }
+
+export function applySupportLoad(structure: StructureState, force: number): ImpactResult {
+  if (structure.collapsed || force <= 0) return { damage: 0, integrity: structure.integrity, collapsed: structure.collapsed, supportFailure: false };
+  const damage = Math.min(structure.integrity, force * 0.5);
+  structure.integrity = Math.max(0, structure.integrity - damage);
+  structure.support = Math.max(0, structure.support - force / structure.maxIntegrity);
+  structure.collapsed = structure.integrity <= structure.maxIntegrity * 0.18 || structure.support <= 0.12;
+  return { damage, integrity: structure.integrity, collapsed: structure.collapsed, supportFailure: structure.support <= 0.12 };
+}

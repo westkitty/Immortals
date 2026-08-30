@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { advanceHistory, archaeologyRecover, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
 import { simulateDeepTime } from '../src/deepTime';
 import { Action, createInputState } from '../src/input';
-import { applyStructureImpact, createStructureState } from '../src/destruction';
+import { applyStructureImpact, applySupportLoad, createStructureState } from '../src/destruction';
 import { applyDamage } from '../src/combat';
 
 const root = join(import.meta.dirname, '..');
@@ -63,6 +63,15 @@ describe('Phase 0 foundation', () => {
     expect(collapse.collapsed).toBe(true);
     expect(structure.support).toBeLessThan(0.12);
     expect(applyStructureImpact(structure, 100).damage).toBe(0);
+  });
+
+  it('propagates bounded support load without instantly destroying neighbors', () => {
+    const neighbor = createStructureState('neighbor-1', 100);
+    const load = applySupportLoad(neighbor, 18);
+    expect(load.damage).toBe(9);
+    expect(neighbor.integrity).toBe(91);
+    expect(neighbor.support).toBeCloseTo(0.82);
+    expect(load.collapsed).toBe(false);
   });
 
   it('applies bounded combat damage and reports defeat', () => {

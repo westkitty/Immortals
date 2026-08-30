@@ -60,7 +60,8 @@ try {
   }
   const collapse = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   const collapsed = collapse.buildings.filter((building) => building.collapsed);
-  if (!collapsed.length || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, rubbleCount: collapse.rubbleCount, errors })}`);
+  const supportAffected = collapse.buildings.filter((building) => building.id !== 'building-1-1' && building.integrity < 100);
+  if (!collapsed.length || !supportAffected.length || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, supportAffected, rubbleCount: collapse.rubbleCount, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
@@ -81,7 +82,7 @@ try {
   const combatDefeat = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

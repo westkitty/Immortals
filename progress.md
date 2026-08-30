@@ -95,7 +95,7 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 
 ## Repair 2 — collapse lifecycle increment
 
-- Extended the browser journey to repeat shockwave impacts until a building reaches zero height, becomes hidden, and reports eight visible rubble chunks.
+- Extended the browser journey to repeat shockwave impacts until a building reaches zero height, becomes hidden, and reports visible rubble.
 - Fixed the browser harness startup race by waiting for Vite's readiness line before connecting; the full journey now completes with zero console errors.
 - Re-ran the full traversal, pause, structure-impact, collapse/rubble, and combat scenarios; inspected `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`.
 - `npm run verify` passes with 14 tests and `npm run test:browser` passes. Repair 2 remains in progress; bridge/support propagation, debris lifecycle, combat defeat flow, and rigid-body physics remain.
@@ -105,3 +105,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Made the in-game defeat transition explicit: the final bounded strike records a battle-won consequence, hides the rival, and persists the defeated health state.
 - Extended the browser journey to land three additional strikes, assert rival health `0`, `visible: false`, and the battle-won history event.
 - Repair 2 remains in progress; bridge/support propagation, debris lifecycle, and rigid-body physics remain.
+
+## Repair 2 — support propagation increment
+
+- Added bounded support-load propagation from a collapsed building to nearby visible neighbors.
+- Made collapse rubble idempotent so later shockwaves cannot duplicate chunks for an already hidden building.
+- Added unit and browser assertions for a neighbor taking support load without immediate collapse; the browser run reports neighbor integrity 91/support 0.82 and four rubble chunks while continuing to prove collapse, combat, defeat, and zero console errors.
+- Repair 2 remains in progress; bridge-wide propagation, debris lifecycle, and rigid-body physics remain.
