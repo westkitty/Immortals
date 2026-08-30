@@ -9,7 +9,7 @@ Create a genuinely playable city traversal slice with superhuman movement and a 
 # Implemented
 
 - Added a real Three.js/WebGL procedural 3D city entry in `src/main.ts`.
-- Added a player and third-person camera with sprint, long jump, momentum carry, explicit wall contact/surface classification, wall run, wall climb, rebound, directional air dash cooldown, line-of-sight grapple pull, glide, dive, hard-landing recovery, moving rideable debris, pause, resize, pointer lock, camera collision pull-in, and deterministic observation hooks.
+- Added a player and third-person camera with sprint, long jump, momentum carry, explicit wall contact/surface classification, wall run, wall climb, reachable traversal tower and browser-proven mantle, rebound, directional air dash cooldown, line-of-sight grapple pull, glide, dive, hard-landing recovery, moving rideable debris, pause, resize, pointer lock, camera collision pull-in, and deterministic observation hooks.
 - Preserved the existing `century1.html` combat/history runtime and other prototypes.
 
 # Files changed
@@ -25,7 +25,7 @@ The package renderer remains Three.js/WebGL with procedural geometry. Keyboard i
 - Source inspection of traversal and input paths — PASS.
 - Phase 0 build/typecheck/unit checks remain passing.
 - Three.js entry build and hook regression test — PASS.
-- `npm run test:browser` — PASS: deterministic sprint-jump, dash, glide, dive, open-air wall-run negative control, pause freeze, screenshot, and zero console errors.
+- `npm run test:browser` — PASS: normal-input climb → mantle route, deterministic sprint-jump, dash, glide, dive, open-air wall-run negative control, pause freeze, screenshot, and zero console errors.
 
 # Browser evidence
 
@@ -41,7 +41,7 @@ The browser observation reported device pixel ratio and draw-call count; a relea
 
 # Known limitations
 
-Wall-to-roof mantle, full multi-wall course completion, and release-grade performance measurement remain bounded follow-up work.
+Full multi-wall course completion and release-grade performance measurement remain bounded follow-up work.
 
 # Completion status
 

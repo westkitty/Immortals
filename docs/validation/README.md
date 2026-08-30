@@ -18,9 +18,7 @@ The Repair 0 browser screenshot was inspected after capture. It confirms that th
 
 ## Repair 1 boundary
 
-The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. Wall-to-roof mantle, a full multi-wall course, and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
-
-The runtime now contains an explicit mantle transition and HUD/text observation state. The current browser journey provides regression coverage but does not yet claim a positive normal-input wall-to-roof route.
+The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. A normal-input route now reaches the procedural traversal tower, climbs it, observes `mantling: true`, and reaches roof height. A full multi-wall course and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
 
 ## Repair 2 incremental boundary
 

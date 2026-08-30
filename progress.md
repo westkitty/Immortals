@@ -150,8 +150,8 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Inspected the collapse and deep-time screenshots; the browser run reports zero console errors. `npm run verify` passes with 15 tests.
 - Phase 5 and Phase 6 remain partial: richer evidence-carrier types, archaeology provenance, campaign-event coupling, snapshots, and mature simulator integration are not complete.
 
-## Phase 1 — mantle implementation increment
+## Phase 1 — mantle route completion increment
 
-- Added a bounded `MANTLE` traversal state that lifts a climbing player onto the roof when the wall-contact path reaches the building crown.
+- Added a reachable procedural traversal tower and a bounded `MANTLE` traversal state that lifts a climbing player onto the roof when the wall-contact path reaches the building crown.
 - Exposed mantle state through the HUD and `render_game_to_text`.
-- `npm run verify` and the full browser regression pass; a positive normal-input wall-to-roof course remains unproven and Phase 1 stays partial.
+- The browser gate now proves the normal-input climb → mantle route, then the full traversal/destruction/history regression; `npm run verify` passes with 15 tests. A full multi-wall course and release-grade performance measurement remain unclaimed.

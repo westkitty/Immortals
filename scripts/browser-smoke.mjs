@@ -28,6 +28,21 @@ try {
     await page.evaluate(() => window.advanceTime(50));
     return active;
   };
+  await hold(['w'], 700);
+  await page.keyboard.down('w');
+  await page.keyboard.down('Space');
+  let mantleSeen = false;
+  for (let step = 0; step < 90; step += 1) {
+    await page.evaluate(() => window.advanceTime(1000 / 60));
+    const sample = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+    mantleSeen ||= sample.traversal.mantling === true;
+  }
+  await page.keyboard.up('Space');
+  await page.keyboard.up('w');
+  const mantle = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (!mantleSeen || mantle.player.y < 15) throw new Error(`Mantle route failed: ${JSON.stringify({ mantleSeen, mantle })}`);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
   const sprintJump = await hold(['w', 'Shift', 'Space'], 220);
   const dash = await hold(['q'], 80);
   const glide = await hold(['g'], 100);

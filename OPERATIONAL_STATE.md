@@ -10,6 +10,6 @@ CURRENT CAPABILITIES: Repair 1 adds logical held/pressed/released actions, point
 
 LAST VALIDATION: `npm run verify` passes with 15 tests. `npm run test:browser` passes traversal, debris lifecycle, pause freeze, structure impact, full collapse/rubble, persistence, rival attack/response, rival defeat, century return, derived district policy output, `H` history ledger toggle, `A` archaeology recovery, deterministic `T` deep-time projection to Year 100,000, screenshots, and zero console errors. The browser harness waits for Vite readiness before connecting.
 
-NEXT PHASE: Continue Phase 5 — add richer evidence carriers and site-specific recovery; keep Phase 6 campaign coupling and the later simulator integration bounded and explicit.
+NEXT PHASE: Continue Phase 1 — add a second wall-to-wall route and multi-wall course chaining; keep later campaign systems bounded and explicit.
 
 KNOWN LIMITATIONS: The active runtime uses bounded kinematic motion plus dynamic rubble velocities, not a general-purpose rigid-body solver. Later Phase 4–10 code is preserved as experimental scaffolding.
