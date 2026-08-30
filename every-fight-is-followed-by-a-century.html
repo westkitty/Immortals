@@ -1,0 +1,2499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b0c">
+  <meta name="description" content="A persistent destructible superhuman action game where every battle becomes history.">
+  <title>EVERY FIGHT IS FOLLOWED BY A CENTURY</title>
+  <style>:root {
+  color-scheme: dark;
+  --ink: #f3ead9;
+  --muted: #9b9d96;
+  --dim: #666d6a;
+  --cyan: #8cf6ff;
+  --amber: #f6c66f;
+  --red: #ff647b;
+  --panel: rgba(9, 12, 13, .82);
+  --panel-solid: #0c1112;
+  --line: rgba(223, 231, 218, .16);
+  --line-strong: rgba(223, 231, 218, .3);
+  --glass: blur(14px) saturate(.78);
+  --shadow: 0 24px 80px rgba(0, 0, 0, .45);
+}
+
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #080b0c; }
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+button, input { font: inherit; }
+button { color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+#game { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; background: #0d1212; }
+
+.hidden { display: none !important; }
+
+#title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(90deg, rgba(8, 11, 12, .96) 0 27%, rgba(8, 11, 12, .64) 56%, rgba(8, 11, 12, .9) 100%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(236, 228, 205, .035) 48px 49px),
+    radial-gradient(circle at 70% 42%, rgba(90, 172, 170, .14), transparent 34%),
+    #080b0c;
+}
+#title-screen::after {
+  content: "";
+  position: absolute;
+  left: 64%;
+  top: -16vh;
+  width: 34vw;
+  height: 132vh;
+  border-left: 1px solid rgba(240, 224, 186, .12);
+  border-right: 1px solid rgba(240, 224, 186, .08);
+  transform: rotate(8deg);
+  background: repeating-linear-gradient(180deg, rgba(244, 200, 111, .035) 0 1px, transparent 1px 19px);
+  pointer-events: none;
+}
+.title-wrap {
+  width: min(1120px, calc(100vw - 56px));
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: end;
+  gap: 64px;
+}
+.title-copy { max-width: 760px; }
+.eyebrow, .section-kicker, .metric-label, .key, .tiny-label {
+  font: 700 10px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.eyebrow { color: var(--amber); margin-bottom: 20px; }
+.title-wrap h1 {
+  margin: 0;
+  font-size: clamp(48px, 7.4vw, 112px);
+  line-height: .82;
+  letter-spacing: -.075em;
+  max-width: 940px;
+  font-weight: 900;
+}
+.title-wrap h1 span { display: block; }
+.title-wrap h1 .century { color: var(--cyan); }
+.thesis {
+  margin: 28px 0 0;
+  font-size: clamp(18px, 2vw, 30px);
+  line-height: 1.18;
+  max-width: 620px;
+  color: #d9d2c4;
+  letter-spacing: -.02em;
+}
+.title-actions { display: grid; gap: 10px; align-self: end; }
+.title-fact {
+  border-top: 1px solid var(--line-strong);
+  padding-top: 14px;
+  margin-top: 12px;
+  font: 600 11px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.title-fact strong { color: var(--ink); }
+
+.primary, .secondary, .ghost, .small-action, .icon-button {
+  border: 1px solid var(--line-strong);
+  background: rgba(14, 19, 20, .82);
+  min-height: 44px;
+  border-radius: 3px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: background .14s ease, border-color .14s ease, transform .14s ease, color .14s ease;
+  font-weight: 750;
+  letter-spacing: .025em;
+}
+.primary { background: var(--ink); color: #0b1011; border-color: var(--ink); }
+.secondary { background: rgba(140, 246, 255, .08); border-color: rgba(140, 246, 255, .38); color: #dffcff; }
+.ghost { background: rgba(8, 11, 12, .5); color: #c6c8c1; }
+.primary:hover, .secondary:hover, .ghost:hover, .small-action:hover, .icon-button:hover { transform: translateY(-1px); border-color: var(--cyan); }
+.primary:hover { background: #fff7e9; }
+button:disabled { opacity: .34; cursor: default; transform: none !important; }
+
+#hud { position: fixed; inset: 0; z-index: 15; pointer-events: none; }
+.hud-top {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 18px;
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 520px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.hud-card {
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  background: linear-gradient(180deg, rgba(8, 12, 13, .78), rgba(8, 12, 13, .56));
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, .16);
+}
+.epoch-card { padding: 12px 14px; max-width: 335px; }
+#year-label { font: 850 clamp(28px, 3vw, 46px)/.95 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.06em; }
+#epoch-label { margin-top: 7px; font-size: 11px; text-transform: uppercase; letter-spacing: .11em; color: var(--amber); }
+#phase-label { margin-top: 7px; font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); letter-spacing: .12em; }
+
+.combat-card { padding: 10px 12px 12px; }
+.bar-row { display: grid; grid-template-columns: 74px 1fr; gap: 9px; align-items: center; margin-top: 7px; }
+.bar-row:first-child { margin-top: 0; }
+.bar-label { font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: #b4b7b1; }
+.bar { height: 6px; background: rgba(255,255,255,.09); overflow: hidden; border-radius: 999px; }
+.bar > span { display: block; height: 100%; width: 100%; transform-origin: left center; transition: width .1s linear; background: var(--cyan); }
+.enemy .bar > span { background: var(--red); }
+.energy .bar > span { background: var(--amber); }
+
+.world-card { justify-self: end; padding: 9px 11px; display: grid; grid-template-columns: repeat(4, auto); gap: 13px; }
+.metric { min-width: 54px; }
+.metric-value { display: block; margin-top: 4px; font: 800 14px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.utility-rail {
+  position: absolute;
+  right: 18px;
+  top: 104px;
+  display: grid;
+  gap: 6px;
+  pointer-events: auto;
+}
+.utility-rail button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(8,12,13,.68);
+  backdrop-filter: blur(10px);
+  color: #bbbfb7;
+  cursor: pointer;
+  font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.utility-rail button:hover { border-color: rgba(140,246,255,.55); color: white; }
+.utility-rail .danger:hover { border-color: rgba(255,100,123,.65); color: #ffc4cc; }
+
+#controls-help {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 6px 14px;
+  padding: 10px 11px;
+  border-left: 1px solid rgba(140,246,255,.34);
+  color: rgba(226,231,220,.66);
+  font: 600 9px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.control-row { display: flex; align-items: center; gap: 7px; }
+.key {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  padding: 0 5px;
+  color: #e7f6f3;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 2px;
+  letter-spacing: 0;
+}
+#inspect-hint { color: var(--amber); }
+
+#intermission {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: 26px;
+  width: min(680px, calc(100vw - 36px));
+  transform: translateX(-50%);
+  padding: 15px 16px 14px;
+  background: rgba(10, 13, 14, .86);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  border: 1px solid var(--line-strong);
+  border-top: 2px solid var(--amber);
+  box-shadow: var(--shadow);
+}
+#intermission-title { margin: 0; font-size: 14px; letter-spacing: .055em; text-transform: uppercase; }
+#intermission-copy { margin: 7px 0 12px; color: #b8bab3; font-size: 13px; line-height: 1.45; }
+.intermission-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.intermission-actions button { min-height: 36px; font-size: 11px; }
+
+#toast {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  top: 50%;
+  width: min(560px, calc(100vw - 44px));
+  transform: translate(-50%, calc(-50% + 18px));
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  padding: 10px 14px;
+  background: rgba(4, 7, 8, .83);
+  border: 1px solid rgba(235,226,203,.22);
+  color: #f3ead9;
+  font: 800 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  transition: opacity .17s ease, transform .17s ease;
+}
+#toast.show { opacity: 1; transform: translate(-50%, -50%); }
+
+#century-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  background: rgba(6,9,10,.76);
+  backdrop-filter: blur(5px) saturate(.5);
+  pointer-events: none;
+}
+.transition-inner { width: min(900px, calc(100vw - 60px)); text-align: center; }
+.transition-rule { width: 90px; height: 1px; background: var(--amber); margin: 0 auto 20px; }
+#transition-year { font: 900 clamp(56px, 10vw, 144px)/.88 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.08em; }
+#transition-copy { max-width: 700px; margin: 19px auto 0; color: #c4c2b8; font-size: clamp(14px, 1.5vw, 19px); line-height: 1.45; }
+
+#history-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  padding: 18px;
+  background: rgba(6,9,10,.9);
+  backdrop-filter: blur(12px) saturate(.75);
+  -webkit-backdrop-filter: blur(12px) saturate(.75);
+  overflow: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: pan-y;
+}
+.history-shell { min-height: calc(100vh - 36px); display: grid; grid-template-rows: auto auto 1fr; max-width: 1500px; margin: 0 auto; }
+.history-header { display: grid; grid-template-columns: 1fr auto; align-items: start; padding: 13px 0 15px; border-bottom: 1px solid var(--line-strong); }
+.history-header h2 { margin: 2px 0 0; font-size: clamp(26px, 3vw, 48px); letter-spacing: -.05em; }
+.history-header p { margin: 7px 0 0; color: #858b86; font-size: 12px; }
+.icon-button { width: 42px; min-height: 42px; padding: 0; font-size: 20px; }
+
+.timeline-strip { padding: 14px 0 16px; border-bottom: 1px solid var(--line); }
+.timeline-top { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 10px; align-items: baseline; }
+#timeline-label { font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--amber); }
+#timeline { width: 100%; accent-color: var(--cyan); }
+.timeline-axis { display: flex; justify-content: space-between; color: #656b68; font: 700 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace; margin-top: 6px; letter-spacing: .08em; }
+
+.history-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, .9fr) minmax(320px, 1.1fr) minmax(300px, .9fr);
+  min-height: 0;
+}
+.history-column { padding: 18px 18px 40px 0; min-width: 0; }
+.history-column + .history-column { padding-left: 18px; border-left: 1px solid var(--line); }
+.history-column h3 { margin: 0 0 14px; font-size: 11px; letter-spacing: .14em; color: #d9d3c7; text-transform: uppercase; }
+.history-list { display: grid; gap: 8px; }
+.history-item {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  background: rgba(255,255,255,.025);
+  border-left: 2px solid rgba(255,255,255,.13);
+}
+.history-item strong { font: 760 10px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; color: #e7e3da; }
+.history-item span { color: #969b96; font-size: 12px; line-height: 1.45; }
+.history-item.battle, .history-item.damage, .history-item.impact { border-left-color: rgba(255,100,123,.58); }
+.history-item.archaeology, .history-item.rediscovery { border-left-color: rgba(140,246,255,.58); }
+.history-item.institution, .history-item.land-use { border-left-color: rgba(246,198,111,.55); }
+.history-item.myth, .history-item.belief { border-left-color: rgba(177,134,255,.55); }
+.lineage-list { margin-top: 10px; padding: 10px; background: rgba(255,255,255,.025); }
+.lineage-list h4 { margin: 0 0 8px; font: 800 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; color: var(--amber); }
+.lineage-list div { padding: 5px 0; color: #939892; border-bottom: 1px solid rgba(255,255,255,.055); font: 600 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.small-action { margin-top: 10px; min-height: 34px; font-size: 10px; }
+.proof-box { margin-top: 18px; padding: 11px; border: 1px solid rgba(140,246,255,.16); background: rgba(140,246,255,.035); }
+#ab-output { margin-top: 8px; color: #8f9690; font: 600 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+#touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.touch-dpad, .touch-actions { position: absolute; bottom: 22px; display: grid; gap: 6px; pointer-events: auto; }
+.touch-dpad { left: 18px; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); }
+.touch-actions { right: 18px; grid-template-columns: repeat(2, 58px); grid-template-rows: repeat(2, 48px); }
+.touch-btn { border: 1px solid rgba(255,255,255,.17); background: rgba(6,9,10,.58); backdrop-filter: blur(8px); border-radius: 4px; color: rgba(255,255,255,.72); font: 800 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.touch-btn:active { background: rgba(140,246,255,.18); border-color: var(--cyan); color: white; }
+#touch-up { grid-column: 2; } #touch-left { grid-column: 1; } #touch-down { grid-column: 2; } #touch-right { grid-column: 3; }
+
+.sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+
+@media (max-width: 900px) {
+  .title-wrap { grid-template-columns: 1fr; gap: 36px; }
+  .title-actions { width: min(380px, 100%); }
+  .hud-top { grid-template-columns: 1fr auto; }
+  .combat-card { grid-column: 1 / -1; grid-row: 2; }
+  .world-card { grid-column: 2; grid-row: 1; }
+  .history-grid { grid-template-columns: 1fr; }
+  .history-column, .history-column + .history-column { padding: 16px 0 24px; border-left: 0; border-bottom: 1px solid var(--line); }
+  .utility-rail { top: 150px; }
+}
+
+@media (max-width: 640px) {
+  #title-screen { place-items: end start; }
+  .title-wrap { width: calc(100vw - 32px); margin: 0 16px 34px; gap: 26px; }
+  .title-wrap h1 { font-size: clamp(45px, 16vw, 78px); }
+  .thesis { font-size: 17px; }
+  .hud-top { left: 10px; right: 10px; top: 10px; gap: 8px; }
+  .epoch-card { padding: 9px 10px; }
+  #year-label { font-size: 26px; }
+  .world-card { gap: 7px; padding: 7px 8px; }
+  .metric { min-width: 38px; }
+  .metric-label { font-size: 7px; letter-spacing: .08em; }
+  .metric-value { font-size: 11px; }
+  .combat-card { padding: 7px 8px 9px; }
+  .utility-rail { right: 10px; top: 130px; grid-template-columns: repeat(2, auto); }
+  .utility-rail button { min-height: 30px; padding: 0 8px; font-size: 8px; }
+  #controls-help { display: none; }
+  #intermission { bottom: 132px; width: calc(100vw - 20px); padding: 12px; }
+  #intermission-copy { font-size: 12px; }
+  .history-header h2 { font-size: 27px; }
+  #history-panel { padding: 10px; }
+  .timeline-axis { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+</style>
+</head>
+<body>
+  <canvas id="game" aria-label="Isometric destructible city battlefield"></canvas>
+
+  <section id="title-screen" aria-labelledby="game-title">
+    <div class="title-wrap">
+      <div class="title-copy">
+        <div class="eyebrow">An immortal action game about collateral memory</div>
+        <h1 id="game-title"><span>EVERY FIGHT</span><span>IS FOLLOWED BY</span><span class="century">A CENTURY</span></h1>
+        <p class="thesis">Everything you destroy becomes history.</p>
+      </div>
+      <div class="title-actions">
+        <button class="primary" id="begin-btn" type="button">BEGIN YEAR 0</button>
+        <button class="secondary" id="continue-btn" type="button">CONTINUE TIMELINE</button>
+        <div class="title-fact"><strong>100,000 years.</strong><br>One geography. No level reset.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hud" class="hidden" aria-label="Game status">
+    <div class="hud-top">
+      <div class="hud-card epoch-card">
+        <div class="tiny-label">Current world</div>
+        <div id="year-label">YEAR 0</div>
+        <div id="epoch-label">Founding Era</div>
+        <div id="phase-label">RETURN / RECOGNIZE</div>
+      </div>
+
+      <div class="hud-card combat-card" aria-label="Combat status">
+        <div class="bar-row"><div class="bar-label">Immortal</div><div class="bar"><span id="health-fill"></span></div></div>
+        <div class="bar-row enemy"><div class="bar-label">Rival</div><div class="bar"><span id="enemy-fill"></span></div></div>
+        <div class="bar-row energy"><div class="bar-label">Momentum</div><div class="bar"><span id="energy-fill"></span></div></div>
+      </div>
+
+      <div class="hud-card world-card">
+        <div class="metric"><span class="metric-label">Return</span><span class="metric-value" id="return-label">0</span></div>
+        <div class="metric"><span class="metric-label">People</span><span class="metric-value" id="population-label">—</span></div>
+        <div class="metric"><span class="metric-label">Tech</span><span class="metric-value" id="tech-label">—</span></div>
+        <div class="metric"><span class="metric-label">Prepared</span><span class="metric-value" id="prep-label">—</span></div>
+      </div>
+    </div>
+
+    <div class="utility-rail" aria-label="Timeline tools">
+      <button id="history-btn" type="button" title="Open history (H)">History · H</button>
+      <button id="save-btn" type="button">Save</button>
+      <button id="export-btn" type="button">Export</button>
+      <button id="import-btn" type="button">Import</button>
+      <button id="project-btn" type="button">Year 100,000</button>
+      <button class="danger" id="reset-btn" type="button">Reset</button>
+      <input id="import-input" class="sr-only" type="file" accept="application/json,.json" aria-label="Import timeline JSON">
+    </div>
+
+    <div id="controls-help" aria-label="Controls">
+      <div class="control-row"><span class="key">WASD</span><span>Sprint / move</span></div>
+      <div class="control-row"><span class="key">⇧</span><span>Extreme sprint</span></div>
+      <div class="control-row"><span class="key">SPACE</span><span>Jump / glide</span></div>
+      <div class="control-row"><span class="key">Q</span><span>Air dash</span></div>
+      <div class="control-row"><span class="key">F</span><span>Punch</span></div>
+      <div class="control-row"><span class="key">E</span><span>Shockwave</span></div>
+      <div class="control-row"><span class="key">R</span><span>Grapple</span></div>
+      <div class="control-row"><span class="key">C</span><span>Dive impact</span></div>
+      <div class="control-row" id="inspect-hint"><span class="key">RMB</span><span>Inspect history</span></div>
+    </div>
+  </section>
+
+  <aside id="intermission" class="hidden" aria-live="polite">
+    <h2 id="intermission-title">YEAR 0</h2>
+    <p id="intermission-copy"></p>
+    <div class="intermission-actions">
+      <button class="primary" id="next-fight-btn" type="button">BEGIN NEXT FIGHT</button>
+      <button class="primary hidden" id="advance-btn" type="button">ADVANCE 100 YEARS</button>
+      <button class="secondary hidden" id="fast-ten-btn" type="button">FAST-FORWARD 10 RETURNS</button>
+    </div>
+  </aside>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <section id="century-transition" class="hidden" aria-live="polite">
+    <div class="transition-inner">
+      <div class="transition-rule"></div>
+      <div id="transition-year">YEAR 100</div>
+      <p id="transition-copy">Civilization continues.</p>
+    </div>
+  </section>
+
+  <section id="history-panel" class="hidden" aria-labelledby="history-title">
+    <div class="history-shell">
+      <header class="history-header">
+        <div>
+          <div class="section-kicker">What happened / what survived / what people believe</div>
+          <h2 id="history-title">THE CAUSAL ARCHIVE</h2>
+          <p>Scrub the same geography through accumulated history. Historical claims can disagree with physical evidence.</p>
+        </div>
+        <button id="history-close" class="icon-button" type="button" aria-label="Close history">×</button>
+      </header>
+
+      <div class="timeline-strip">
+        <div class="timeline-top"><span class="tiny-label">Historical scrubber</span><span id="timeline-label">CURRENT — YEAR 0</span></div>
+        <input id="timeline" type="range" min="0" max="0" value="0" aria-label="Historical timeline">
+        <div class="timeline-axis"><span>FOUNDING</span><span>CENTURIES</span><span>MILLENNIA</span><span>DEEP TIME</span><span>100,000</span></div>
+      </div>
+
+      <div class="history-grid">
+        <section class="history-column" aria-labelledby="actual-title">
+          <h3 id="actual-title">Recorded causal events</h3>
+          <div id="history-events" class="history-list"></div>
+        </section>
+        <section class="history-column" aria-labelledby="belief-title">
+          <h3 id="belief-title">Belief, myth, error, rediscovery</h3>
+          <div id="beliefs-list" class="history-list"></div>
+        </section>
+        <section class="history-column" aria-labelledby="site-title">
+          <h3 id="site-title">Selected site lineage</h3>
+          <div id="site-box" class="history-list"></div>
+          <div class="proof-box">
+            <div class="tiny-label">Causality laboratory</div>
+            <button id="ab-btn" class="small-action" type="button">RUN HISTORY A / HISTORY B</button>
+            <div id="ab-output">Identical starting seed. Destroy west in one history, east in the other, then compare 10,000 and 100,000 years.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="touch-controls" class="hidden" aria-label="Touch controls">
+    <div class="touch-dpad">
+      <button class="touch-btn" id="touch-up" type="button" aria-label="Move up">▲</button>
+      <button class="touch-btn" id="touch-left" type="button" aria-label="Move left">◀</button>
+      <button class="touch-btn" id="touch-down" type="button" aria-label="Move down">▼</button>
+      <button class="touch-btn" id="touch-right" type="button" aria-label="Move right">▶</button>
+    </div>
+    <div class="touch-actions">
+      <button class="touch-btn" id="touch-jump" type="button">JUMP</button>
+      <button class="touch-btn" id="touch-dash" type="button">DASH</button>
+      <button class="touch-btn" id="touch-punch" type="button">HIT</button>
+      <button class="touch-btn" id="touch-shock" type="button">WAVE</button>
+    </div>
+  </section>
+
+  <script>(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.CenturySim = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const SAVE_VERSION = 1;
+  const YEAR_STEP = 100;
+  const MAX_YEAR = 100000;
+  const DISTRICT_NAMES = ['Westbank', 'Eastbank', 'Crownward', 'South Terrace'];
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function round(v, n = 2) { const p = 10 ** n; return Math.round(v * p) / p; }
+  function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
+
+  function hash32(input) {
+    const s = String(input);
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h += h << 13; h ^= h >>> 7;
+    h += h << 3; h ^= h >>> 17;
+    h += h << 5;
+    return h >>> 0;
+  }
+
+  function rand01(seed) {
+    let t = hash32(seed) + 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
+  function pick(seed, arr) { return arr[Math.floor(rand01(seed) * arr.length) % arr.length]; }
+
+  function uid(prefix, seed) { return `${prefix}-${hash32(seed).toString(36)}`; }
+
+  function districtFor(x, y) {
+    if (Math.abs(y) > Math.abs(x)) return y < 0 ? 'Crownward' : 'South Terrace';
+    return x < 0 ? 'Westbank' : 'Eastbank';
+  }
+
+  function getEpoch(year, world) {
+    const tech = world?.stats?.technology ?? 0;
+    const adaptation = world?.stats?.preparedness ?? 0;
+    if (year < 1000) return 'Recognition';
+    if (year < 5000) return 'Institutional Memory';
+    if (year < 15000) return 'Myth and Succession';
+    if (year < 30000) return 'Archaeological Civilization';
+    if (year < 50000) return adaptation > 0.55 ? 'Deep Adaptation' : 'Fragmented Deep Time';
+    if (year < 75000) return 'Forgetting and Rediscovery';
+    if (tech < 0.35) return 'World Built Around the Ruins';
+    if (tech > 0.82) return 'World Built Around the Returns';
+    return 'World Built Around Us';
+  }
+
+  function architecturalFamily(world) {
+    const t = world.stats.technology;
+    const prep = world.stats.preparedness;
+    const stability = world.stats.stability;
+    if (stability < 0.28) return 'Successor Ruinwork';
+    if (prep > 0.82 && t > 0.7) return 'Resilience Lattice';
+    if (prep > 0.55) return 'Battle-Adapted Urban';
+    if (t > 0.78) return 'High-Rise Composite';
+    if (t > 0.52) return 'Electrified Metropolitan';
+    if (t > 0.3) return 'Dense Industrial';
+    if (t > 0.16) return 'Early Industrial';
+    return 'Founding Masonry';
+  }
+
+  function createBuilding(seed, x, y, special = null) {
+    const district = districtFor(x, y);
+    const centrality = 1 - clamp(Math.hypot(x, y) / 280, 0, 1);
+    const nearRiver = clamp(1 - Math.abs(x) / 120, 0, 1);
+    const r = rand01(`${seed}:b:${x}:${y}`);
+    let type = special || (r < 0.12 ? 'civic' : r < 0.25 ? 'market' : r < 0.42 ? 'workshop' : r < 0.7 ? 'housing' : 'warehouse');
+    let h = 24 + rand01(`${seed}:h:${x}:${y}`) * 48 + centrality * 24;
+    let cultural = type === 'civic' ? 0.48 : 0.12 + rand01(`${seed}:c:${x}:${y}`) * 0.18;
+    let religious = 0.05;
+    let name = `${district} ${type[0].toUpperCase()}${type.slice(1)} ${Math.abs(hash32(`${x}:${y}`)) % 97 + 1}`;
+    if (type === 'cathedral') { h = 76; cultural = 0.9; religious = 0.94; name = 'Cathedral of the First Dawn'; }
+    if (type === 'palace') { h = 64; cultural = 0.8; name = 'River Crown Palace'; }
+    if (type === 'market') cultural += 0.08;
+    return {
+      id: uid('site', `${seed}:${x}:${y}:${type}`),
+      kind: type === 'bridge' ? 'bridge' : 'building',
+      type,
+      name,
+      originalName: name,
+      x, y,
+      w: type === 'cathedral' ? 30 : 22 + rand01(`${seed}:w:${x}:${y}`) * 13,
+      d: type === 'cathedral' ? 28 : 20 + rand01(`${seed}:d:${x}:${y}`) * 13,
+      h,
+      status: 'intact',
+      use: type,
+      integrity: 100,
+      maxIntegrity: 100,
+      damage: 0,
+      district,
+      yearBuilt: 0,
+      age: 0,
+      landValue: clamp(0.2 + centrality * 0.5 + nearRiver * 0.16 + rand01(`${seed}:lv:${x}:${y}`) * 0.12, 0, 1),
+      economic: clamp(0.18 + centrality * 0.45 + (type === 'market' ? 0.28 : 0) + rand01(`${seed}:e:${x}:${y}`) * 0.12, 0, 1),
+      cultural: clamp(cultural, 0, 1),
+      religious: clamp(religious, 0, 1),
+      heritage: type === 'cathedral' || type === 'palace' ? 0.55 : 0.08,
+      repeatedHits: 0,
+      protected: false,
+      materialLineage: [],
+      lineage: [{ year: 0, state: type === 'cathedral' ? 'cathedral founded' : `${type} built` }],
+      lastCause: null,
+      renderVariant: hash32(`${seed}:rv:${x}:${y}`) % 5
+    };
+  }
+
+  function generateFoundingSites(seed) {
+    const sites = [];
+    const coords = [];
+    for (let x = -180; x <= 180; x += 36) {
+      for (let y = -180; y <= 180; y += 36) {
+        if (Math.abs(x) < 32) continue; // river
+        if (Math.abs(x % 72) < 2 || Math.abs(y % 72) < 2) continue; // broad streets
+        coords.push([x, y]);
+      }
+    }
+    for (const [x, y] of coords) {
+      let special = null;
+      if (x === -108 && y === -108) special = 'cathedral';
+      if (x === 108 && y === -108) special = 'palace';
+      sites.push(createBuilding(seed, x, y, special));
+    }
+    sites.push({
+      id: 'bridge-first', kind: 'bridge', type: 'bridge', name: 'Western Crossing', originalName: 'Western Crossing',
+      x: 0, y: 36, w: 82, d: 13, h: 6, status: 'intact', use: 'bridge', integrity: 120, maxIntegrity: 120,
+      damage: 0, district: 'Westbank', yearBuilt: 0, age: 0, landValue: 0.95, economic: 0.92, cultural: 0.45,
+      religious: 0.03, heritage: 0.2, repeatedHits: 0, protected: false, materialLineage: [],
+      lineage: [{ year: 0, state: 'bridge opened between the river banks' }], lastCause: null, renderVariant: 0
+    });
+    return sites;
+  }
+
+  function createWorld(seed = 8675309) {
+    const sites = generateFoundingSites(seed);
+    const world = {
+      saveVersion: SAVE_VERSION,
+      seed,
+      year: 0,
+      returnCount: 1,
+      epoch: 'Recognition',
+      architecturalFamily: 'Founding Masonry',
+      stats: {
+        population: 18400,
+        technology: 0.11,
+        economy: 0.46,
+        stability: 0.68,
+        religion: 0.52,
+        preparedness: 0.01,
+        archaeology: 0,
+        climate: 0,
+        riverOffset: 0,
+        battleFatigue: 0,
+        historicalLiteracy: 0.34
+      },
+      districtState: {},
+      sites,
+      events: [],
+      beliefs: [],
+      institutions: [],
+      names: Object.fromEntries(DISTRICT_NAMES.map(n => [n, [{ year: 0, name: n }]])),
+      recentBattleDamage: 0,
+      cumulativeDamage: 0,
+      casualtyPressure: 0,
+      lastBattle: null,
+      rareFlags: {},
+      timeline: [],
+      playerPattern: { protectedSites: [], recklessDistricts: {}, mercy: 0, destruction: 0 },
+      legacyImpact: Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0])),
+      foundingImpact: Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0])),
+      meta: { createdAt: new Date().toISOString(), lastSavedAt: null }
+    };
+    refreshDistrictState(world);
+    recordEvent(world, {
+      type: 'founding', title: 'The First City', cause: 'Civilization before the first playable return',
+      actual: 'A river city of stone, workshops, markets, a cathedral, a palace, and one crucial crossing stood here.',
+      salience: 0.55, siteId: null, x: 0, y: 0
+    });
+    storeTimelineKeyframe(world, true);
+    return world;
+  }
+
+  function refreshDistrictState(world) {
+    const next = {};
+    for (const name of DISTRICT_NAMES) next[name] = { intact: 0, ruined: 0, value: 0, economy: 0, heritage: 0, populationShare: 0.25, hits: 0 };
+    for (const s of world.sites) {
+      const d = next[s.district] || next.Westbank;
+      if (s.status === 'intact' || s.status === 'repaired' || s.status === 'rebuilt' || s.status === 'repurposed') d.intact++;
+      if (['collapsed', 'ruin', 'buried', 'abandoned', 'battle_corridor'].includes(s.status)) d.ruined++;
+      d.value += s.landValue || 0;
+      d.economy += s.economic || 0;
+      d.heritage += s.heritage || 0;
+      d.hits += s.repeatedHits || 0;
+    }
+    const totalValue = Object.values(next).reduce((a, d) => a + d.value + 0.1, 0);
+    for (const d of Object.values(next)) d.populationShare = (d.value + 0.1) / totalValue;
+    world.districtState = next;
+  }
+
+  function recordEvent(world, partial) {
+    const event = {
+      id: uid('evt', `${world.seed}:${world.year}:${world.events.length}:${partial.type}:${partial.title}`),
+      year: partial.year ?? world.year,
+      returnCount: world.returnCount,
+      type: partial.type || 'event',
+      title: partial.title || 'Untitled event',
+      actual: partial.actual || '',
+      cause: partial.cause || '',
+      siteId: partial.siteId ?? null,
+      x: partial.x ?? null,
+      y: partial.y ?? null,
+      salience: clamp(partial.salience ?? 0.3, 0, 1),
+      evidence: partial.evidence || ['material trace'],
+      actors: partial.actors || [],
+      tags: partial.tags || [],
+      consequences: partial.consequences || []
+    };
+    world.events.push(event);
+    if (world.events.length > 900) {
+      const protectedEvents = world.events.filter(e => e.salience > 0.62 || e.type === 'battle' || e.type === 'archaeology');
+      const recent = world.events.slice(-420);
+      const ids = new Set(recent.map(e => e.id));
+      for (const e of protectedEvents) ids.add(e.id);
+      world.events = world.events.filter(e => ids.has(e.id)).slice(-700);
+    }
+    return event;
+  }
+
+  function findSite(world, id) { return world.sites.find(s => s.id === id); }
+
+  function damageSite(world, siteId, amount, cause = {}) {
+    const site = findSite(world, siteId);
+    if (!site || ['buried', 'battle_corridor'].includes(site.status)) return null;
+    const prev = site.integrity;
+    site.integrity = Math.max(0, site.integrity - Math.max(0, amount));
+    site.damage = clamp(1 - site.integrity / site.maxIntegrity, 0, 1);
+    site.repeatedHits += amount > 18 ? 1 : 0;
+    site.lastCause = cause.label || cause.source || 'immortal impact';
+    world.recentBattleDamage += amount;
+    world.cumulativeDamage += amount;
+    world.legacyImpact = world.legacyImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    world.legacyImpact[site.district] = (world.legacyImpact[site.district] || 0) + amount / 100;
+    world.foundingImpact = world.foundingImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    if (cause.player && world.year <= 1000) world.foundingImpact[site.district] = (world.foundingImpact[site.district] || 0) + amount / 100;
+    if (cause.player) {
+      world.playerPattern.destruction += amount / 100;
+      world.playerPattern.recklessDistricts[site.district] = (world.playerPattern.recklessDistricts[site.district] || 0) + amount / 100;
+    }
+    if (site.integrity <= 0 && prev > 0) {
+      site.status = 'collapsed';
+      site.lineage.push({ year: world.year, state: `destroyed during Return ${world.returnCount}`, cause: site.lastCause });
+      site.materialLineage.push({ year: world.year, source: site.originalName, state: 'rubble created' });
+      const ev = recordEvent(world, {
+        type: 'destruction',
+        title: `${site.name} collapsed`,
+        cause: site.lastCause,
+        actual: `${site.name} was structurally destroyed during Return ${world.returnCount}.`,
+        siteId: site.id, x: site.x, y: site.y,
+        salience: clamp(0.32 + site.cultural * 0.35 + site.economic * 0.18 + site.heritage * 0.3, 0, 1),
+        evidence: ['rubble', 'impact deformation', site.cultural > 0.5 ? 'witness accounts' : 'local records'],
+        tags: ['battle-damage', site.district]
+      });
+      return ev;
+    }
+    if (site.damage > 0.45 && prev / site.maxIntegrity <= 0.55) site.status = 'heavily damaged';
+    else if (site.damage > 0.12 && site.status === 'intact') site.status = 'damaged';
+    return null;
+  }
+
+  function protectSite(world, siteId) {
+    const site = findSite(world, siteId);
+    if (!site) return;
+    site.protected = true;
+    if (!world.playerPattern.protectedSites.includes(siteId)) world.playerPattern.protectedSites.push(siteId);
+    world.playerPattern.mercy += 0.15;
+  }
+
+  function createCrater(world, x, y, radius, cause = {}) {
+    const id = uid('crater', `${world.seed}:${world.year}:${world.returnCount}:${round(x, 1)}:${round(y, 1)}:${world.sites.length}`);
+    const district = districtFor(x, y);
+    const nearRiver = clamp(1 - Math.abs(x - world.stats.riverOffset) / 85, 0, 1);
+    const crater = {
+      id, kind: 'crater', type: 'crater', name: `Impact Basin ${world.returnCount}.${Math.abs(hash32(id)) % 90 + 10}`,
+      originalName: `Impact Basin ${world.returnCount}.${Math.abs(hash32(id)) % 90 + 10}`,
+      x, y, radius: clamp(radius, 7, 32), w: radius * 2, d: radius * 2, h: -radius * 0.25,
+      status: 'fresh crater', use: 'impact scar', integrity: 100, maxIntegrity: 100, damage: 0,
+      district, yearBuilt: world.year, age: 0,
+      landValue: 0.08, economic: 0.03, cultural: 0.18, religious: 0.08, heritage: 0.12,
+      repeatedHits: 1, protected: false, water: nearRiver * 0.32,
+      materialLineage: [{ year: world.year, source: 'local substrate', state: 'vitrified impact glass formed' }],
+      lineage: [{ year: world.year, state: 'crater formed', cause: cause.label || cause.source || 'immortal impact' }],
+      lastCause: cause.label || cause.source || 'immortal impact', renderVariant: hash32(id) % 5
+    };
+    world.sites.push(crater);
+    recordEvent(world, {
+      type: 'terrain-scar', title: `${crater.name} formed`, cause: crater.lastCause,
+      actual: `A ${Math.round(crater.radius * 2)}-meter impact basin was created in ${district}.`,
+      siteId: id, x, y, salience: clamp(0.35 + crater.radius / 65, 0, 0.9),
+      evidence: ['crater morphology', 'impact glass', 'deformation horizon'], tags: ['terrain', district]
+    });
+    world.recentBattleDamage += radius * 4;
+    world.cumulativeDamage += radius * 4;
+    world.legacyImpact = world.legacyImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    world.legacyImpact[district] = (world.legacyImpact[district] || 0) + radius / 10;
+    world.foundingImpact = world.foundingImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    if (cause.player && world.year <= 1000) world.foundingImpact[district] = (world.foundingImpact[district] || 0) + radius / 10;
+    if (cause.player) world.playerPattern.destruction += radius / 10;
+    return crater;
+  }
+
+  function beginBattle(world, opponentName = 'THE OTHER IMMORTAL') {
+    world.recentBattleDamage = 0;
+    world.casualtyPressure = 0;
+    world.lastBattle = { startYear: world.year, opponentName, startedAtReturn: world.returnCount, outcome: 'ongoing', damage: 0 };
+    return recordEvent(world, {
+      type: 'battle', title: `Return ${world.returnCount}: ${opponentName} arrives`,
+      actual: `Two immortals entered the inhabited region in Year ${world.year}.`,
+      cause: 'Return Cycle', salience: 0.78, evidence: ['witnesses', 'urban records', 'impact telemetry'], actors: ['player', opponentName]
+    });
+  }
+
+  function endBattle(world, outcome = 'won') {
+    if (!world.lastBattle) world.lastBattle = { opponentName: 'THE OTHER IMMORTAL' };
+    world.lastBattle.outcome = outcome;
+    world.lastBattle.damage = round(world.recentBattleDamage, 1);
+    world.stats.battleFatigue = clamp(world.stats.battleFatigue + world.recentBattleDamage / 1600, 0, 1);
+    const title = outcome === 'lost' ? 'The immortal returned defeated' : outcome === 'draw' ? 'The battle ended without a victor' : 'The rival was driven away';
+    recordEvent(world, {
+      type: 'battle-outcome', title,
+      actual: `Return ${world.returnCount} ended with outcome: ${outcome}. Total recorded structural pressure: ${Math.round(world.recentBattleDamage)}.`,
+      cause: 'combat outcome', salience: clamp(0.55 + world.recentBattleDamage / 2000, 0.55, 0.95),
+      evidence: ['battle damage', 'survivor records', 'institutional reports'], actors: ['player', world.lastBattle.opponentName]
+    });
+    return world.lastBattle;
+  }
+
+  function futureUseForCrater(world, site, key) {
+    const groundwater = clamp((1 - Math.abs(site.x - world.stats.riverOffset) / 115) * 0.72 + site.water * 0.5, 0, 1);
+    const d = world.districtState[site.district] || { value: 0.5, ruined: 0, intact: 1 };
+    const populationPressure = clamp(world.stats.population / 82000, 0, 1);
+    const risk = clamp(site.repeatedHits / 7 + world.stats.preparedness * 0.35, 0, 1);
+    const memorial = clamp(site.cultural * 0.5 + world.stats.religion * 0.35 + site.heritage * 0.4, 0, 1);
+    const economy = clamp(world.stats.economy * 0.55 + (d.value / Math.max(1, d.intact + d.ruined)) * 0.3, 0, 1);
+    const r = rand01(key);
+    if (risk > 0.74 && world.stats.preparedness > 0.52) return 'battle corridor';
+    if (groundwater > 0.66 && r < 0.78) return memorial > 0.62 ? 'sacred lake' : economy > 0.6 ? 'urban lakefront' : 'lake';
+    if (memorial > 0.7 && r < 0.75) return world.stats.religion > 0.52 ? 'sacred ground' : 'memorial reserve';
+    if (economy > 0.66 && world.stats.technology > 0.4 && r < 0.68) return 'industrial basin';
+    if (populationPressure > 0.56 && risk < 0.5 && r < 0.72) return economy > 0.56 ? 'dense housing' : 'informal settlement';
+    if (site.age > 7000 && world.stats.archaeology > 0.4) return 'archaeological preserve';
+    if (r < 0.22) return 'quarry';
+    if (r < 0.38) return 'garbage basin';
+    if (r < 0.58) return 'farmland';
+    return 'open scar';
+  }
+
+  function evolveCrater(world, site, key) {
+    const priorUse = site.use;
+    site.age += YEAR_STEP;
+    const erosion = 0.004 + Math.abs(world.stats.climate) * 0.006;
+    site.radius = Math.max(4, site.radius * (1 - erosion));
+    site.w = site.d = site.radius * 2;
+    site.water = clamp((site.water || 0) + (1 - Math.abs(site.x - world.stats.riverOffset) / 125) * 0.05 + world.stats.climate * 0.02, 0, 1);
+    const nextUse = futureUseForCrater(world, site, key);
+    if (nextUse !== priorUse && (site.age <= 1000 || rand01(`${key}:change`) < 0.34)) {
+      site.use = nextUse;
+      site.lineage.push({ year: world.year, state: nextUse });
+      if (nextUse.includes('memorial') || nextUse === 'sacred ground' || nextUse === 'sacred lake') {
+        site.cultural = clamp(site.cultural + 0.2, 0, 1);
+        site.heritage = clamp(site.heritage + 0.16, 0, 1);
+      }
+      if (nextUse === 'battle corridor') site.status = 'battle_corridor';
+      recordEvent(world, {
+        type: 'land-use', title: `${site.name} became ${nextUse}`,
+        actual: `${site.name} changed land use to ${nextUse} because of local risk, water, population, economy, and cultural pressure.`,
+        cause: 'century-scale land-use response', siteId: site.id, x: site.x, y: site.y,
+        salience: clamp(0.25 + site.cultural * 0.3 + site.heritage * 0.25, 0.2, 0.75), evidence: ['land-use continuity', 'infrastructure', 'site stratigraphy']
+      });
+    }
+  }
+
+  function rebuildName(world, site, key) {
+    const family = architecturalFamily(world);
+    const roots = {
+      'Founding Masonry': ['Hall', 'House', 'Court', 'Works'],
+      'Early Industrial': ['Mill', 'Foundry', 'Exchange', 'Depot'],
+      'Dense Industrial': ['Works', 'Block', 'Terminal', 'Arcade'],
+      'Electrified Metropolitan': ['Tower', 'Forum', 'Station', 'Gallery'],
+      'High-Rise Composite': ['Spire', 'Stack', 'Hub', 'Arcology'],
+      'Battle-Adapted Urban': ['Bastion', 'Flexframe', 'Safehouse', 'Dissipator'],
+      'Resilience Lattice': ['Lattice', 'Deflection Hall', 'Continuity Node', 'Quiet Core'],
+      'Successor Ruinwork': ['Stonehold', 'Salvage Court', 'Oldwall', 'Ruinhouse']
+    };
+    const suffix = pick(`${key}:suffix`, roots[family] || roots['Founding Masonry']);
+    return `${site.district} ${suffix} ${Math.abs(hash32(key)) % 700 + 1}`;
+  }
+
+  function evolveBuilding(world, site, key) {
+    site.age += YEAR_STEP;
+    const d = world.districtState[site.district] || { value: 0.5, ruined: 0, intact: 1, hits: 0 };
+    const governance = clamp(world.stats.stability * 0.55 + world.stats.economy * 0.45, 0, 1);
+    const legacy = Math.min(16, (world.legacyImpact && world.legacyImpact[site.district]) || 0);
+    const founding = (world.foundingImpact && world.foundingImpact[site.district]) || 0;
+    const risk = clamp(site.repeatedHits / 7 + d.hits / Math.max(1, d.intact + d.ruined) / 8 + legacy * 0.004 + founding * 0.004, 0, 1);
+    const preservePressure = clamp(site.cultural * 0.4 + site.heritage * 0.5 + site.religious * world.stats.religion * 0.35, 0, 1);
+    const development = clamp(site.landValue * 0.35 + world.stats.economy * 0.35 + world.stats.population / 110000 * 0.3, 0, 1);
+    const r = rand01(key);
+
+    if (['collapsed', 'ruin', 'heavily damaged', 'damaged'].includes(site.status)) {
+      if (risk > 0.78 && world.stats.preparedness > 0.48) {
+        if (site.status !== 'battle_corridor') {
+          site.status = 'battle_corridor'; site.use = 'intentionally empty impact corridor'; site.h = 0;
+          site.lineage.push({ year: world.year, state: 'cleared into an impact corridor' });
+        }
+      } else if (preservePressure > 0.66 && r < 0.68) {
+        site.status = 'ruin'; site.use = site.religious > 0.45 ? 'shrine ruin' : 'preserved ruin';
+        site.integrity = Math.max(12, site.integrity);
+        site.heritage = clamp(site.heritage + 0.13, 0, 1);
+        if (!site.lineage.some(l => l.year === world.year && l.state.includes('ruin'))) site.lineage.push({ year: world.year, state: site.use });
+      } else if (governance + development > 1.0 && r < 0.82) {
+        const oldName = site.name;
+        site.status = site.age > 1200 ? 'rebuilt' : 'repaired';
+        site.use = development > 0.68 ? 'mixed urban' : site.type;
+        site.integrity = site.maxIntegrity;
+        site.damage = 0;
+        site.h = clamp(site.h * (0.75 + world.stats.technology * 0.8) + rand01(`${key}:height`) * 18, 18, 130);
+        if (site.status === 'rebuilt') site.name = rebuildName(world, site, key);
+        site.lineage.push({ year: world.year, state: `${site.status} as ${site.use}`, previousName: oldName });
+        site.materialLineage.push({ year: world.year, source: oldName, state: 'surviving material reused in reconstruction' });
+      } else if (world.stats.stability < 0.34 && r < 0.55) {
+        site.status = 'abandoned'; site.use = 'abandoned ruin';
+        site.lineage.push({ year: world.year, state: 'abandoned' });
+      }
+    } else {
+      if (site.protected || site.heritage > 0.72) {
+        site.heritage = clamp(site.heritage + 0.006, 0, 1);
+        site.integrity = Math.min(site.maxIntegrity, site.integrity + 4 + world.stats.technology * 5);
+      } else if (site.age > 1600 && r < 0.08 + site.age / 90000) {
+        site.status = 'repurposed';
+        site.use = pick(`${key}:repurpose`, ['housing', 'archive', 'workshop', 'market', 'school', 'transit hall', 'civic forum']);
+        site.lineage.push({ year: world.year, state: `repurposed as ${site.use}` });
+      }
+      if (risk > 0.56 && world.stats.preparedness > 0.36 && r < 0.22) {
+        site.status = 'reinforced';
+        site.integrity = site.maxIntegrity + 30 + world.stats.technology * 80;
+        site.maxIntegrity = site.integrity;
+        site.lineage.push({ year: world.year, state: 'reinforced against immortal impact' });
+      }
+    }
+  }
+
+  function mutateName(name, key) {
+    if (name.length < 5) return name;
+    const rules = [
+      s => s.replace(/bank/gi, 'ban'),
+      s => s.replace(/ward/gi, 'war'),
+      s => s.replace(/terrace/gi, 'terras'),
+      s => s.replace(/th/g, 't'),
+      s => s.replace(/er/g, 'ar'),
+      s => s.replace(/ow/g, 'o'),
+      s => s.replace(/e(?=[^ ]*$)/, '')
+    ];
+    const fn = rules[Math.floor(rand01(key) * rules.length)];
+    let out = fn(name);
+    if (out === name) {
+      const i = 1 + Math.floor(rand01(`${key}:i`) * Math.max(1, name.length - 2));
+      out = name.slice(0, i) + name.slice(i + 1);
+    }
+    return out;
+  }
+
+  function decayMemoryAndCreateBeliefs(world) {
+    const cutoff = world.year - 100;
+    const candidates = world.events.filter(e => e.year <= cutoff && e.salience > 0.28);
+    const slice = candidates.slice(-22);
+    for (const e of slice) {
+      const age = Math.max(100, world.year - e.year);
+      const existing = world.beliefs.find(b => b.eventId === e.id && b.year === world.year);
+      if (existing) continue;
+      const sourceDurability = clamp(
+        (e.evidence.includes('impact telemetry') ? 0.35 : 0) +
+        (e.evidence.includes('impact glass') || e.evidence.includes('deformation horizon') ? 0.28 : 0) +
+        world.stats.historicalLiteracy * 0.42 +
+        world.stats.archaeology * 0.25 + e.salience * 0.18,
+        0, 1
+      );
+      const carrierLoss = clamp(Math.log10(age / 100 + 1) * 0.18 + (1 - world.stats.stability) * 0.15, 0, 0.8);
+      const accuracy = clamp(sourceDurability - carrierLoss + rand01(`${world.seed}:belief:${world.year}:${e.id}`) * 0.18 - 0.07, 0, 1);
+      let interpretation = e.actual;
+      let label = 'documented history';
+      if (accuracy < 0.25) {
+        label = 'myth';
+        interpretation = pick(`${e.id}:${world.year}:myth`, [
+          `The Returning One deliberately caused ${e.title.toLowerCase()} as a warning.`,
+          `${e.title} is remembered as a divine punishment whose original participants are uncertain.`,
+          `Local tradition says the rival immortal caused the event, despite contradictory physical evidence.`,
+          `The event survives only as a place-name and a ritual whose reason is unknown.`
+        ]);
+      } else if (accuracy < 0.52) {
+        label = 'disputed history';
+        interpretation = pick(`${e.id}:${world.year}:dispute`, [
+          `Most historians accept that ${e.title.toLowerCase()} occurred, but disagree about which immortal caused it.`,
+          `The event is considered historical, though later political archives altered its reported purpose.`,
+          `Material evidence supports the event, while popular tradition assigns it a different meaning.`
+        ]);
+      } else if (accuracy < 0.75) {
+        label = 'partial reconstruction';
+        interpretation = `Scholars reconstruct the broad facts of ${e.title.toLowerCase()}, but several motives and casualties remain uncertain.`;
+      }
+      world.beliefs.push({ id: uid('belief', `${world.year}:${e.id}`), year: world.year, eventId: e.id, label, accuracy: round(accuracy, 2), interpretation });
+    }
+    if (world.beliefs.length > 480) world.beliefs = world.beliefs.slice(-480);
+  }
+
+  function archaeologyPass(world) {
+    if (world.year < 3000) return;
+    const chanceBase = world.stats.archaeology * 0.2 + world.stats.technology * 0.08;
+    for (const site of world.sites) {
+      if (site.age < 2500 || site.rareArchaeologyDone) continue;
+      const buriedLike = ['ruin', 'abandoned', 'buried'].includes(site.status) || (site.kind === 'crater' && site.radius < 9);
+      if (!buriedLike) continue;
+      const p = chanceBase + site.heritage * 0.08 + site.materialLineage.length * 0.025;
+      if (rand01(`${world.seed}:arch:${world.year}:${site.id}`) < p * 0.09) {
+        site.rareArchaeologyDone = true;
+        site.heritage = clamp(site.heritage + 0.26, 0, 1);
+        if (site.status === 'buried' || site.status === 'abandoned') site.status = 'excavated';
+        site.lineage.push({ year: world.year, state: 'archaeologically rediscovered' });
+        recordEvent(world, {
+          type: 'archaeology', title: `${site.name} was rediscovered`,
+          actual: `Excavation recovered material lineage from a much earlier return layer at ${site.name}.`,
+          cause: 'archaeological investigation', siteId: site.id, x: site.x, y: site.y,
+          salience: clamp(0.48 + site.heritage * 0.3, 0, 0.9), evidence: ['stratigraphy', 'material analysis', 'archival comparison']
+        });
+        world.stats.historicalLiteracy = clamp(world.stats.historicalLiteracy + 0.02, 0, 1);
+      }
+    }
+  }
+
+  function rareStatePass(world) {
+    const oldSurvivors = world.sites.filter(s => s.kind === 'building' && !['collapsed', 'ruin', 'abandoned', 'buried', 'battle_corridor'].includes(s.status) && s.age >= 5000);
+    for (const s of oldSurvivors) {
+      if (!s.rareLongevity && s.age >= 7000) {
+        s.rareLongevity = true;
+        s.heritage = clamp(s.heritage + 0.3, 0, 1);
+        s.lineage.push({ year: world.year, state: 'declared an exceptionally ancient continuously maintained structure' });
+        recordEvent(world, {
+          type: 'rare-chain', title: `${s.name} acquired a myth of indestructibility`,
+          actual: `${s.name} survived dozens of returns and became culturally exceptional because of that longevity.`,
+          cause: 'extraordinary survival', siteId: s.id, x: s.x, y: s.y, salience: 0.78,
+          evidence: ['continuous maintenance records', 'material continuity']
+        });
+      }
+    }
+    if (world.stats.preparedness > 0.7 && !world.rareFlags.centuryWatch) {
+      world.rareFlags.centuryWatch = true;
+      world.institutions.push({ id: 'century-watch', founded: world.year, name: 'Century Watch', purpose: 'predict, evacuate, and record the Return Cycle' });
+      recordEvent(world, {
+        type: 'institution', title: 'Century Watch founded',
+        actual: 'A permanent institution was established to predict, document, and survive future Returns.',
+        cause: 'repeated statistically legible immortal violence', salience: 0.7, evidence: ['law', 'budget records', 'public warning system']
+      });
+    }
+  }
+
+  function maybeDriftDistrictNames(world) {
+    if (world.year === 0 || world.year % 1000 !== 0) return;
+    for (const district of DISTRICT_NAMES) {
+      const lineage = world.names[district];
+      const current = lineage[lineage.length - 1].name;
+      const preservation = world.stats.historicalLiteracy * 0.5 + world.stats.stability * 0.25 + (district === 'Crownward' ? 0.08 : 0);
+      if (rand01(`${world.seed}:namedrift:${world.year}:${district}`) > preservation) {
+        lineage.push({ year: world.year, name: mutateName(current, `${world.seed}:${world.year}:${district}`) });
+      }
+    }
+  }
+
+  function abstractBattle(world) {
+    beginBattle(world, pick(`${world.seed}:opponent:${world.returnCount}`, ['THE PALE RIVAL', 'THE WEATHERED ONE', 'THE CENTURY KNIFE']));
+    const targetDistrict = pick(`${world.seed}:absdistrict:${world.returnCount}`, DISTRICT_NAMES);
+    const candidates = world.sites.filter(s => s.district === targetDistrict && s.kind !== 'crater' && !['buried', 'battle_corridor'].includes(s.status));
+    const hits = 2 + Math.floor(rand01(`${world.seed}:hitcount:${world.returnCount}`) * 5);
+    for (let i = 0; i < hits && candidates.length; i++) {
+      const s = candidates[Math.floor(rand01(`${world.seed}:abs:${world.returnCount}:${i}`) * candidates.length)];
+      damageSite(world, s.id, 24 + rand01(`${world.seed}:absdmg:${world.returnCount}:${i}`) * 75, { source: 'unseen return', label: 'abstracted immortal battle' });
+    }
+    if (rand01(`${world.seed}:abscrater:${world.returnCount}`) > 0.45) {
+      const x = -170 + rand01(`${world.seed}:cx:${world.returnCount}`) * 340;
+      const y = -170 + rand01(`${world.seed}:cy:${world.returnCount}`) * 340;
+      createCrater(world, x, y, 8 + rand01(`${world.seed}:cr:${world.returnCount}`) * 18, { source: 'unseen return', label: 'abstracted immortal impact' });
+    }
+    endBattle(world, pick(`${world.seed}:absout:${world.returnCount}`, ['won', 'lost', 'draw']));
+  }
+
+  function simulateCentury(world, opts = {}) {
+    if (world.year >= MAX_YEAR) return world;
+    if (opts.abstractBattle) abstractBattle(world);
+    refreshDistrictState(world);
+
+    const damageNorm = clamp(world.recentBattleDamage / 1700, 0, 1);
+    const prevPop = world.stats.population;
+    const climatePhase = world.year / 7400 + (world.seed % 31) / 11;
+    world.stats.climate = clamp(Math.sin(climatePhase) * 0.58 + Math.sin(climatePhase * 0.37) * 0.26, -1, 1);
+    world.stats.riverOffset = clamp(world.stats.riverOffset + world.stats.climate * 0.35 + (rand01(`${world.seed}:river:${world.year}`) - 0.5) * 0.5, -38, 38);
+
+    const growth = 0.035 + world.stats.economy * 0.05 + world.stats.technology * 0.035 - damageNorm * 0.11 - Math.abs(world.stats.climate) * 0.015;
+    const carryingCapacity = 65000 + world.stats.technology * 430000 + world.stats.economy * 120000 + world.stats.preparedness * 90000;
+    const logistic = growth * (1 - world.stats.population / Math.max(80000, carryingCapacity));
+    world.stats.population = Math.max(2400, Math.min(720000, Math.round(world.stats.population * (1 + logistic))));
+    world.stats.economy = clamp(world.stats.economy + 0.018 + world.stats.technology * 0.015 - damageNorm * 0.09 + (rand01(`${world.seed}:econ:${world.year}`) - 0.5) * 0.05, 0.08, 1);
+    world.stats.stability = clamp(world.stats.stability + 0.012 - damageNorm * 0.075 + (rand01(`${world.seed}:stab:${world.year}`) - 0.5) * 0.045, 0.08, 1);
+
+    const collapseRisk = clamp((0.42 - world.stats.stability) * 0.22 + damageNorm * 0.12 + Math.abs(world.stats.climate) * 0.03, 0, 0.18);
+    if (rand01(`${world.seed}:collapse:${world.year}`) < collapseRisk) {
+      const loss = 0.08 + rand01(`${world.seed}:collapseLoss:${world.year}`) * 0.22;
+      world.stats.technology = clamp(world.stats.technology - loss, 0.05, 1);
+      world.stats.economy = clamp(world.stats.economy - loss * 0.7, 0.05, 1);
+      world.stats.stability = clamp(world.stats.stability - 0.12, 0.05, 1);
+      recordEvent(world, {
+        type: 'civilizational-shock', title: 'A regional continuity crisis disrupted institutions',
+        actual: 'Political and economic continuity failed for ordinary historical reasons amplified by accumulated battle damage and environmental pressure.',
+        cause: 'path-dependent institutional collapse', salience: 0.62, evidence: ['abandonment layers', 'administrative discontinuity']
+      });
+    } else {
+      world.stats.technology = clamp(world.stats.technology + 0.018 + world.stats.historicalLiteracy * 0.012 + world.stats.preparedness * 0.01, 0.05, 1);
+    }
+
+    world.stats.preparedness = clamp(world.stats.preparedness + 0.009 + world.returnCount * 0.00024 + damageNorm * 0.018, 0, 1);
+    world.stats.archaeology = clamp(world.stats.archaeology + (world.year > 2000 ? 0.006 + world.stats.technology * 0.004 : 0), 0, 1);
+    world.stats.historicalLiteracy = clamp(world.stats.historicalLiteracy + 0.004 + world.stats.technology * 0.006 - (1 - world.stats.stability) * 0.004, 0.05, 1);
+    world.stats.religion = clamp(world.stats.religion + (rand01(`${world.seed}:religion:${world.year}`) - 0.52) * 0.045 + damageNorm * 0.012, 0.05, 0.95);
+    world.stats.battleFatigue = clamp(world.stats.battleFatigue * 0.82 + damageNorm * 0.18, 0, 1);
+    world.legacyImpact = world.legacyImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    for (const district of DISTRICT_NAMES) world.legacyImpact[district] = (world.legacyImpact[district] || 0) * 0.985;
+
+    world.year += YEAR_STEP;
+    world.returnCount += 1;
+    world.epoch = getEpoch(world.year, world);
+    world.architecturalFamily = architecturalFamily(world);
+
+    refreshDistrictState(world);
+    for (const site of world.sites) {
+      const key = `${world.seed}:evolve:${world.year}:${site.id}`;
+      if (site.kind === 'crater') evolveCrater(world, site, key);
+      else evolveBuilding(world, site, key);
+      const founding = (world.foundingImpact && world.foundingImpact[site.district]) || 0;
+      const foundingEcho = founding * Math.exp(-world.year / 70000);
+      site.landValue = clamp((site.landValue || 0.2) + world.stats.economy * 0.0012 - foundingEcho * 0.00012 + (site.protected ? 0.0008 : 0), 0.03, 1);
+    }
+
+    if (world.stats.population > prevPop * 1.08 && world.sites.filter(s => s.kind === 'building' && !['collapsed', 'ruin', 'abandoned', 'battle_corridor', 'buried'].includes(s.status)).length < 118) {
+      addSuccessorConstruction(world);
+    }
+
+    maybeDriftDistrictNames(world);
+    archaeologyPass(world);
+    decayMemoryAndCreateBeliefs(world);
+    rareStatePass(world);
+    refreshDistrictState(world);
+    world.recentBattleDamage = 0;
+    storeTimelineKeyframe(world, false);
+    return world;
+  }
+
+  function addSuccessorConstruction(world) {
+    const candidates = [];
+    for (let x = -198; x <= 198; x += 36) {
+      for (let y = -198; y <= 198; y += 36) {
+        if (Math.abs(x - world.stats.riverOffset) < 29) continue;
+        const blocked = world.sites.some(s => Math.hypot(s.x - x, s.y - y) < 19 && !['buried', 'battle_corridor'].includes(s.status));
+        if (!blocked) candidates.push([x, y]);
+      }
+    }
+    if (!candidates.length) return;
+    const [x, y] = candidates[Math.floor(rand01(`${world.seed}:newbuild:${world.year}`) * candidates.length)];
+    const b = createBuilding(`${world.seed}:${world.year}`, x, y);
+    b.yearBuilt = world.year;
+    b.age = 0;
+    b.h = clamp(18 + world.stats.technology * 82 + rand01(`${world.seed}:newh:${world.year}`) * 28, 18, 128);
+    b.name = rebuildName(world, b, `${world.seed}:newname:${world.year}`);
+    b.originalName = b.name;
+    b.lineage = [{ year: world.year, state: `new construction during ${world.architecturalFamily}` }];
+    world.sites.push(b);
+  }
+
+  function storeTimelineKeyframe(world, force) {
+    const should = force || world.year <= 2500 || world.year % 1000 === 0 || world.year === MAX_YEAR;
+    if (!should) return;
+    const snapshot = {
+      year: world.year,
+      returnCount: world.returnCount,
+      epoch: world.epoch,
+      architecturalFamily: world.architecturalFamily,
+      stats: deepClone(world.stats),
+      sites: world.sites.map(s => ({
+        id: s.id, kind: s.kind, type: s.type, name: s.name, originalName: s.originalName,
+        x: s.x, y: s.y, w: s.w, d: s.d, h: s.h, radius: s.radius,
+        status: s.status, use: s.use, integrity: s.integrity, maxIntegrity: s.maxIntegrity,
+        district: s.district, yearBuilt: s.yearBuilt, age: s.age, cultural: s.cultural,
+        religious: s.religious, heritage: s.heritage, repeatedHits: s.repeatedHits, protected: s.protected,
+        water: s.water, renderVariant: s.renderVariant
+      })),
+      eventIds: world.events.slice(-40).map(e => e.id),
+      beliefIds: world.beliefs.slice(-24).map(b => b.id)
+    };
+    world.timeline = world.timeline.filter(k => k.year !== snapshot.year);
+    world.timeline.push(snapshot);
+    world.timeline.sort((a, b) => a.year - b.year);
+    if (world.timeline.length > 140) {
+      const early = world.timeline.filter(k => k.year <= 2500);
+      const late = world.timeline.filter(k => k.year > 2500).filter((_, i) => i % 2 === 0 || _.year === world.year);
+      world.timeline = [...early, ...late].slice(-140);
+    }
+  }
+
+  function simulateMany(world, cycles, opts = {}) {
+    const n = clamp(Math.floor(cycles), 0, 1000);
+    for (let i = 0; i < n && world.year < MAX_YEAR; i++) simulateCentury(world, { abstractBattle: opts.abstractBattles !== false });
+    return world;
+  }
+
+  function summarizeWorld(world) {
+    refreshDistrictState(world);
+    const active = world.sites.filter(s => s.kind === 'building' && !['collapsed', 'ruin', 'abandoned', 'battle_corridor', 'buried'].includes(s.status)).length;
+    const ruined = world.sites.filter(s => ['collapsed', 'ruin', 'abandoned', 'buried'].includes(s.status)).length;
+    const corridors = world.sites.filter(s => s.status === 'battle_corridor').length;
+    const craters = world.sites.filter(s => s.kind === 'crater').length;
+    const heritage = world.sites.filter(s => s.heritage > 0.72).length;
+    return {
+      year: world.year, population: world.stats.population, technology: round(world.stats.technology, 3),
+      economy: round(world.stats.economy, 3), stability: round(world.stats.stability, 3), preparedness: round(world.stats.preparedness, 3),
+      active, ruined, corridors, craters, heritage, events: world.events.length, beliefs: world.beliefs.length,
+      westValue: round(world.districtState.Westbank?.value || 0, 2), eastValue: round(world.districtState.Eastbank?.value || 0, 2),
+      westRuins: world.districtState.Westbank?.ruined || 0, eastRuins: world.districtState.Eastbank?.ruined || 0,
+      ancientScarsWest: world.sites.filter(s => s.kind === 'crater' && s.yearBuilt <= 100 && s.x < 0).length,
+      ancientScarsEast: world.sites.filter(s => s.kind === 'crater' && s.yearBuilt <= 100 && s.x > 0).length,
+      foundingImpactWest: round((world.foundingImpact?.Westbank || 0) + (world.foundingImpact?.Crownward || 0) * 0.5 + (world.foundingImpact?.['South Terrace'] || 0) * 0.5, 2),
+      foundingImpactEast: round((world.foundingImpact?.Eastbank || 0) + (world.foundingImpact?.Crownward || 0) * 0.5 + (world.foundingImpact?.['South Terrace'] || 0) * 0.5, 2)
+    };
+  }
+
+  function runABProof(seed = 44119, targetYear = 10000) {
+    const a = createWorld(seed);
+    const b = createWorld(seed);
+    const wreck = (world, side) => {
+      beginBattle(world, 'VALIDATION RIVAL');
+      for (const s of world.sites) {
+        if (s.kind === 'crater') continue;
+        if ((side === 'west' && s.x < -25) || (side === 'east' && s.x > 25)) {
+          if (rand01(`${seed}:wreck:${side}:${s.id}`) < 0.62) damageSite(world, s.id, 120, { source: 'validation impact', label: `catastrophic ${side}ern destruction`, player: true });
+        }
+      }
+      createCrater(world, side === 'west' ? -110 : 110, 60, 24, { source: 'validation impact', label: `${side} impact`, player: true });
+      endBattle(world, 'won');
+    };
+    wreck(a, 'west'); wreck(b, 'east');
+    const cycles = Math.ceil(targetYear / 100);
+    simulateMany(a, cycles, { abstractBattles: true });
+    simulateMany(b, cycles, { abstractBattles: true });
+    const sa = summarizeWorld(a), sb = summarizeWorld(b);
+    const divergence = {
+      westValue: round(Math.abs(sa.westValue - sb.westValue), 2),
+      eastValue: round(Math.abs(sa.eastValue - sb.eastValue), 2),
+      westRuins: Math.abs(sa.westRuins - sb.westRuins),
+      eastRuins: Math.abs(sa.eastRuins - sb.eastRuins),
+      population: Math.abs(sa.population - sb.population),
+      activeSites: Math.abs(sa.active - sb.active),
+      heritageSites: Math.abs(sa.heritage - sb.heritage),
+      eventCount: Math.abs(sa.events - sb.events),
+      ancientScarsWest: Math.abs(sa.ancientScarsWest - sb.ancientScarsWest),
+      ancientScarsEast: Math.abs(sa.ancientScarsEast - sb.ancientScarsEast),
+      foundingImpactWest: round(Math.abs(sa.foundingImpactWest - sb.foundingImpactWest), 2),
+      foundingImpactEast: round(Math.abs(sa.foundingImpactEast - sb.foundingImpactEast), 2)
+    };
+    const spatiallyDifferent = divergence.westValue > 0.2 || divergence.eastValue > 0.2 || divergence.westRuins > 0 || divergence.eastRuins > 0 || divergence.ancientScarsWest > 0 || divergence.ancientScarsEast > 0 || divergence.foundingImpactWest > 0.5 || divergence.foundingImpactEast > 0.5;
+    const historicallyDifferent = divergence.eventCount > 0 || divergence.activeSites > 0 || divergence.heritageSites > 0;
+    return { targetYear, historyA: sa, historyB: sb, divergence, pass: spatiallyDifferent && historicallyDifferent };
+  }
+
+  function serialize(world) {
+    const copy = deepClone(world);
+    copy.saveVersion = SAVE_VERSION;
+    copy.meta.lastSavedAt = new Date().toISOString();
+    return JSON.stringify(copy);
+  }
+
+  function deserialize(text) {
+    const parsed = typeof text === 'string' ? JSON.parse(text) : deepClone(text);
+    if (!parsed || parsed.saveVersion !== SAVE_VERSION || !Array.isArray(parsed.sites) || !parsed.stats) throw new Error('Unsupported or malformed save data.');
+    parsed.year = clamp(Number(parsed.year) || 0, 0, MAX_YEAR);
+    parsed.returnCount = Math.max(1, Number(parsed.returnCount) || 1);
+    parsed.timeline = Array.isArray(parsed.timeline) ? parsed.timeline : [];
+    parsed.events = Array.isArray(parsed.events) ? parsed.events : [];
+    parsed.beliefs = Array.isArray(parsed.beliefs) ? parsed.beliefs : [];
+    parsed.institutions = Array.isArray(parsed.institutions) ? parsed.institutions : [];
+    parsed.playerPattern = parsed.playerPattern || { protectedSites: [], recklessDistricts: {}, mercy: 0, destruction: 0 };
+    parsed.legacyImpact = parsed.legacyImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    parsed.foundingImpact = parsed.foundingImpact || Object.fromEntries(DISTRICT_NAMES.map(n => [n, 0]));
+    refreshDistrictState(parsed);
+    parsed.epoch = getEpoch(parsed.year, parsed);
+    parsed.architecturalFamily = architecturalFamily(parsed);
+    return parsed;
+  }
+
+  return {
+    SAVE_VERSION, YEAR_STEP, MAX_YEAR, DISTRICT_NAMES,
+    clamp, lerp, round, hash32, rand01, pick, deepClone,
+    districtFor, getEpoch, architecturalFamily,
+    createWorld, recordEvent, findSite, damageSite, protectSite, createCrater,
+    beginBattle, endBattle, simulateCentury, simulateMany, storeTimelineKeyframe,
+    summarizeWorld, runABProof, serialize, deserialize, refreshDistrictState
+  };
+});
+</script>
+  <script>(() => {
+  'use strict';
+  const Sim = window.CenturySim;
+  if (!Sim) throw new Error('CenturySim is required before game.js');
+
+  const $ = (sel) => document.querySelector(sel);
+  const canvas = $('#game');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  const ui = {
+    title: $('#title-screen'),
+    begin: $('#begin-btn'),
+    continue: $('#continue-btn'),
+    hud: $('#hud'),
+    year: $('#year-label'),
+    epoch: $('#epoch-label'),
+    return: $('#return-label'),
+    pop: $('#population-label'),
+    tech: $('#tech-label'),
+    prep: $('#prep-label'),
+    health: $('#health-fill'),
+    enemyHealth: $('#enemy-fill'),
+    energy: $('#energy-fill'),
+    phase: $('#phase-label'),
+    toast: $('#toast'),
+    intermission: $('#intermission'),
+    interTitle: $('#intermission-title'),
+    interCopy: $('#intermission-copy'),
+    advance: $('#advance-btn'),
+    nextFight: $('#next-fight-btn'),
+    fastTen: $('#fast-ten-btn'),
+    history: $('#history-panel'),
+    historyClose: $('#history-close'),
+    historyEvents: $('#history-events'),
+    beliefs: $('#beliefs-list'),
+    siteBox: $('#site-box'),
+    timeline: $('#timeline'),
+    timelineLabel: $('#timeline-label'),
+    exportBtn: $('#export-btn'),
+    importBtn: $('#import-btn'),
+    importInput: $('#import-input'),
+    saveBtn: $('#save-btn'),
+    resetBtn: $('#reset-btn'),
+    historyBtn: $('#history-btn'),
+    projectBtn: $('#project-btn'),
+    abBtn: $('#ab-btn'),
+    abOut: $('#ab-output'),
+    controls: $('#controls-help'),
+    touch: $('#touch-controls'),
+    transition: $('#century-transition'),
+    transitionYear: $('#transition-year'),
+    transitionCopy: $('#transition-copy'),
+    inspectHint: $('#inspect-hint')
+  };
+
+  const STORAGE_KEY = 'every-fight-century-save-v1';
+  const FIXED_DT = 1 / 60;
+  const TAU = Math.PI * 2;
+
+  const game = {
+    world: null,
+    mode: 'title',
+    previousMode: null,
+    renderSnapshot: null,
+    selectedSiteId: null,
+    camera: { x: 0, y: 0, shake: 0, zoom: 1 },
+    player: null,
+    enemy: null,
+    particles: [],
+    effects: [],
+    rubble: [],
+    keys: new Set(),
+    justPressed: new Set(),
+    mouse: { x: 0, y: 0, down: false },
+    lastTime: performance.now(),
+    accumulator: 0,
+    running: true,
+    audio: null,
+    battleStartedAt: 0,
+    currentBattleActive: false,
+    transitionTimer: 0,
+    transitionApplied: false,
+    inputEnabled: false,
+    importToken: 0,
+    lastAutoSave: 0,
+    debug: false
+  };
+
+  function makeFighter(player = true) {
+    return {
+      x: player ? -36 : 120,
+      y: player ? 80 : -90,
+      z: 0,
+      vx: 0, vy: 0, vz: 0,
+      radius: player ? 7.5 : 8.5,
+      hp: 100, maxHp: 100,
+      energy: 100,
+      facingX: player ? 1 : -1,
+      facingY: 0,
+      grounded: true,
+      dashCd: 0,
+      punchCd: 0,
+      shockCd: 0,
+      grappleCd: 0,
+      attackCd: 0,
+      stun: 0,
+      dive: false,
+      grapple: null,
+      trail: [],
+      color: player ? '#89f6ff' : '#ff5b71'
+    };
+  }
+
+  function resetTransient() {
+    game.player = makeFighter(true);
+    game.enemy = makeFighter(false);
+    game.particles.length = 0;
+    game.effects.length = 0;
+    game.rubble.length = 0;
+    game.camera.x = game.player.x;
+    game.camera.y = game.player.y;
+    game.currentBattleActive = false;
+  }
+
+  function ensureAudio() {
+    if (game.audio) return game.audio;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    const ac = new AC();
+    const master = ac.createGain();
+    master.gain.value = 0.22;
+    master.connect(ac.destination);
+    game.audio = { ac, master };
+    return game.audio;
+  }
+
+  function tone(freq = 90, duration = 0.08, gain = 0.1, type = 'sine', slide = 0.5) {
+    const a = ensureAudio();
+    if (!a) return;
+    const now = a.ac.currentTime;
+    const osc = a.ac.createOscillator();
+    const g = a.ac.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq * slide), now + duration);
+    g.gain.setValueAtTime(gain, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(g); g.connect(a.master);
+    osc.start(now); osc.stop(now + duration + 0.02);
+  }
+
+  function impactSound(power = 1) {
+    tone(75 + power * 15, 0.12 + power * 0.05, 0.07 + power * 0.035, 'sawtooth', 0.28);
+    tone(190, 0.05, 0.025, 'square', 0.55);
+  }
+
+  function toast(message, ms = 2400) {
+    ui.toast.textContent = message;
+    ui.toast.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => ui.toast.classList.remove('show'), ms);
+  }
+
+  function formatPopulation(n) {
+    if (n >= 1e6) return `${(n / 1e6).toFixed(1)}m`;
+    if (n >= 1000) return `${Math.round(n / 1000)}k`;
+    return String(n);
+  }
+
+  function currentView() {
+    return game.renderSnapshot || game.world;
+  }
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    canvas.width = Math.max(1, Math.floor(innerWidth * dpr));
+    canvas.height = Math.max(1, Math.floor(innerHeight * dpr));
+    canvas.style.width = `${innerWidth}px`;
+    canvas.style.height = `${innerHeight}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function project(x, y, z = 0) {
+    const scale = 2.05 * game.camera.zoom;
+    const dx = x - game.camera.x;
+    const dy = y - game.camera.y;
+    const shake = game.camera.shake;
+    const sx = innerWidth * 0.5 + (dx - dy) * scale + (Math.random() - 0.5) * shake;
+    const sy = innerHeight * 0.55 + (dx + dy) * scale * 0.5 - z * scale + (Math.random() - 0.5) * shake;
+    return { x: sx, y: sy };
+  }
+
+  function unprojectScreen(sx, sy) {
+    const scale = 2.05 * game.camera.zoom;
+    const a = (sx - innerWidth * 0.5) / scale;
+    const b = (sy - innerHeight * 0.55) / (scale * 0.5);
+    return { x: game.camera.x + (a + b) * 0.5, y: game.camera.y + (b - a) * 0.5 };
+  }
+
+  function poly(points, fill, stroke = null, lineWidth = 1) {
+    if (!points.length) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke(); }
+  }
+
+  function line(points, stroke, width = 1, dash = []) {
+    if (!points.length) return;
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.stroke();
+    ctx.restore();
+  }
+
+  function paletteFor(view) {
+    const t = view.stats?.technology || 0;
+    const climate = view.stats?.climate || 0;
+    const prep = view.stats?.preparedness || 0;
+    if (view.architecturalFamily === 'Successor Ruinwork') return { ground: '#171714', road: '#3a332c', top: '#8f7c63', left: '#5d5141', right: '#443b31', accent: '#c6a36a' };
+    if (prep > 0.82) return { ground: '#0a1318', road: '#1a2b31', top: '#73a7a9', left: '#315f68', right: '#24434c', accent: '#8bf9ff' };
+    if (t > 0.72) return { ground: '#11161b', road: '#293038', top: '#9ca5ad', left: '#59636c', right: '#3f4850', accent: '#b7e8ff' };
+    if (t > 0.42) return { ground: '#171819', road: '#3a3937', top: '#9c927e', left: '#635d53', right: '#47433d', accent: '#f0bd68' };
+    if (climate < -0.5) return { ground: '#1c2020', road: '#424445', top: '#a69b83', left: '#6b6254', right: '#4e4840', accent: '#d9e8e8' };
+    return { ground: '#1d1a16', road: '#4a4236', top: '#b09b76', left: '#756448', right: '#544834', accent: '#e2c46b' };
+  }
+
+  function colorWithAlpha(hex, alpha) {
+    const h = hex.replace('#', '');
+    const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+  }
+
+  function drawGround(view, pal) {
+    ctx.fillStyle = '#050708';
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+    const corners = [project(-260, -260), project(260, -260), project(260, 260), project(-260, 260)];
+    poly(corners, pal.ground, '#23303a', 1.2);
+
+    // River: the oldest non-human continuity anchor.
+    const ro = view.stats?.riverOffset || 0;
+    const river = [project(ro - 15, -260), project(ro + 15, -260), project(ro + 15, 260), project(ro - 15, 260)];
+    poly(river, colorWithAlpha('#1c6073', 0.82), colorWithAlpha('#79d9df', 0.22), 1);
+    for (let y = -250; y < 250; y += 28) {
+      const a = project(ro - 9 + Math.sin(y * 0.05 + view.year * 0.001) * 3, y);
+      const b = project(ro + 8 + Math.sin(y * 0.05 + 0.7 + view.year * 0.001) * 3, y + 10);
+      line([a, b], 'rgba(148,226,232,.13)', 1);
+    }
+
+    // Persistent road lattice. It bends visually around important scars.
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (let x = -216; x <= 216; x += 72) {
+      line([project(x, -230), project(x, 230)], pal.road, 12 * game.camera.zoom);
+      line([project(x, -230), project(x, 230)], 'rgba(255,255,255,.06)', 1.2);
+    }
+    for (let y = -216; y <= 216; y += 72) {
+      line([project(-230, y), project(230, y)], pal.road, 12 * game.camera.zoom);
+      line([project(-230, y), project(230, y)], 'rgba(255,255,255,.06)', 1.2);
+    }
+    ctx.restore();
+
+    const oldScars = view.sites.filter(s => s.kind === 'crater' && s.age > 1000 && s.radius > 7).slice(0, 10);
+    for (const s of oldScars) {
+      const ring = [];
+      for (let i = 0; i <= 36; i++) {
+        const a = i / 36 * TAU;
+        ring.push(project(s.x + Math.cos(a) * (s.radius + 8), s.y + Math.sin(a) * (s.radius + 8)));
+      }
+      line(ring, colorWithAlpha(pal.accent, 0.13), 3, [7, 9]);
+    }
+  }
+
+  function drawCrater(site, view, selected) {
+    const pts = [];
+    const r = site.radius || 12;
+    for (let i = 0; i < 40; i++) {
+      const a = i / 40 * TAU;
+      pts.push(project(site.x + Math.cos(a) * r, site.y + Math.sin(a) * r));
+    }
+    const water = site.water || (site.use && site.use.includes('lake') ? 0.8 : 0);
+    let fill = water > 0.45 ? `rgba(33,107,130,${0.45 + water * 0.25})` : site.use === 'battle corridor' ? 'rgba(160,94,44,.18)' : 'rgba(15,10,8,.72)';
+    if (site.use === 'sacred ground' || site.use === 'memorial reserve') fill = 'rgba(75,65,42,.55)';
+    poly(pts, fill, selected ? '#fff4a8' : 'rgba(208,158,97,.35)', selected ? 3 : 1.5);
+    const c = project(site.x, site.y, 0);
+    ctx.save();
+    ctx.font = `${Math.max(9, 10 * game.camera.zoom)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = selected ? '#fff4a8' : 'rgba(230,220,190,.42)';
+    if (game.camera.zoom > 0.82 && (selected || site.heritage > 0.7)) ctx.fillText(site.use || 'impact scar', c.x, c.y + 4);
+    ctx.restore();
+  }
+
+  function buildingColors(site, pal) {
+    if (site.status === 'ruin' || site.status === 'abandoned' || site.status === 'collapsed') {
+      return { top: '#675b4b', left: '#403832', right: '#302a26' };
+    }
+    if (site.status === 'reinforced') return { top: '#83a7a7', left: '#45676c', right: '#314a51' };
+    if (site.protected || site.heritage > 0.78) return { top: '#c2aa7c', left: '#796c52', right: '#574e3f' };
+    const v = (site.renderVariant || 0) * 0.04;
+    return { top: pal.top, left: colorWithAlpha(pal.left, 0.95 - v), right: colorWithAlpha(pal.right, 0.96 - v) };
+  }
+
+  function drawBuilding(site, pal, selected) {
+    if (site.status === 'battle_corridor' || site.h <= 0.5) {
+      const p = [project(site.x - site.w / 2, site.y - site.d / 2), project(site.x + site.w / 2, site.y - site.d / 2), project(site.x + site.w / 2, site.y + site.d / 2), project(site.x - site.w / 2, site.y + site.d / 2)];
+      poly(p, 'rgba(95,55,29,.2)', selected ? '#ffe59a' : 'rgba(255,181,95,.28)', selected ? 3 : 1);
+      for (let i = -2; i <= 2; i++) {
+        line([project(site.x - site.w / 2, site.y + i * site.d / 5), project(site.x + site.w / 2, site.y + (i + 1) * site.d / 5)], 'rgba(255,178,74,.24)', 2);
+      }
+      return;
+    }
+
+    let h = site.h || 25;
+    if (['collapsed', 'ruin', 'abandoned'].includes(site.status)) h *= site.status === 'collapsed' ? 0.16 : 0.42;
+    if (site.status === 'damaged') h *= 0.86;
+    if (site.status === 'heavily damaged') h *= 0.65;
+    const x0 = site.x - site.w / 2, x1 = site.x + site.w / 2;
+    const y0 = site.y - site.d / 2, y1 = site.y + site.d / 2;
+    const b0 = project(x0, y0), b1 = project(x1, y0), b2 = project(x1, y1), b3 = project(x0, y1);
+    const t0 = project(x0, y0, h), t1 = project(x1, y0, h), t2 = project(x1, y1, h), t3 = project(x0, y1, h);
+    const c = buildingColors(site, pal);
+    poly([b1, b2, t2, t1], c.right, selected ? '#fff7bc' : 'rgba(0,0,0,.25)', selected ? 2.5 : 0.8);
+    poly([b2, b3, t3, t2], c.left, selected ? '#fff7bc' : 'rgba(0,0,0,.22)', selected ? 2.5 : 0.8);
+    poly([t0, t1, t2, t3], c.top, selected ? '#fff7bc' : 'rgba(255,255,255,.08)', selected ? 2.5 : 0.8);
+
+    if (site.status === 'reinforced' || (currentView().stats?.preparedness || 0) > 0.55) {
+      const stripes = Math.min(5, Math.max(2, Math.floor(h / 22)));
+      for (let i = 1; i <= stripes; i++) {
+        const z = h * i / (stripes + 1);
+        line([project(x1, y0, z), project(x1, y1, z)], 'rgba(130,235,240,.13)', 1.4);
+        line([project(x0, y1, z), project(x1, y1, z)], 'rgba(130,235,240,.1)', 1.4);
+      }
+    }
+
+    if (site.status === 'collapsed' || site.status === 'ruin') {
+      const seed = Sim.hash32(site.id + ':' + site.status);
+      for (let i = 0; i < 4; i++) {
+        const ox = ((seed >> (i * 4)) & 15) / 15 * site.w - site.w / 2;
+        const oy = ((seed >> (i * 3 + 2)) & 15) / 15 * site.d - site.d / 2;
+        const p = project(site.x + ox, site.y + oy, 1 + i);
+        ctx.fillStyle = 'rgba(170,145,105,.42)';
+        ctx.fillRect(p.x - 3, p.y - 2, 6 + i, 3);
+      }
+    }
+
+    if (site.protected) {
+      const p = project(site.x, site.y, h + 6);
+      ctx.save(); ctx.strokeStyle = 'rgba(131,248,255,.65)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, TAU); ctx.stroke(); ctx.restore();
+    }
+  }
+
+  function drawWorld(view) {
+    const pal = paletteFor(view);
+    drawGround(view, pal);
+
+    const items = [...view.sites].sort((a, b) => (a.x + a.y) - (b.x + b.y) || (a.kind === 'crater' ? -1 : 1));
+    for (const s of items) {
+      const selected = s.id === game.selectedSiteId;
+      if (s.kind === 'crater') drawCrater(s, view, selected);
+      else drawBuilding(s, pal, selected);
+    }
+
+    for (const r of game.rubble) {
+      const p = project(r.x, r.y, r.z || 0);
+      ctx.fillStyle = r.color || 'rgba(165,143,112,.68)';
+      ctx.fillRect(p.x - r.size, p.y - r.size * 0.6, r.size * 2, r.size * 1.2);
+    }
+  }
+
+  function drawFighter(f, enemy = false) {
+    if (!f) return;
+    const shadow = project(f.x, f.y, 0);
+    const p = project(f.x, f.y, f.z + 10);
+    const zScale = 1 + f.z * 0.003;
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.ellipse(shadow.x, shadow.y + 4, 15 * game.camera.zoom, 7 * game.camera.zoom, 0, 0, TAU); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = f.color; ctx.shadowBlur = enemy ? 18 : 22;
+    ctx.fillStyle = enemy ? '#5b1722' : '#0f6b73';
+    ctx.strokeStyle = f.color; ctx.lineWidth = 2.3;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y - 16 * zScale);
+    ctx.lineTo(p.x + 8, p.y - 4);
+    ctx.lineTo(p.x + 6, p.y + 11);
+    ctx.lineTo(p.x, p.y + 16);
+    ctx.lineTo(p.x - 7, p.y + 10);
+    ctx.lineTo(p.x - 8, p.y - 4);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = enemy ? '#ffcad2' : '#d9fbff';
+    ctx.beginPath(); ctx.arc(p.x, p.y - 17 * zScale, 5.5, 0, TAU); ctx.fill();
+    const aim = project(f.x + f.facingX * 13, f.y + f.facingY * 13, f.z + 8);
+    ctx.strokeStyle = enemy ? '#ff8191' : '#9ff7ff'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(p.x, p.y - 2); ctx.lineTo(aim.x, aim.y); ctx.stroke();
+    ctx.restore();
+
+    if (f.trail.length > 1) {
+      ctx.save();
+      for (let i = 1; i < f.trail.length; i++) {
+        const a = f.trail[i - 1], b = f.trail[i];
+        const pa = project(a.x, a.y, a.z + 8), pb = project(b.x, b.y, b.z + 8);
+        ctx.strokeStyle = colorWithAlpha(f.color, i / f.trail.length * 0.25);
+        ctx.lineWidth = 5 * i / f.trail.length;
+        ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawParticles() {
+    for (const p of game.particles) {
+      const q = project(p.x, p.y, p.z);
+      const a = Sim.clamp(p.life / p.maxLife, 0, 1);
+      ctx.fillStyle = p.color || `rgba(198,180,150,${a * 0.55})`;
+      ctx.beginPath(); ctx.arc(q.x, q.y, Math.max(1, p.size * a * game.camera.zoom), 0, TAU); ctx.fill();
+    }
+    for (const e of game.effects) {
+      if (e.type === 'ring') {
+        const pts = [];
+        for (let i = 0; i <= 44; i++) {
+          const a = i / 44 * TAU;
+          pts.push(project(e.x + Math.cos(a) * e.r, e.y + Math.sin(a) * e.r, e.z || 0));
+        }
+        line(pts, colorWithAlpha(e.color || '#c5fbff', Sim.clamp(e.life / e.maxLife, 0, 1) * 0.72), Math.max(1, e.width * game.camera.zoom));
+      }
+    }
+  }
+
+  function render() {
+    const view = currentView();
+    if (!view) {
+      ctx.fillStyle = '#050708'; ctx.fillRect(0, 0, innerWidth, innerHeight); return;
+    }
+    drawWorld(view);
+    if (!game.renderSnapshot && game.mode !== 'title') {
+      if (game.currentBattleActive) drawFighter(game.enemy, true);
+      drawFighter(game.player, false);
+      drawParticles();
+    }
+    drawAtmosphere(view);
+  }
+
+  function drawAtmosphere(view) {
+    const grad = ctx.createLinearGradient(0, 0, 0, innerHeight);
+    const age = view.year / Sim.MAX_YEAR;
+    grad.addColorStop(0, age > 0.6 ? 'rgba(54,91,106,.14)' : 'rgba(25,37,50,.16)');
+    grad.addColorStop(0.55, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,.42)');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, innerWidth, innerHeight);
+    if ((view.stats?.preparedness || 0) > 0.66) {
+      ctx.save(); ctx.globalAlpha = 0.08 + (view.stats.preparedness - 0.66) * 0.2;
+      for (let x = 0; x < innerWidth; x += 80) { ctx.fillStyle = '#79f4ff'; ctx.fillRect(x, innerHeight - 4, 40, 1); }
+      ctx.restore();
+    }
+  }
+
+  function spawnDust(x, y, power = 1, color = null) {
+    const count = Math.min(28, 6 + Math.floor(power * 9));
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * TAU;
+      const sp = 6 + Math.random() * 26 * power;
+      game.particles.push({
+        x, y, z: Math.random() * 8,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: 10 + Math.random() * 32,
+        life: 0.4 + Math.random() * 0.8, maxLife: 1.2,
+        size: 2 + Math.random() * 4 * power, color
+      });
+    }
+    if (game.particles.length > 320) game.particles.splice(0, game.particles.length - 320);
+  }
+
+  function spawnRubble(site, power = 1) {
+    for (let i = 0; i < 12; i++) {
+      game.rubble.push({
+        x: site.x + (Math.random() - 0.5) * site.w * 1.2,
+        y: site.y + (Math.random() - 0.5) * site.d * 1.2,
+        z: 0,
+        size: 1.5 + Math.random() * 3.5 * power,
+        color: 'rgba(164,140,104,.62)'
+      });
+    }
+    if (game.rubble.length > 180) game.rubble.splice(0, game.rubble.length - 180);
+  }
+
+  function ring(x, y, r, color = '#b5f8ff', life = 0.5, width = 3) {
+    game.effects.push({ type: 'ring', x, y, r, color, life, maxLife: life, width });
+  }
+
+  function activeSites() {
+    return game.world.sites.filter(s => s.kind !== 'crater' && !['collapsed', 'buried', 'battle_corridor'].includes(s.status) && (s.h || 0) > 3);
+  }
+
+  function pointInSite(x, y, s, pad = 0) {
+    return x >= s.x - s.w / 2 - pad && x <= s.x + s.w / 2 + pad && y >= s.y - s.d / 2 - pad && y <= s.y + s.d / 2 + pad;
+  }
+
+  function damageSiteVisual(site, amount, cause) {
+    const was = site.status;
+    const ev = Sim.damageSite(game.world, site.id, amount, cause);
+    if (ev || (was !== site.status && site.status === 'collapsed')) {
+      spawnRubble(site, Math.min(2, amount / 70));
+      spawnDust(site.x, site.y, Math.min(2.2, amount / 70));
+      impactSound(Math.min(2, amount / 90));
+      game.camera.shake = Math.max(game.camera.shake, 8 + amount * 0.08);
+    } else if (amount > 20) {
+      spawnDust(site.x, site.y, Math.min(1, amount / 50));
+    }
+  }
+
+  function collideFighterWithBuildings(f, playerControlled) {
+    const speed = Math.hypot(f.vx, f.vy);
+    if (f.z > 18) return;
+    for (const s of activeSites()) {
+      if (!pointInSite(f.x, f.y, s, f.radius * 0.45)) continue;
+      const dx = f.x - s.x, dy = f.y - s.y;
+      const ax = Math.abs(dx) / Math.max(1, s.w), ay = Math.abs(dy) / Math.max(1, s.d);
+      const destructive = speed > 42 || f.dive;
+      if (destructive) {
+        const amount = Math.max(18, speed * (playerControlled ? 1.25 : 1.5));
+        damageSiteVisual(s, amount, { label: playerControlled ? 'player body impact' : 'launched immortal impact', player: playerControlled });
+        const passThrough = s.status === 'collapsed' || speed > 82;
+        if (!passThrough) { f.vx *= -0.22; f.vy *= -0.22; }
+        else { f.vx *= 0.82; f.vy *= 0.82; }
+        f.x += Math.sign(dx || 1) * 3; f.y += Math.sign(dy || 1) * 3;
+      } else {
+        if (ax > ay) { f.x = s.x + Math.sign(dx || 1) * (s.w / 2 + f.radius); f.vx = 0; }
+        else { f.y = s.y + Math.sign(dy || 1) * (s.d / 2 + f.radius); f.vy = 0; }
+      }
+      break;
+    }
+  }
+
+  function updatePlayer(dt) {
+    const p = game.player;
+    if (!p || game.mode === 'history') return;
+    p.dashCd = Math.max(0, p.dashCd - dt);
+    p.punchCd = Math.max(0, p.punchCd - dt);
+    p.shockCd = Math.max(0, p.shockCd - dt);
+    p.grappleCd = Math.max(0, p.grappleCd - dt);
+    p.stun = Math.max(0, p.stun - dt);
+    p.energy = Math.min(100, p.energy + dt * 12);
+
+    let ix = 0, iy = 0;
+    if (game.keys.has('KeyW') || game.keys.has('ArrowUp')) iy -= 1;
+    if (game.keys.has('KeyS') || game.keys.has('ArrowDown')) iy += 1;
+    if (game.keys.has('KeyA') || game.keys.has('ArrowLeft')) ix -= 1;
+    if (game.keys.has('KeyD') || game.keys.has('ArrowRight')) ix += 1;
+    const len = Math.hypot(ix, iy) || 1;
+    ix /= len; iy /= len;
+    if ((ix || iy) && p.stun <= 0) { p.facingX = ix; p.facingY = iy; }
+    const sprint = game.keys.has('ShiftLeft') || game.keys.has('ShiftRight');
+    const accel = sprint ? 150 : 104;
+    const max = sprint ? 68 : 45;
+    if (p.stun <= 0) { p.vx += ix * accel * dt; p.vy += iy * accel * dt; }
+    const groundDrag = p.grounded ? 7.2 : 1.25;
+    if (!ix) p.vx *= Math.max(0, 1 - groundDrag * dt);
+    if (!iy) p.vy *= Math.max(0, 1 - groundDrag * dt);
+    const sp = Math.hypot(p.vx, p.vy);
+    if (sp > max && p.dashCd < 0.28) { p.vx = p.vx / sp * max; p.vy = p.vy / sp * max; }
+
+    if (pressed('Space') && p.grounded && p.stun <= 0) {
+      p.vz = 58; p.grounded = false; tone(180, 0.08, 0.035, 'triangle', 1.6);
+    }
+    let gravity = 105;
+    if (!p.grounded && p.vz < 0 && game.keys.has('Space')) gravity = 34; // glide
+    p.vz -= gravity * dt;
+
+    if (pressed('KeyQ') && p.dashCd <= 0 && p.energy >= 14 && p.stun <= 0) {
+      const fx = (ix || iy) ? ix : p.facingX, fy = (ix || iy) ? iy : p.facingY;
+      p.vx += fx * 92; p.vy += fy * 92; p.dashCd = 0.62; p.energy -= 14;
+      ring(p.x, p.y, 9, '#8bf5ff', 0.24, 2); tone(320, 0.07, 0.035, 'sawtooth', 0.4);
+    }
+    if ((pressed('ControlLeft') || pressed('KeyC')) && !p.grounded) {
+      p.vz = -128; p.dive = true; p.energy = Math.max(0, p.energy - 8);
+    }
+    if (pressed('KeyR') && p.grappleCd <= 0 && p.energy >= 10) startGrapple();
+    if (pressed('KeyF')) doPunch();
+    if (pressed('KeyE')) doShockwave();
+
+    if (p.grapple) {
+      p.grapple.time -= dt;
+      const dx = p.grapple.x - p.x, dy = p.grapple.y - p.y;
+      const d = Math.hypot(dx, dy) || 1;
+      p.vx += dx / d * 175 * dt; p.vy += dy / d * 175 * dt;
+      p.vz += 25 * dt;
+      if (p.grapple.time <= 0 || d < 16) p.grapple = null;
+    }
+
+    p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+    if (p.z <= 0) {
+      if (!p.grounded && (p.dive || p.vz < -72)) {
+        const power = Sim.clamp(Math.abs(p.vz) / 90, 0.6, 1.8);
+        Sim.createCrater(game.world, p.x, p.y, 8 + power * 7, { label: 'player dive impact', player: true });
+        spawnDust(p.x, p.y, power * 1.2); ring(p.x, p.y, 18 + power * 10, '#d0fbff', 0.42, 4);
+        for (const s of activeSites()) {
+          const d = Math.hypot(s.x - p.x, s.y - p.y);
+          if (d < 42) damageSiteVisual(s, (42 - d) * power * 1.1, { label: 'dive shockwave', player: true });
+        }
+        if (game.currentBattleActive && Math.hypot(game.enemy.x - p.x, game.enemy.y - p.y) < 42) launchEnemyFrom(p.x, p.y, 36 * power, 20 * power);
+        impactSound(power); game.camera.shake = 16 * power;
+      }
+      p.z = 0; p.vz = 0; p.grounded = true; p.dive = false;
+    } else p.grounded = false;
+
+    p.x = Sim.clamp(p.x, -235, 235); p.y = Sim.clamp(p.y, -235, 235);
+    collideFighterWithBuildings(p, true);
+    p.trail.push({ x: p.x, y: p.y, z: p.z }); if (p.trail.length > 8) p.trail.shift();
+  }
+
+  function startGrapple() {
+    const p = game.player;
+    let best = null, bestD = 145;
+    for (const s of activeSites()) {
+      if ((s.h || 0) < 25) continue;
+      const d = Math.hypot(s.x - p.x, s.y - p.y);
+      if (d < bestD) { best = s; bestD = d; }
+    }
+    if (!best) { toast('No grapple anchor in range.', 900); return; }
+    p.grapple = { x: best.x, y: best.y, time: 0.85, siteId: best.id };
+    p.grappleCd = 0.8; p.energy -= 10;
+    tone(420, 0.08, 0.025, 'triangle', 1.4);
+  }
+
+  function doPunch() {
+    const p = game.player;
+    if (p.punchCd > 0 || p.stun > 0) return;
+    p.punchCd = 0.28;
+    const hitX = p.x + p.facingX * 18, hitY = p.y + p.facingY * 18;
+    ring(hitX, hitY, 8, '#d9ffff', 0.16, 2);
+    let hit = false;
+    if (game.currentBattleActive) {
+      const e = game.enemy;
+      const d = Math.hypot(e.x - hitX, e.y - hitY);
+      if (d < 24 + e.radius) {
+        e.hp = Math.max(0, e.hp - 14);
+        const strength = 72 + Math.hypot(p.vx, p.vy) * 0.6;
+        e.vx += p.facingX * strength; e.vy += p.facingY * strength; e.vz += 24;
+        e.stun = 0.24; hit = true;
+        spawnDust(e.x, e.y, 0.55, 'rgba(255,126,146,.55)'); impactSound(0.55);
+      }
+    }
+    if (!hit) {
+      let best = null, bd = 30;
+      for (const s of activeSites()) {
+        const d = Math.hypot(s.x - hitX, s.y - hitY);
+        if (d < bd) { best = s; bd = d; }
+      }
+      if (best) { damageSiteVisual(best, 34 + Math.hypot(p.vx, p.vy) * 0.6, { label: 'player punch', player: true }); hit = true; }
+    }
+    tone(hit ? 105 : 220, 0.05, 0.03, 'square', 0.55);
+  }
+
+  function doShockwave() {
+    const p = game.player;
+    if (p.shockCd > 0 || p.energy < 34 || p.stun > 0) return;
+    p.shockCd = 1.7; p.energy -= 34;
+    const radius = 68;
+    ring(p.x, p.y, radius, '#9bf6ff', 0.5, 5);
+    Sim.createCrater(game.world, p.x, p.y, 10 + Math.hypot(p.vx, p.vy) * 0.06, { label: 'player shockwave', player: true });
+    for (const s of activeSites()) {
+      const d = Math.hypot(s.x - p.x, s.y - p.y);
+      if (d < radius) damageSiteVisual(s, (radius - d) * 0.85, { label: 'player shockwave', player: true });
+    }
+    if (game.currentBattleActive) {
+      const d = Math.hypot(game.enemy.x - p.x, game.enemy.y - p.y);
+      if (d < radius) { game.enemy.hp = Math.max(0, game.enemy.hp - 18); launchEnemyFrom(p.x, p.y, 68 - d, 28); }
+    }
+    spawnDust(p.x, p.y, 1.5); impactSound(1.5); game.camera.shake = 18;
+  }
+
+  function launchEnemyFrom(x, y, horizontal, vertical) {
+    const e = game.enemy;
+    const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
+    e.vx += dx / d * horizontal; e.vy += dy / d * horizontal; e.vz += vertical; e.grounded = false; e.stun = 0.45;
+  }
+
+  function updateEnemy(dt) {
+    if (!game.currentBattleActive || !game.enemy) return;
+    const e = game.enemy, p = game.player;
+    e.attackCd = Math.max(0, e.attackCd - dt); e.stun = Math.max(0, e.stun - dt);
+    const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1;
+    if (e.stun <= 0) {
+      if (d > 22) { e.vx += dx / d * 92 * dt; e.vy += dy / d * 92 * dt; }
+      if (d < 25 && e.attackCd <= 0) {
+        e.attackCd = 0.9 + Math.random() * 0.35;
+        const force = 64 + game.world.stats.preparedness * 12;
+        p.vx += dx / d * force; p.vy += dy / d * force; p.vz += 24; p.grounded = false; p.hp = Math.max(0, p.hp - 10); p.stun = 0.22;
+        spawnDust(p.x, p.y, 0.7, 'rgba(255,128,144,.42)'); ring(p.x, p.y, 12, '#ff7388', 0.18, 3); impactSound(0.8); game.camera.shake = 10;
+      }
+      if (d > 80 && Math.random() < dt * 0.45) {
+        e.vx += dx / d * 72; e.vy += dy / d * 72;
+      }
+    }
+    const sp = Math.hypot(e.vx, e.vy), cap = 60;
+    if (sp > cap && e.stun <= 0) { e.vx = e.vx / sp * cap; e.vy = e.vy / sp * cap; }
+    e.vx *= Math.max(0, 1 - 1.15 * dt); e.vy *= Math.max(0, 1 - 1.15 * dt);
+    e.vz -= 98 * dt;
+    e.x += e.vx * dt; e.y += e.vy * dt; e.z += e.vz * dt;
+    if (e.z <= 0) { e.z = 0; e.vz = 0; e.grounded = true; } else e.grounded = false;
+    collideFighterWithBuildings(e, false);
+    e.x = Sim.clamp(e.x, -235, 235); e.y = Sim.clamp(e.y, -235, 235);
+    if (sp > 28) { e.trail.push({ x: e.x, y: e.y, z: e.z }); if (e.trail.length > 7) e.trail.shift(); }
+
+    if (e.hp <= 0) finishBattle('won');
+    else if (p.hp <= 0) finishBattle('lost');
+  }
+
+  function pressed(code) { return game.justPressed.has(code); }
+
+  function updateParticles(dt) {
+    for (const p of game.particles) {
+      p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 42 * dt;
+      p.vx *= 0.985; p.vy *= 0.985; if (p.z < 0) { p.z = 0; p.vz *= -0.18; }
+    }
+    game.particles = game.particles.filter(p => p.life > 0);
+    for (const e of game.effects) { e.life -= dt; if (e.type === 'ring') e.r += dt * 24; }
+    game.effects = game.effects.filter(e => e.life > 0);
+    game.camera.shake *= Math.max(0, 1 - 8 * dt);
+  }
+
+  function updateCamera(dt) {
+    if (!game.player || game.renderSnapshot) return;
+    const lookX = game.player.x + game.player.vx * 0.16;
+    const lookY = game.player.y + game.player.vy * 0.16;
+    const k = 1 - Math.exp(-dt * 6);
+    game.camera.x += (lookX - game.camera.x) * k;
+    game.camera.y += (lookY - game.camera.y) * k;
+  }
+
+  function fixedUpdate(dt) {
+    if (!game.world || game.mode === 'title' || game.mode === 'history' || game.mode === 'transition') {
+      updateParticles(dt);
+      game.justPressed.clear();
+      return;
+    }
+    updatePlayer(dt);
+    if (game.mode === 'combat') updateEnemy(dt);
+    updateParticles(dt);
+    updateCamera(dt);
+    game.justPressed.clear();
+  }
+
+  function frame(now) {
+    const delta = Math.min(0.05, (now - game.lastTime) / 1000);
+    game.lastTime = now;
+    game.accumulator += delta;
+    while (game.accumulator >= FIXED_DT) { fixedUpdate(FIXED_DT); game.accumulator -= FIXED_DT; }
+    if (game.mode === 'transition') updateTransition(delta);
+    render();
+    updateHud();
+    requestAnimationFrame(frame);
+  }
+
+  function updateHud() {
+    if (!game.world) return;
+    const view = currentView();
+    ui.year.textContent = `YEAR ${view.year.toLocaleString()}`;
+    ui.epoch.textContent = view.epoch || Sim.getEpoch(view.year, view);
+    ui.return.textContent = `RETURN ${view.returnCount}`;
+    ui.pop.textContent = formatPopulation(view.stats.population);
+    ui.tech.textContent = `${Math.round(view.stats.technology * 100)}%`;
+    ui.prep.textContent = `${Math.round(view.stats.preparedness * 100)}%`;
+    ui.health.style.width = `${game.player ? game.player.hp : 100}%`;
+    ui.energy.style.width = `${game.player ? game.player.energy : 100}%`;
+    ui.enemyHealth.style.width = `${game.enemy ? game.enemy.hp : 100}%`;
+    ui.phase.textContent = game.renderSnapshot ? 'ARCHIVE VIEW' : game.mode === 'combat' ? 'IMMORTAL CONTACT' : game.mode === 'explore' ? 'RETURN / RECOGNIZE' : game.mode === 'intermission' ? 'AFTERMATH' : game.mode.toUpperCase();
+    ui.enemyHealth.parentElement.parentElement.classList.toggle('hidden', !game.currentBattleActive || !!game.renderSnapshot);
+  }
+
+  function beginNewGame() {
+    ensureAudio()?.ac.resume?.();
+    game.world = Sim.createWorld(Math.floor(Math.random() * 99999999));
+    resetTransient();
+    game.mode = 'explore';
+    game.inputEnabled = true;
+    ui.title.classList.add('hidden');
+    ui.hud.classList.remove('hidden');
+    ui.intermission.classList.remove('hidden');
+    ui.interTitle.textContent = 'YEAR 0 — BEFORE THE FIRST DAMAGE';
+    ui.interCopy.textContent = 'Walk the young city. Right-click a structure to inspect it. When you are ready, call the first immortal.';
+    ui.advance.classList.add('hidden');
+    ui.fastTen.classList.add('hidden');
+    ui.nextFight.classList.remove('hidden');
+    ui.nextFight.textContent = 'CALL THE FIRST IMMORTAL';
+    autosave();
+  }
+
+  function continueGame() {
+    ensureAudio()?.ac.resume?.();
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) throw new Error('No local save exists.');
+      game.world = Sim.deserialize(raw);
+      resetTransient();
+      game.mode = 'explore';
+      game.inputEnabled = true;
+      ui.title.classList.add('hidden'); ui.hud.classList.remove('hidden');
+      showReturnExploration(); toast(`Loaded Year ${game.world.year.toLocaleString()}.`);
+    } catch (err) { toast(err.message || 'Could not load save.'); }
+  }
+
+  function startBattle() {
+    if (!game.world || game.currentBattleActive) return;
+    ensureAudio()?.ac.resume?.();
+    game.player.hp = game.player.maxHp; game.player.energy = 100;
+    game.enemy = makeFighter(false);
+    const angle = Sim.rand01(`${game.world.seed}:spawn:${game.world.returnCount}`) * TAU;
+    game.enemy.x = game.player.x + Math.cos(angle) * 155;
+    game.enemy.y = game.player.y + Math.sin(angle) * 155;
+    game.currentBattleActive = true;
+    game.mode = 'combat';
+    game.battleStartedAt = performance.now();
+    const names = ['THE WEATHERED ONE', 'THE PALE RIVAL', 'THE CENTURY KNIFE', 'THE OTHER IMMORTAL'];
+    Sim.beginBattle(game.world, Sim.pick(`${game.world.seed}:enemyname:${game.world.returnCount}`, names));
+    ui.intermission.classList.add('hidden');
+    toast(`RETURN ${game.world.returnCount}. They remembered you.`);
+    tone(56, 0.7, 0.07, 'sawtooth', 0.4);
+  }
+
+  function finishBattle(outcome) {
+    if (!game.currentBattleActive) return;
+    game.currentBattleActive = false;
+    game.mode = 'intermission';
+    Sim.endBattle(game.world, outcome);
+    autosave();
+    ui.intermission.classList.remove('hidden');
+    ui.interTitle.textContent = outcome === 'won' ? 'THE RIVAL WITHDRAWS' : 'YOU WERE DEFEATED. HISTORY CONTINUES.';
+    const destroyed = game.world.sites.filter(s => s.status === 'collapsed').length;
+    const scars = game.world.sites.filter(s => s.kind === 'crater' && s.yearBuilt === game.world.year).length;
+    ui.interCopy.textContent = `${destroyed} structures currently collapsed. ${scars} fresh impact scars. Nothing resets. Advance the century and return to what this becomes.`;
+    ui.advance.classList.remove('hidden'); ui.fastTen.classList.remove('hidden'); ui.nextFight.classList.add('hidden');
+  }
+
+  function advanceCentury() {
+    if (!game.world || game.mode === 'transition') return;
+    game.mode = 'transition';
+    game.transitionTimer = 0;
+    game.transitionApplied = false;
+    ui.intermission.classList.add('hidden');
+    ui.transition.classList.remove('hidden');
+    ui.transitionYear.textContent = `YEAR ${game.world.year.toLocaleString()}`;
+    ui.transitionCopy.textContent = 'Smoke clears. Survivors choose what to rebuild, abandon, worship, exploit, or route around.';
+  }
+
+  function updateTransition(dt) {
+    game.transitionTimer += dt;
+    const t = game.transitionTimer;
+    if (!game.transitionApplied && t >= 1.05) {
+      game.transitionApplied = true;
+      Sim.simulateCentury(game.world, { abstractBattle: false });
+      resetTransient();
+      game.mode = 'transition';
+      ui.transitionYear.textContent = `YEAR ${game.world.year.toLocaleString()}`;
+      ui.transitionCopy.textContent = transitionSummary();
+      autosave();
+    }
+    if (t >= 2.85) {
+      ui.transition.classList.add('hidden');
+      game.mode = 'explore';
+      showReturnExploration();
+    }
+  }
+
+  function transitionSummary() {
+    const e = game.world.events.slice(-8).find(x => ['land-use', 'archaeology', 'institution', 'civilizational-shock'].includes(x.type));
+    return e ? e.title : `${game.world.architecturalFamily}. The old damage has entered the city's next argument with itself.`;
+  }
+
+  function showReturnExploration() {
+    ui.intermission.classList.remove('hidden');
+    ui.interTitle.textContent = `RETURN ${game.world.returnCount} — YEAR ${game.world.year.toLocaleString()}`;
+    const last = game.world.events.slice().reverse().find(e => e.year === game.world.year && e.type !== 'battle');
+    ui.interCopy.textContent = last ? `${last.title}. Walk before the next fight. The city changed while you were gone.` : 'Walk before the next fight. The city changed while you were gone.';
+    ui.advance.classList.add('hidden'); ui.fastTen.classList.add('hidden'); ui.nextFight.classList.remove('hidden');
+    ui.nextFight.textContent = 'BEGIN NEXT FIGHT';
+  }
+
+  function fastForwardTen() {
+    if (!game.world) return;
+    const cycles = Math.min(10, Math.ceil((Sim.MAX_YEAR - game.world.year) / 100));
+    if (cycles <= 0) return toast('This timeline is already at Year 100,000.');
+    const processAftermathFirst = game.mode === 'intermission' || (game.mode === 'history' && game.previousMode === 'intermission');
+    ui.intermission.classList.add('hidden');
+    ui.history.classList.add('hidden');
+    ui.transition.classList.remove('hidden');
+    ui.transitionYear.textContent = `+${cycles * 100} YEARS`;
+    ui.transitionCopy.textContent = 'Abstracting unseen returns. Civilizations still build, fail, remember, misremember, and adapt.';
+    setTimeout(() => {
+      let remaining = cycles;
+      if (processAftermathFirst && remaining > 0) {
+        // The active fight must enter history before later unseen Returns are synthesized.
+        Sim.simulateCentury(game.world, { abstractBattle: false });
+        remaining -= 1;
+      }
+      if (remaining > 0) Sim.simulateMany(game.world, remaining, { abstractBattles: true });
+      resetTransient();
+      game.previousMode = null;
+      ui.transition.classList.add('hidden');
+      game.mode = 'explore';
+      showReturnExploration(); autosave();
+      toast(`Deep-time simulation reached Year ${game.world.year.toLocaleString()}.`);
+    }, 40);
+  }
+
+  function projectToDeepTime() {
+    if (!game.world || game.world.year >= Sim.MAX_YEAR) return toast('Already at Year 100,000.');
+    if (game.currentBattleActive) return toast('Finish the current immortal fight before projecting deep time.');
+    if (game.mode === 'transition') return toast('The current century is already advancing.');
+    const processAftermathFirst = game.mode === 'intermission' || (game.mode === 'history' && game.previousMode === 'intermission');
+    if (!confirm('Simulate every remaining Return to Year 100,000 as abstracted battles? This mutates the active timeline. Export first if you want the pre-jump state.')) return;
+    const cycles = Math.ceil((Sim.MAX_YEAR - game.world.year) / 100);
+    ui.history.classList.add('hidden');
+    ui.intermission.classList.add('hidden');
+    ui.transition.classList.remove('hidden');
+    ui.transitionYear.textContent = 'DEEP TIME';
+    ui.transitionCopy.textContent = 'Compressing centuries, not causality. This may take a moment.';
+    setTimeout(() => {
+      let remaining = cycles;
+      if (processAftermathFirst && remaining > 0) {
+        Sim.simulateCentury(game.world, { abstractBattle: false });
+        remaining -= 1;
+      }
+      if (remaining > 0) Sim.simulateMany(game.world, remaining, { abstractBattles: true });
+      resetTransient(); game.mode = 'explore'; game.previousMode = null; game.renderSnapshot = null;
+      ui.transition.classList.add('hidden'); showReturnExploration(); autosave();
+      toast('Year 100,000 reached. The land is now older than public memory.');
+    }, 60);
+  }
+
+  function autosave() {
+    if (!game.world) return;
+    try {
+      const raw = Sim.serialize(game.world);
+      localStorage.setItem(STORAGE_KEY, raw);
+      game.lastAutoSave = performance.now();
+      ui.continue.disabled = false;
+    } catch (err) { toast(`Autosave failed: ${err.message}`); }
+  }
+
+  function manualSave() { autosave(); toast('Timeline saved locally.'); }
+
+  function exportSave() {
+    if (!game.world) return;
+    const blob = new Blob([Sim.serialize(game.world)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `every-fight-century-year-${game.world.year}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  async function importSave(file) {
+    if (!file) return;
+    const token = ++game.importToken;
+    try {
+      const text = await file.text();
+      if (token !== game.importToken) return;
+      const world = Sim.deserialize(text);
+      game.world = world; resetTransient(); game.mode = 'explore'; game.renderSnapshot = null;
+      ui.title.classList.add('hidden'); ui.hud.classList.remove('hidden'); ui.history.classList.add('hidden');
+      showReturnExploration(); autosave(); toast(`Imported Year ${world.year.toLocaleString()}.`);
+    } catch (err) { toast(`Import rejected: ${err.message}`); }
+  }
+
+  function resetTimeline() {
+    if (!confirm('Erase the local timeline and return to Year 0? Export first if you want to preserve it.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    game.world = null; game.mode = 'title'; game.renderSnapshot = null; game.selectedSiteId = null;
+    ui.hud.classList.add('hidden'); ui.intermission.classList.add('hidden'); ui.history.classList.add('hidden'); ui.title.classList.remove('hidden');
+    ui.continue.disabled = true; toast('Local timeline erased.');
+  }
+
+  function openHistory() {
+    if (!game.world) return;
+    if (game.mode === 'transition') return toast('History is updating while the century advances.');
+    if (game.mode === 'history') return;
+    game.previousMode = game.mode;
+    game.mode = 'history'; game.renderSnapshot = null;
+    ui.history.classList.remove('hidden'); ui.intermission.classList.add('hidden');
+    syncTimelineControl(); renderHistoryLists(); renderSelectedSite();
+  }
+
+  function closeHistory() {
+    ui.history.classList.add('hidden');
+    game.renderSnapshot = null;
+    const restoreMode = game.currentBattleActive ? 'combat' : (game.previousMode || 'explore');
+    game.previousMode = null;
+    game.mode = restoreMode;
+    if (restoreMode === 'intermission') {
+      ui.intermission.classList.remove('hidden');
+    } else if (!game.currentBattleActive) {
+      showReturnExploration();
+    }
+  }
+
+  function syncTimelineControl() {
+    const frames = game.world.timeline;
+    ui.timeline.min = 0; ui.timeline.max = Math.max(0, frames.length - 1); ui.timeline.step = 1; ui.timeline.value = frames.length - 1;
+    ui.timelineLabel.textContent = `CURRENT — YEAR ${game.world.year.toLocaleString()}`;
+  }
+
+  function timelineChange() {
+    const frames = game.world.timeline;
+    const i = Number(ui.timeline.value);
+    const frame = frames[i];
+    if (!frame || frame.year === game.world.year) {
+      game.renderSnapshot = null; ui.timelineLabel.textContent = `CURRENT — YEAR ${game.world.year.toLocaleString()}`;
+    } else {
+      game.renderSnapshot = frame; ui.timelineLabel.textContent = `ARCHIVE — YEAR ${frame.year.toLocaleString()} / RETURN ${frame.returnCount}`;
+    }
+    renderHistoryLists(); renderSelectedSite();
+  }
+
+  function clearNode(node) { while (node.firstChild) node.firstChild.remove(); }
+
+  function addTextRow(parent, title, body, cls = '') {
+    const item = document.createElement('div'); item.className = `history-item ${cls}`;
+    const h = document.createElement('strong'); h.textContent = title;
+    const p = document.createElement('span'); p.textContent = body;
+    item.append(h, p); parent.appendChild(item);
+  }
+
+  function renderHistoryLists() {
+    clearNode(ui.historyEvents); clearNode(ui.beliefs);
+    const year = game.renderSnapshot?.year ?? game.world.year;
+    const events = game.world.events.filter(e => e.year <= year).slice(-24).reverse();
+    for (const e of events) addTextRow(ui.historyEvents, `${e.year.toLocaleString()} — ${e.title}`, e.actual, e.type);
+    const beliefs = game.world.beliefs.filter(b => b.year <= year).slice(-16).reverse();
+    if (!beliefs.length) addTextRow(ui.beliefs, 'No mature historical disputes yet', 'Give civilization a few centuries. Eyewitness history has not had enough time to rot.');
+    for (const b of beliefs) {
+      const evt = game.world.events.find(e => e.id === b.eventId);
+      addTextRow(ui.beliefs, `${b.label.toUpperCase()} · ${Math.round(b.accuracy * 100)}%`, `${evt ? evt.title + ': ' : ''}${b.interpretation}`, b.label.includes('myth') ? 'myth' : 'belief');
+    }
+  }
+
+  function renderSelectedSite() {
+    clearNode(ui.siteBox);
+    const view = currentView();
+    const site = view.sites.find(s => s.id === game.selectedSiteId);
+    if (!site) {
+      addTextRow(ui.siteBox, 'No site selected', 'Right-click a building or scar in the world, then open History.'); return;
+    }
+    addTextRow(ui.siteBox, site.name, `${site.status} · ${site.use} · ${site.district}`);
+    addTextRow(ui.siteBox, 'Continuity', `Built/formed Year ${site.yearBuilt ?? 0}. Age ${Math.round(site.age || 0).toLocaleString()} years. Heritage ${Math.round((site.heritage || 0) * 100)}%. Repeated major hits: ${site.repeatedHits || 0}.`);
+    const live = game.world.sites.find(s => s.id === site.id);
+    if (live?.lineage?.length) {
+      const wrap = document.createElement('div'); wrap.className = 'lineage-list';
+      const label = document.createElement('h4'); label.textContent = 'SITE LINEAGE'; wrap.appendChild(label);
+      for (const l of live.lineage.slice(-14).reverse()) {
+        const row = document.createElement('div'); row.textContent = `${Number(l.year).toLocaleString()} — ${l.state}`; wrap.appendChild(row);
+      }
+      ui.siteBox.appendChild(wrap);
+    }
+    if (!game.renderSnapshot && live && live.kind !== 'crater') {
+      const b = document.createElement('button'); b.className = 'small-action'; b.textContent = live.protected ? 'PROTECTED BY YOU' : 'MARK AS PROTECTED'; b.disabled = live.protected;
+      b.addEventListener('click', () => {
+        Sim.protectSite(game.world, live.id);
+        Sim.recordEvent(game.world, { type: 'player-choice', title: `${live.name} marked for protection`, actual: 'The immortal visibly treated this site as worth redirecting future violence away from.', cause: 'player choice', siteId: live.id, x: live.x, y: live.y, salience: 0.55, evidence: ['repeated observed behavior'] });
+        renderSelectedSite(); autosave(); toast('The city may eventually notice the pattern.');
+      });
+      ui.siteBox.appendChild(b);
+    }
+  }
+
+  function inspectAtScreen(x, y) {
+    if (!game.world) return;
+    const w = unprojectScreen(x, y);
+    let best = null, bd = 999;
+    for (const s of currentView().sites) {
+      const d = Math.hypot(s.x - w.x, s.y - w.y);
+      const hit = s.kind === 'crater' ? d < (s.radius || 10) + 10 : pointInSite(w.x, w.y, s, 8);
+      if (hit && d < bd) { best = s; bd = d; }
+    }
+    if (best) {
+      game.selectedSiteId = best.id;
+      toast(`${best.name} — ${best.status} / ${best.use}`, 1600);
+      if (game.mode === 'history') renderSelectedSite();
+    }
+  }
+
+  function runABLab() {
+    if (!game.world) return;
+    ui.abBtn.disabled = true; ui.abOut.textContent = 'Running identical-seed histories to Year 10,000 and Year 100,000…';
+    setTimeout(() => {
+      try {
+        const p10 = Sim.runABProof(game.world.seed, 10000);
+        const p100 = Sim.runABProof(game.world.seed, 100000);
+        ui.abOut.textContent = `10,000y: ${p10.pass ? 'PASS' : 'FAIL'} · west value Δ ${p10.divergence.westValue}, east value Δ ${p10.divergence.eastValue}, ancient scar Δ W/E ${p10.divergence.ancientScarsWest}/${p10.divergence.ancientScarsEast}. 100,000y: ${p100.pass ? 'PASS' : 'FAIL'} · west value Δ ${p100.divergence.westValue}, east value Δ ${p100.divergence.eastValue}, founding-impact Δ W/E ${p100.divergence.foundingImpactWest}/${p100.divergence.foundingImpactEast}.`;
+      } catch (err) { ui.abOut.textContent = `Proof failed to run: ${err.message}`; }
+      ui.abBtn.disabled = false;
+    }, 50);
+  }
+
+  function bindButtonKey(el, code) {
+    if (!el) return;
+    const on = (ev) => { ev.preventDefault(); game.keys.add(code); game.justPressed.add(code); };
+    const off = (ev) => { ev.preventDefault(); game.keys.delete(code); };
+    el.addEventListener('pointerdown', on); el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('pointerleave', off);
+  }
+
+  function bindEvents() {
+    addEventListener('resize', resize);
+    addEventListener('keydown', (e) => {
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+      if (!game.keys.has(e.code)) game.justPressed.add(e.code);
+      game.keys.add(e.code);
+      if (e.code === 'KeyH' && game.world) { e.preventDefault(); game.mode === 'history' ? closeHistory() : openHistory(); }
+      if (e.code === 'Escape' && game.mode === 'history') closeHistory();
+    }, { passive: false });
+    addEventListener('keyup', (e) => game.keys.delete(e.code));
+    addEventListener('blur', () => game.keys.clear());
+    canvas.addEventListener('pointermove', (e) => { game.mouse.x = e.clientX; game.mouse.y = e.clientY; });
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.button === 2) { e.preventDefault(); inspectAtScreen(e.clientX, e.clientY); return; }
+      if (e.button === 0 && game.mode !== 'history') { game.justPressed.add('KeyF'); game.keys.add('KeyF'); setTimeout(() => game.keys.delete('KeyF'), 30); }
+    });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    ui.begin.addEventListener('click', beginNewGame);
+    ui.continue.addEventListener('click', continueGame);
+    ui.nextFight.addEventListener('click', startBattle);
+    ui.advance.addEventListener('click', advanceCentury);
+    ui.fastTen.addEventListener('click', fastForwardTen);
+    ui.historyBtn.addEventListener('click', openHistory);
+    ui.historyClose.addEventListener('click', closeHistory);
+    ui.timeline.addEventListener('input', timelineChange);
+    ui.saveBtn.addEventListener('click', manualSave);
+    ui.exportBtn.addEventListener('click', exportSave);
+    ui.importBtn.addEventListener('click', () => ui.importInput.click());
+    ui.importInput.addEventListener('change', () => { importSave(ui.importInput.files?.[0]); ui.importInput.value = ''; });
+    ui.resetBtn.addEventListener('click', resetTimeline);
+    ui.projectBtn.addEventListener('click', projectToDeepTime);
+    ui.abBtn.addEventListener('click', runABLab);
+
+    bindButtonKey($('#touch-up'), 'KeyW'); bindButtonKey($('#touch-down'), 'KeyS'); bindButtonKey($('#touch-left'), 'KeyA'); bindButtonKey($('#touch-right'), 'KeyD');
+    bindButtonKey($('#touch-jump'), 'Space'); bindButtonKey($('#touch-punch'), 'KeyF'); bindButtonKey($('#touch-dash'), 'KeyQ'); bindButtonKey($('#touch-shock'), 'KeyE');
+  }
+
+  function boot() {
+    resize(); bindEvents();
+    let hasSave = false;
+    try { hasSave = !!localStorage.getItem(STORAGE_KEY); } catch (_) { /* private mode */ }
+    ui.continue.disabled = !hasSave;
+    if (matchMedia('(pointer: coarse)').matches) ui.touch.classList.remove('hidden');
+    requestAnimationFrame(frame);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "project": "Immortals",
+  "title": "Every Fight Is Followed By A Century",
+  "runtime": {
+    "entry": "century1.html",
+    "devServer": "Vite",
+    "renderer": "Canvas 2D",
+    "webgl": false,
+    "physics": "application-owned deterministic 2D simulation",
+    "persistence": "localStorage save envelope",
+    "workers": false,
+    "postprocessing": false,
+    "instancing": false,
+    "lod": false,
+    "generatedAssets": "embedded raster data URLs",
+    "gamepad": false,
+    "spatialAudio": false
+  },
+  "truthBoundary": "This checkpoint records the existing 2D prototype; 3D traversal and expanded deep-time capabilities are later phase work."
+}

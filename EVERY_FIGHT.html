@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EVERY FIGHT IS FOLLOWED BY A CENTURY</title>
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#10141b; --panel2:#171d27; --ink:#e8ecef; --dim:#8b95a3;
+    --hair:#26303e; --gold:#d9b45a; --ember:#ff6a3d; --cyan:#42c3e6; --green:#63c95a;
+    --rred:#ff4033; --violet:#a98bff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; background:var(--bg); color:var(--ink); overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  #wrap{position:fixed; inset:0;}
+  canvas#world,#fx{position:absolute; inset:0; display:block; width:100%; height:100%;}
+  canvas#fx{pointer-events:none;}
+  /* ---------- HUD ---------- */
+  #hud{position:absolute; top:0; left:0; right:0; height:52px; display:flex; align-items:center;
+    gap:16px; padding:0 16px; background:linear-gradient(180deg,rgba(8,10,14,.78),rgba(8,10,14,.35));
+    backdrop-filter:blur(3px); border-bottom:1px solid var(--hair); z-index:20; font-size:13px;}
+  #brand{font-weight:800; letter-spacing:.18em; font-size:13px; color:var(--gold); white-space:nowrap;}
+  #brand small{color:var(--dim); letter-spacing:.08em; font-weight:600;}
+  .stat{display:flex; flex-direction:column; line-height:1.05; min-width:64px;}
+  .stat .k{color:var(--dim); font-size:10px; text-transform:uppercase; letter-spacing:.12em;}
+  .stat .v{font-weight:700; font-size:14px;}
+  .hpbar{width:180px; height:12px; border:1px solid var(--hair); border-radius:6px; overflow:hidden; background:#0c1016;}
+  .hpbar>i{display:block; height:100%; background:linear-gradient(90deg,var(--rred),var(--ember)); transition:width .12s;}
+  .hpbar.h2>i{background:linear-gradient(90deg,var(--rred),var(--ember));}
+  #epoch{color:var(--cyan); font-weight:700;}
+  #modeTag{color:var(--dim); font-size:11px; letter-spacing:.1em;}
+  #hud .spacer{flex:1;}
+  .hbtn{background:var(--panel2); border:1px solid var(--hair); color:var(--ink); padding:7px 12px;
+    border-radius:7px; cursor:pointer; font-size:12px; font-weight:600; transition:.12s;}
+  .hbtn:hover{background:#223; border-color:var(--gold); color:var(--gold);}
+  .hbtn.primary{border-color:var(--gold); color:var(--gold);}
+  /* ---------- panels ---------- */
+  #panel{position:absolute; top:64px; right:16px; width:min(440px,92vw); max-height:calc(100vh - 96px);
+    background:var(--panel); border:1px solid var(--hair); border-radius:12px; z-index:30; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); display:none; flex-direction:column;}
+  #panel.open{display:flex;}
+  #panelHead{display:flex; align-items:center; gap:8px; padding:12px 14px; border-bottom:1px solid var(--hair);}
+  #panelHead .t{font-weight:800; letter-spacing:.05em; color:var(--gold);}
+  #panelHead .spacer{flex:1;}
+  .xbtn{background:none; border:none; color:var(--dim); font-size:18px; cursor:pointer; line-height:1;}
+  #panelBody{padding:14px; overflow-y:auto; font-size:13px;}
+  #panelTab{display:flex; gap:2px; padding:8px 10px 0;}
+  #panelTab button{background:none; border:none; color:var(--dim); padding:9px 12px; cursor:pointer;
+    font-weight:700; font-size:12px; border-bottom:2px solid transparent; letter-spacing:.04em;}
+  #panelTab button.active{color:var(--ink); border-color:var(--gold);}
+  #panel .tabBody{display:none;}
+  #panel .tabBody.active{display:block;}
+  /* timeline scrubber */
+  #tlWrap{margin:8px 0 12px;}
+  #tl{position:relative; height:46px; cursor:pointer; border:1px solid var(--hair); border-radius:8px;
+    background:repeating-linear-gradient(90deg,#141a23,#141a23 2px,#10151d 2px,#10151d 100%);}
+  #tl .cursor{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--gold); box-shadow:0 0 8px var(--gold);}
+  #tl .mark{position:absolute; top:0; bottom:0; width:1px; background:var(--hair);}
+  #tl .mark.big{background:var(--cyan);}
+  #tlLabel{display:flex; justify-content:space-between; color:var(--dim); font-size:11px; margin-top:4px;}
+  #tlScale{display:flex; gap:4px; margin:4px 0;}
+  #tlScale button{background:#141a23; border:1px solid var(--hair); color:var(--dim); border-radius:5px;
+    padding:3px 8px; font-size:11px; cursor:pointer;}
+  #tlScale button.active{color:var(--gold); border-color:var(--gold);}
+  /* event list */
+  .ev{display:flex; gap:10px; padding:7px 2px; border-bottom:1px solid #1b2430; line-height:1.35;}
+  .ev .y{color:var(--gold); font-weight:700; min-width:70px; white-space:nowrap;}
+  .ev .x{color:var(--ink);}
+  .ev .badge{display:inline-block; font-size:9px; padding:1px 5px; border-radius:4px; margin-left:6px;
+    background:#232c39; color:var(--dim); vertical-align:middle;}
+  /* lineage */
+  .chain{position:relative; margin-left:6px; padding-left:16px;}
+  .chain::before{content:""; position:absolute; left:4px; top:6px; bottom:6px; width:2px; background:#2a3646;}
+  .chain .step{position:relative; padding:4px 2px 4px 6px;}
+  .chain .step::before{content:""; position:absolute; left:-14px; top:11px; width:7px; height:7px; border-radius:50%;
+    background:var(--gold); margin-left:-3px;}
+  .chain .step.alt::before{background:var(--cyan);}
+  .chain .step .y{color:var(--gold); font-weight:700; font-size:11px;}
+  .chain .step .s{color:var(--cyan); font-size:10px; text-transform:uppercase; letter-spacing:.08em;}
+  .chain .step .n{color:var(--ink);}
+  /* reputation */
+  .rep{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .rep .chip{background:#171d27; border:1px solid var(--hair); border-radius:8px; padding:8px 10px; font-size:12px; }
+  .rep .chip b{color:var(--gold);}
+  /* card / overlay */
+  #overlay{position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    z-index:40; background:radial-gradient(ellipse at center,rgba(10,12,16,.55),rgba(6,8,11,.92));}
+  #overlay.show{display:flex;}
+  #card{max-width:min(640px,92vw); text-align:center; padding:40px 40px; border:1px solid var(--hair);
+    border-radius:16px; background:linear-gradient(160deg,rgba(20,25,34,.96),rgba(12,15,20,.96));}
+  #card .kicker{color:var(--gold); letter-spacing:.35em; font-size:12px; font-weight:800; margin-bottom:14px;}
+  #card h1{font-size:30px; letter-spacing:.02em; margin-bottom:6px;}
+  #card .year{font-size:56px; font-weight:800; color:var(--gold); margin:6px 0; line-height:1;}
+  #card p{color:var(--dim); font-size:14px; margin:12px 0; line-height:1.5;}
+  #card .art{width:100%; height:150px; border-radius:12px; overflow:hidden; margin:18px 0;
+    background:#0b0f15; position:relative;}
+  #card .art canvas{width:100%; height:100%; display:block;}
+  #card .btnrow{display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+  #card .hbtn{font-size:13px; padding:10px 18px;}
+  /* toast / explore hint */
+  #hint{position:absolute; bottom:18px; left:50%; transform:translateX(-50%); color:var(--dim);
+    font-size:12px; background:rgba(10,13,18,.7); padding:8px 16px; border:1px solid var(--hair);
+    border-radius:20px; z-index:15; text-align:center; transition:opacity .5s;}
+  #crosshair{position:absolute; width:20px; height:20px; pointer-events:none; z-index:12; opacity:.8;
+    transform:translate(-50%,-50%);}
+  #crosshair::before,#crosshair::after{content:""; position:absolute; background:var(--ember);}
+  #crosshair::before{left:0; right:0; top:9px; height:2px;}
+  #crosshair::after{top:0; bottom:0; left:9px; width:2px;}
+  /* settings */
+  #settings{position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:60;
+    background:rgba(5,7,10,.9);}
+  #settings.show{display:flex;}
+  #settings .box{width:min(460px,92vw); background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:22px;}
+  #settings label{display:block; color:var(--dim); font-size:12px; margin:12px 0 4px;}
+  #settings input,#settings select{width:100%; background:#0c1016; color:var(--ink); border:1px solid var(--hair);
+    border-radius:6px; padding:8px 10px; font-size:13px;}
+  #settings .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
+  #about{font-size:12px; color:var(--dim); line-height:1.5; margin-top:12px;}
+  .err{color:var(--rred); font-size:12px; margin-top:8px;}
+  ::-webkit-scrollbar{width:10px;} ::-webkit-scrollbar-thumb{background:#222c39; border-radius:6px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="world"></canvas>
+  <canvas id="fx"></canvas>
+
+  <div id="hud">
+    <div id="brand">EVERY FIGHT IS FOLLOWED BY A CENTURY <small id="modeTag"></small></div>
+    <div class="stat"><span class="k">Year</span><span class="v" id="yearV">0</span></div>
+    <div class="stat"><span class="k">Return</span><span class="v" id="returnV">0</span></div>
+    <div class="stat"><span class="k">Population</span><span class="v" id="popV">—</span></div>
+    <div class="stat"><span class="k">Era</span><span class="v" id="eraV" style="font-size:12px;">—</span></div>
+    <div class="stat"><span class="k">You</span>
+      <div class="hpbar" style="width:120px" title="Player health"><i id="pHP" style="width:100%"></i></div>
+    </div>
+    <div class="stat"><span class="k">Rival</span>
+      <div class="hpbar h2" style="width:120px" title="Rival health"><i id="rHP" style="width:0%"></i></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="hbtn" id="btnHistory">History</button>
+    <button class="hbtn" id="btnSettings">Settings</button>
+  </div>
+
+  <div id="panel">
+    <div id="panelHead"><div class="t" id="panelTitle">History</div><div class="spacer"></div>
+      <button class="xbtn" id="panelClose">✕</button></div>
+    <div id="panelTab">
+      <button data-tab="timeline" class="active">Timeline</button>
+      <button data-tab="events">Events</button>
+      <button data-tab="lineage">Lineage</button>
+      <button data-tab="rep">Reputation</button>
+    </div>
+    <div id="panelBody">
+      <div class="tabBody active" id="tab-timeline">
+        <div id="tlWrap">
+          <div id="tl"></div>
+          <div id="tlLabel"><span>0</span><span id="tlReadout"></span></div>
+        </div>
+        <div id="tlScale">
+          <button data-scale="century">Century</button>
+          <button data-scale="millennia" class="active">Millennium</button>
+          <button data-scale="epoch">Epoch</button>
+          <button data-scale="deep">Deep Time</button>
+        </div>
+        <div id="layerCtl" style="margin-top:10px; font-size:12px; color:var(--dim);">
+          <b style="color:var(--cyan);">Layer overlay:</b> while dragging, the selected past
+          snapshot is ghosted over the present in white.<div id="cmpSel"></div>
+        </div>
+      </div>
+      <div class="tabBody" id="tab-events"><div id="eventList"></div></div>
+      <div class="tabBody" id="tab-lineage"><div id="lineageWrap"></div></div>
+      <div class="tabBody" id="tab-rep"><div id="repWrap"></div></div>
+    </div>
+  </div>
+
+  <div id="overlay"><div id="card">
+    <div class="kicker" id="cardKicker"></div>
+    <h1 id="cardTitle"></h1>
+    <div class="year" id="cardYear"></div>
+    <div id="cardArt"><div class="art"><canvas id="cardCanvas" width="560" height="150"></canvas></div></div>
+    <p id="cardText"></p>
+    <div class="btnrow" id="cardBtns"></div>
+  </div></div>
+
+  <div id="hint"></div>
+  <div id="crosshair"></div>
+
+  <div id="settings">
+    <div class="box">
+      <h2 style="color:var(--gold); font-size:16px; margin-bottom:6px;">Settings &amp; History</h2>
+      <label>World seed (same seed + same actions = same history)</label>
+      <input id="seed" type="text" value="12345" />
+      <label>Start at year</label>
+      <input id="startYear" type="number" value="0" min="0" />
+      <label>Starting scenario</label>
+      <select id="scenario">
+        <option value="young">Young City (site lineage enabled)</option>
+        <option value="wasteland">Pre-devastated west (divergence A)</option>
+        <option value="eastdev">Pre-devastated east (divergence B)</option>
+      </select>
+      <div class="row">
+        <button class="hbtn primary" id="btnNew">New World</button>
+        <button class="hbtn" id="btnSave">Save</button>
+        <button class="hbtn" id="btnLoad">Load</button>
+        <button class="hbtn" id="btnExport">Export JSON</button>
+        <button class="hbtn" id="btnImport">Import JSON</button>
+      </div>
+      <div id="about">
+        <b style="color:var(--gold);">Mission 1</b> — Move with <b>WASD</b>, aim with the mouse,
+        <b>Left-click</b> or <b>Space</b> to punch, <b>Shift</b> to sprint, <b>F</b> shockwave,
+        <b>Q</b> dash, <b>W</b> double-tap to boost. When the rival is down, <b>let the century pass</b> —
+        the city you scarred will grow back differently. Watch a single punch echo for 100,000 years.
+      </div>
+      <div id="settingsErr" class="err"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* core.js (inlined) */
+/* ============================================================================
+   EVERY FIGHT IS FOLLOWED BY A CENTURY
+   core.js  —  pure, deterministic world/history engine (no DOM).
+   Loaded by the browser (as a global) AND by Node (via require) for validation.
+   ============================================================================ */
+"use strict";
+(function (root) {
+  // ------------------------------------------------------------------ RNG ---
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function hash2(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  // ------------------------------------------------------------- Constants ---
+  const TER = { WATER: 0, GROUND: 1, FOREST: 2, HILL: 3, MARSH: 4, SAND: 5, ROCK: 6 };
+  const USE = { OPEN: 0, ROAD: 1, BUILDING: 2, RUIN: 3, CRATER: 4, FARM: 5,
+                PARK: 6, MONUMENT: 7, EXCAVATION: 8, SHELTER: 9 };
+
+  // Named landmark type ids
+  const LM = { CATHEDRAL: 0, PALACE: 1, BRIDGE: 2, TOWER: 3, SQUARE: 4, WALL: 5, MARKET: 6, DOCK: 7 };
+
+  // ------------------------------------------------------------- Helpers  ----
+  const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const SALT = "EFFAC";
+
+  function idx(w, x, y) { return y * w + x; }
+
+  // ------------------------------------------------------------------ World ---
+  // A cell is { t:terrain, u:use, elev:0..1, integ:1..0, useAge:yrsSinceUse,
+  //            veg:0..1, sed:sediment depth, dmgAge, dmgReturn, layers:[{y,kind}], build:build|null }
+  // build = { era, value, culture, heritage, owner, name, landmark, styles }
+
+  function makeWorld(seed) {
+    const W = 120, H = 120;
+    const rng = mulberry32(seed >>> 0);
+    const cells = new Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) cells[idx(W, x, y)] = {
+      x, y, t: TER.GROUND, u: USE.OPEN, elev: 0.5, integ: 1, useAge: 0,
+      veg: 0, sed: 0, dmgAge: 0, dmgReturn: 0, hitReturns: 0, layers: [], build: null,
+    };
+    return {
+      W, H, cells, seed,
+      year: 0, returnCount: 0,
+      worldRngState: seed >>> 0,
+      history: [],           // causal event ledger
+      eventLog: [],          // human-readable recent/important events
+      landmarks: [],         // significant structures with lineage
+      material: [],          // tracked material fragments w/ lineage
+      districts: [],         // aggregate settlement cells
+      monuments: [],         // cultural monuments
+      excSites: [],          // archaeology sites
+      environment: { climate: 0, precip: 0.5, seaLevel: 0, riverShift: 0, vegRegime: 0.5, forest: 0.4 },
+      river: { cells: [], dir: 1 },
+      technology: { era: 0, level: 1, traits: {}, eras: null },
+      politics: { stability: 0.55, factions: [], ruler: "Legate of the River", regime: "city-state" },
+      religion: { sects: [], dominant: "River Faith" },
+      memory: { carriers: [], knowledge: {}, myths: [], naming: {} },
+      pop: { total: 26000, trend: 0, rurals: 0, urban: 0 },
+      economy: { centers: [], tradeRouteDirs: {} },
+      culture: { art: 0, literacy: 0.05 },
+      player: { title: "", reputation: {}, alive: true },
+      immortals: [],     // other immortals with memory
+      checkpoints: [],   // for the history scrubber
+      epochSummaries: [],
+      counters: { deaths: 0, destructions: 0, savesInWorld: 0, catastrophic: 0 },
+    };
+  }
+
+  // ----------------------------------------------------------- RNG state  ---
+  // Single deterministic stream living on state.worldRngState. Every draw
+  // mutates the state, so a given seed + identical inputs always replays.
+  function makeRng(state) {
+    return function () {
+      state.worldRngState = (Math.imul(state.worldRngState >>> 0, 1664525) + 1013904223) >>> 0;
+      return (state.worldRngState >>> 0) / 4294967296;
+    };
+  }
+  function rngFor(state) { return makeRng(state); }
+
+  // ----------------------------------------------------------- Noise  -------
+  function makeNoise(seed) {
+    const rng = mulberry32(seed >>> 0);
+    const g = new Float32Array(256);
+    for (let i = 0; i < 256; i++) g[i] = rng();
+    function n(x, y) {
+      const xi = Math.floor(x), yi = Math.floor(y);
+      const xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+      const h = (x, y) => g[((y & 255) << 8 | (x & 255)) & 255];
+      const a = h(xi, yi), b = h(xi + 1, yi), c = h(xi, yi + 1), d = h(xi + 1, yi + 1);
+      return lerp(lerp(a, b, u), lerp(c, d, u), v);
+    }
+    return n;
+  }
+
+  // ------------------------------------------------------------- Landmarks ---
+  function emptyLineage() { return { year: 0, state: "intact", note: "built" }; }
+
+  function makeLandmark(id, type, name, cx, cy, size, seed) {
+    return {
+      id, type, name, cx, cy, size, // size = footprint radius
+      integ: 1, destroyedAt: -1, era: 0, originYear: 0,
+      lineage: [emptyLineage()],      // array of {year,state,note}
+      materials: [],                  // fragments of this structure with lineage
+      heritage: 0,                    // 0..1 cultural value
+      status: "intact",
+      history: [],                    // events specific to it
+      hitCount: 0,                    // times struck by immortal damage
+      hitReturn: -1,                  // last return it was hit
+      lastHitYear: -1,
+      buried: false,                  // buried by sediment / successor city
+      excavated: false,
+    };
+  }
+
+  // --------------------------------------------------------- Init world   ---
+  function terrainFor(x, y, noise, W, H) {
+    // coast on the South (bottom), river running west->east in the middle.
+    const n1 = noise(x * 0.07, y * 0.07);
+    const n2 = noise(x * 0.03 + 40, y * 0.03 + 40);
+    let elev = (n1 * 0.6 + n2 * 0.4);
+    // coast: south region lower elevation
+    const coast = (y / H);
+    elev -= (coast - 0.72) * 1.6;
+    if (elev < 0.16) return { t: TER.WATER, elev: 0.06 };
+    if (elev > 0.86) return { t: TER.HILL, elev: 0.92 };
+    if (n1 > 0.72 && elev < 0.5) return { t: TER.MARSH, elev: 0.2 };
+    if (n1 > 0.62) return { t: TER.FOREST, elev: 0.5 };
+    if (elev < 0.3) return { t: TER.SAND, elev: 0.28 };
+    return { t: TER.GROUND, elev: 0.5 };
+  }
+
+  // Build the river as a wide band crossing the map (with a meander over time)
+  function riverCellsFor(state, useRiverShift) {
+    const { W, H, river } = state;
+    const shift = useRiverShift ? state.environment.riverShift : 0;
+    const set = [];
+    const baseY = Math.round(H * 0.5);
+    const rng = rngFor(state);
+    const meander = (x) => Math.sin(x * 0.06) * 8 + Math.sin(x * 0.023 + 1.7) * 6 + shift;
+    for (let x = 0; x < W; x++) {
+      const cy = Math.round(baseY + meander(x));
+      const width = 3 + Math.round(Math.sin(x * 0.05) * 1.5);
+      for (let dy = -width; dy <= width; dy++) {
+        const y = cy + dy;
+        if (y < 0 || y >= H) continue;
+        set.push(idx(W, x, y));
+      }
+    }
+    return set;
+  }
+
+  function carveWaterToCells(state) {
+    const { W } = state;
+    const riverSet = new Set(riverCellsFor(state, true));
+    for (let y = 0; y < state.H; y++) for (let x = 0; x < state.W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (riverSet.has(i)) { c.t = TER.WATER; c.elev = 0.06; c.u = USE.OPEN; c.build = null; }
+      else if (c.t === TER.WATER && c.elev < 0.1) { /* coastal water stays */ }
+    }
+    state.river.cells = [...riverSet];
+  }
+
+  // Determine districts: cluster of contiguous urban cells + a label
+  function recomputeDistricts(state) {
+    // simple: split urban cells into a few named regions by coarse regions
+    const { W, H } = state;
+    const buckets = { NW: [], NE: [], SW: [], SE: [], CENTER: [] };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const c = state.cells[idx(W, x, y)];
+      if (c.u === USE.BUILDING || c.u === USE.RUIN || c.u === USE.MONUMENT || c.u === USE.MARKET || c.u === USE.PARK || c.u === USE.SHELTER) {
+        const key = (x < W / 2 ? (y < H / 2 ? "NW" : "SW") : (y < H / 2 ? "NE" : "SE"));
+        buckets[key].push({ x, y });
+      }
+    }
+    const names = { NW: "West Bank", NE: "East Bank", SW: "Southward Fields", SE: "Lower Quarter", CENTER: "The Old Core" };
+    state.districts = Object.keys(buckets).filter(k => buckets[k].length).map(k => {
+      const pts = buckets[k];
+      let cx = 0, cy = 0; pts.forEach(p => { cx += p.x; cy += p.y; });
+      cx /= pts.length; cy /= pts.length;
+      return { id: k, name: names[k], cx, cy, cells: pts.length, pop: 0 };
+    });
+  }
+
+  // Put the initial "young city" on the map.
+  function seedCity(state) {
+    const { W, H } = state;
+    const rng = rngFor(state);
+    const centerX = Math.round(W / 2), baseY = Math.round(H / 2);
+    const riverSet = new Set(state.river.cells);
+    const roadSet = new Set();
+    const nearRiver = (x, y) => {
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+        if (riverSet.has(idx(W, nx, ny))) return true;
+      }
+      return false;
+    };
+    const mkRoad = (x, y) => { if (x >= 0 && x < W && y >= 0 && y < H) roadSet.add(idx(W, x, y)); };
+    // main east-west road / north-south road grid
+    for (let x = 6; x < W - 6; x++) { mkRoad(x, baseY - 6); mkRoad(x, baseY + 6); }
+    for (let y = 6; y < H - 6; y++) { mkRoad(centerX - 18, y); mkRoad(centerX + 18, y); }
+
+    let popNeeded = state.pop.total;
+    // place residents & buildings in density bands
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (c.t === TER.WATER) continue;
+      const inGrid = roadSet.has(i);
+      const distFromCenter = Math.hypot(x - centerX, y - baseY);
+      const distRivern = nearRiver(x, y) ? 1 : 0;
+      // Build density function: strong near roads, river, center
+      const density = clamp(roadSet.has(i) ? 1.0 : 0.0, 0, 1) * 1.1 +
+                      (distRivern ? 1.0 : 0) +
+                      clamp(1 - distFromCenter / 45, 0, 1) * 1.6;
+      const chance = density * 0.16;
+      if (rng() < chance && density > 0.6) {
+        c.u = USE.BUILDING;
+        c.build = { era: 0, value: 0.2 + rng() * 0.3, culture: 0.1 + rng() * 0.2, heritage: 0, owner: "private", integrity: 1, name: null, styles: 0 };
+        c.integ = 1;
+      }
+    }
+    // carve roads in
+    roadSet.forEach(i => { const c = state.cells[i]; if (c.t !== TER.WATER) { c.u = USE.ROAD; c.build = null; c.integ = 1; } });
+
+    // --- Landmarks ---
+    const lmDefs = [
+      { type: LM.CATHEDRAL, name: "The Western Cathedral", x: centerX - 18, y: baseY - 6, size: 4, heritage: 0.95 },
+      { type: LM.PALACE,    name: "River Palace",          x: centerX + 18, y: baseY - 6, size: 4, heritage: 0.92 },
+      { type: LM.BRIDGE,    name: "The Great Bridge",      x: centerX,      y: baseY,     size: 3, heritage: 0.9, isBridge: true },
+      { type: LM.SQUARE,    name: "The Public Square",     x: centerX,      y: baseY + 6, size: 5, heritage: 0.7 },
+      { type: LM.TOWER,     name: "The Old Watchtower",    x: centerX - 6,  y: baseY + 12, size: 2, heritage: 0.6 },
+      { type: LM.MARKET,    name: "The Market Hall",       x: centerX - 30, y: baseY + 4, size: 4, heritage: 0.5 },
+      { type: LM.WALL,      name: "The West Defensive Wall", x: centerX - 30, y: baseY, size: 6, heritage: 0.4, linear: "S" },
+      { type: LM.DOCK,      name: "The River Docks",       x: centerX - 12, y: baseY + 2, size: 3, heritage: 0.5 },
+    ];
+    let lmId = 0;
+    lmDefs.forEach(def => {
+      // place footprint on non-water cells
+      let placed = 0;
+      let cy = def.y, cx = def.x;
+      const placeAt = (px, py) => {
+        if (px < 1 || px >= W - 1 || py < 1 || py >= H - 1) return;
+        const i = idx(W, px, py), c = state.cells[i];
+        if (c.t === TER.WATER) return;
+        c.u = USE.MONUMENT; c.integ = 1;
+        c.build = { era: 0, value: 0.5, culture: def.heritage, heritage: def.heritage, owner: "state", integrity: 1, name: null, styles: 0 };
+        placed++;
+      };
+      if (def.linear === "S") {
+        for (let d = -def.size; d <= def.size; d++) placeAt(def.x, def.y + d);
+      } else {
+        for (let dy = -def.size; dy <= def.size; dy++) for (let dx = -def.size; dx <= def.size; dx++) {
+          if (dx * dx + dy * dy <= def.size * def.size) placeAt(def.x + dx, def.y + dy);
+        }
+      }
+      const lm = makeLandmark(lmId++, def.type, def.name, def.x, def.y, def.size, state.seed);
+      if (def.isBridge) lm.isBridge = true;
+      lm.heritage = def.heritage;
+      lm.integ = 1;
+      lm.footprintCells = [];
+      const footprint = [];
+      for (let dy = -def.size; dy <= def.size; dy++) for (let dx = -def.size; dx <= def.size; dx++) {
+        if (dx * dx + dy * dy <= def.size * def.size) { const px = def.x + dx, py = def.y + dy; if (px >= 0 && px < W && py >= 0 && py < H && state.cells[idx(W,px,py)].t !== TER.WATER) footprint.push([px, py]); }
+      }
+      lm.footprintCells = footprint;
+      state.landmarks.push(lm);
+    });
+
+    recomputeDistricts(state);
+    // Record origin history
+    logEvent(state, "city-founded", 0, "A young city is founded at the river's bend.", { place: "riverbend" });
+    // baseline memory carriers
+    state.memory.carriers.push({ id: "church-archives", kind: "institution", name: "Cathedral Archives", strength: 1.0, dist: "west" });
+    state.memory.carriers.push({ id: "guild-rodar", kind: "institution", name: "Merchants' Guild", strength: 1.0, dist: "both" });
+    state.memory.carriers.push({ id: "water-clock", kind: "institution", name: "Water-Clerk Registrar", strength: 0.9, dist: "center" });
+  }
+
+  // ----------------------------------------------------------- Eventing   ----
+  function logEvent(state, type, year, text, meta) {
+    const ev = { type, year, text, meta: meta || {} };
+    state.eventLog.push(ev);
+    if (state.eventLog.length > 400) state.eventLog.splice(0, state.eventLog.length - 400);
+    state.history.push(ev);
+    return ev;
+  }
+
+  function pushLineage(lm, year, st, note) {
+    lm.lineage.push({ year, state: st, note });
+    if (lm.lineage.length > 400) lm.lineage.splice(0, lm.lineage.length - 400);
+  }
+  function pushHistory(lm, year, note) {
+    lm.history.push({ year, note });
+    if (lm.history.length > 200) lm.history.splice(0, lm.history.length - 200);
+  }
+
+  // ----------------------------------------------------------- Destruction ---
+  // Apply a blast of damage at a point (radius). Cells are damaged; buildings
+  // degrade; integrity<=0 cells become rubble. Landmark footprints tracked.
+  function blast(state, cx, cy, radius, power, cause, returnNo) {
+    const { W, H } = state;
+    const hitLandmarks = new Set();
+    let destroyed = 0;
+    for (let y = Math.floor(cy - radius); y <= Math.ceil(cy + radius); y++) {
+      for (let x = Math.floor(cx - radius); x <= Math.ceil(cx + radius); x++) {
+        if (x < 0 || x >= W || y < 0 || y >= H) continue;
+        const d = Math.hypot(x - cx, y - cy);
+        if (d > radius) continue;
+        const fall = (1 - d / (radius + 0.5));
+        const i = idx(W, x, y), c = state.cells[i];
+        // damage cell
+        c.integ -= fall * power;
+        c.dmgAge = 0; c.dmgReturn = returnNo;
+        if (fall > 0.12 && c.t !== TER.WATER) c.hitReturns = (c.hitReturns || 0) + 1;
+        if (c.t === TER.WATER) continue;
+        if (c.integ <= 0) {
+          // mark as rubble / crater
+          if (c.u === USE.BUILDING || c.u === USE.MONUMENT) destroyed++;
+          c.u = USE.RUIN; c.integ = 0; c.build = null;
+          c.layers.push({ y: state.year, kind: "c" }); if (c.layers.length > 4) c.layers.shift();
+          for (const lm of state.landmarks) {
+            if (lm.footprintCells && lm.footprintCells.some(f => f[0] === x && f[1] === y)) {
+              lm.integ -= fall * power * 0.4; hitLandmarks.add(lm.id);
+              lm.hitCount = (lm.hitCount || 0) + 1; lm.hitReturn = returnNo; lm.lastHitYear = state.year;
+            }
+          }
+        }
+      }
+    }
+    // crater on open ground for strong hits
+    if (radius >= 2.2 && power > 1.0) {
+      const centerCell = state.cells[idx(W, clamp(Math.round(cx), 0, W - 1), clamp(Math.round(cy), 0, H - 1))];
+      if (centerCell.t !== TER.WATER) {
+        // form crater visually
+        for (let yy = Math.floor(cy - radius * 0.5); yy <= Math.ceil(cy + radius * 0.5); yy++)
+          for (let xx = Math.floor(cx - radius * 0.5); xx <= Math.ceil(cx + radius * 0.5); xx++) {
+            if (xx < 0 || xx >= W || yy < 0 || yy >= H) continue;
+            const ci = idx(W, xx, yy), c2 = state.cells[ci];
+            if (c2.t === TER.WATER) continue;
+            const dd = Math.hypot(xx - cx, yy - cy) / (radius * 0.5 + 1);
+            if (dd < 1) { c2.u = USE.CRATER; c2.integ = 0; c2.build = null; c2.elev = Math.max(0.02, c2.elev - 0.25*(1-dd)); if (c2.elev < 0.1) c2.t = TER.MARSH; }
+          }
+      }
+    }
+    state.counters.destructions += destroyed;
+    // Record landmark events
+    for (const lm of state.landmarks) {
+      if (hitLandmarks.has(lm.id)) {
+        if (lm.integ < 0.35 && !lm.destroyed) {
+          lm.destroyed = state.year; lm.status = "ruin"; lm.destroyedAt = state.year;
+          pushLineage(lm, state.year, "ruin", `${cause} destroyed ${lm.name}.`);
+          pushHistory(lm, state.year, `Reduced to ruin by ${cause === "player" ? "the returning immortal" : "the rival"}.`);
+          logEvent(state, "landmark-destroyed", state.year, `The ${lm.name} is destroyed by ${cause === "player" ? "the returning immortal" : "the rival"}.`, { lm: lm.id, place: lm.cx + ":" + lm.cy });
+          if (lm.type === LM.BRIDGE) {
+            logEvent(state, "trade-severed", state.year, `The destruction of the ${lm.name} severs {directional} trade.`, { lm: lm.id });
+            state.politics.stability = clamp(state.politics.stability - 0.08, 0, 1);
+          }
+        } else if (lm.integ < 0.75) {
+          if (lm.status === "intact") { lm.status = "damaged"; pushLineage(lm, state.year, "damaged", `${lm.name} damaged by ${cause}.`); pushHistory(lm, state.year, "Damaged in battle."); }
+        }
+      }
+    }
+    return { destroyed, hitLandmarks: [...hitLandmarks] };
+  }
+
+  // Rupture a road / bridge span -> blocks trade
+  function ruptureRoad(state, cx, cy, radius, cause, returnNo) {
+    blast(state, cx, cy, radius, 1.4, cause, returnNo);
+    state.politics.stability = clamp(state.politics.stability - 0.05, 0, 1);
+  }
+
+  // destroy a specific landmark completely (for scripted / forced cases)
+  function fullyDestroy(state, lm) {
+    state.counters.destructions += Math.max(1, lm.footprintCells.length);
+    lm.integ = 0; lm.destroyed = true; lm.destroyedAt = state.year; lm.status = "ruin";
+    lm.footprintCells.forEach(([x, y]) => { const c = state.cells[idx(state.W, x, y)]; c.u = USE.RUIN; c.integ = 0; c.build = null; c.layers.push({ y: state.year, kind: "c" }); });
+    pushLineage(lm, state.year, "ruin", `The ${lm.name} is destroyed.`);
+    pushHistory(lm, state.year, "Destroyed.");
+    logEvent(state, "landmark-destroyed", state.year, `The ${lm.name} is destroyed.`, { lm: lm.id, place: lm.cx + ":" + lm.cy });
+  }
+
+  // ------------------------------------------------------------- Memory  ----
+  const NAME_GLOSS = [
+    "Westfall", "Wesfal", "Vesal", "Vesalle", "West", "Westmere", "The Far Bank",
+    "Sacred Quay", "Old Crater", "The Hollow", "Second Shore", "Hawning",
+  ];
+
+  function nameDrift(state, name, rng) {
+    // pick a drift event only occasionally
+    if (rng() < 0.35) return name;
+    const suf = ["-fall", "-mere", "-ton", "-stead", "-ly", "-mark", "-gate", "-shore", "-holm"];
+    // shorten / mutate
+    let out = name;
+    // lowercase-ish transformation
+    const tokens = name.split(" ");
+    if (tokens.length > 1 && rng() < 0.5 && state.memory.naming[tokens[tokens.length - 1]] === undefined) {
+      out = tokens[tokens.length - 1] + (rng() < 0.5 ? suf[(rng() * suf.length) | 0] : "");
+    }
+    if (rng() < 0.3) out = out.replace(/[aeiou]/gi, (m, o) => (o % 2 === 0 ? m : ""));
+    if (rng() < 0.2) out = out.slice(0, Math.max(3, out.length - 1)) + (rng() < 0.5 ? "a" : "e");
+    return out.trim() || name;
+  }
+
+  // Derive/apply cultural memory over time. Carriers decay; myths form.
+  function stepMemory(state, rng, dt) {
+    const m = state.memory;
+    const cyc = dt / 100; // centuries
+    // decay carrier strength slowly (per century) — institutions last millennia, not centuries
+    for (const c of m.carriers) c.strength = clamp(c.strength - 0.012 * cyc, 0, 1);
+    // carrier loss danger (political unrest / natural lifespan)
+    for (let i = m.carriers.length - 1; i >= 0; i--) {
+      const c = m.carriers[i];
+      if (c.strength <= 0.02 ||
+          (rng() < 0.02 * cyc && state.politics.stability < 0.3)) {
+        m.carriers.splice(i, 1);
+        m.knowledge[c.id] = { lost: true, year: state.year };
+      }
+    }
+    // renewal: institutions are re-founded and copies made when society is stable
+    const renewalChance = (0.03 + state.politics.stability * 0.05) * cyc;
+    if (m.carriers.length && rng() < renewalChance) {
+      const c = m.carriers[(rng() * m.carriers.length) | 0];
+      c.strength = clamp(c.strength + 0.2, 0, 1);
+    }
+    // occasionally a brand new institution forms around a surviving monument/shrine
+    if (m.carriers.length < 10 && rng() < 0.012 * cyc) {
+      const names = ["Chronicle Keep", "Order of the Return", "Lapidary Society", "Bureau of Ages",
+                     "College of Antiquity", "The Rememberers", "Archivarium", "Guild of Watchers"];
+      const name = names[(rng() * names.length) | 0];
+      const dists = ["west", "east", "south", "north", "center"];
+      m.carriers.push({ id: "inst-" + name + "-" + (m.carriers.length), kind: "institution", name, strength: 0.7, dist: dists[(rng() * dists.length) | 0] });
+      logEvent(state, "institution", state.year, `A new institution is founded: ${name}.`, {});
+    }
+    // ensure knowledge keyed by place stays aligned with reality (accuracy shrinks w/o carriers)
+    for (const k in m.knowledge) {
+      const rec = m.knowledge[k];
+      if (rec.lost) continue;
+      const carriers = m.carriers.filter(c => c.dist === rec.dist);
+      rec.accuracy = clamp(rec.accuracy * (0.98 + 0.06 * carriers.length), 0, 1);
+    }
+    // aging names drift
+    for (const k in m.naming) { m.naming[k] = nameDrift(state, m.naming[k], rng); }
+
+    // myths: biased re-reading of landmark events. Randomly promote some.
+    if (rng() < 0.16 * cyc && state.history.some(e => e.type === "landmark-destroyed" && !e._mythified)) {
+      const ev = state.history.find(e => e.type === "landmark-destroyed" && !e._mythified);
+      const lmRef = ev && ev.meta && ev.meta.lm != null ? state.landmarks[ev.meta.lm] : null;
+      if (ev && lmRef) {
+        ev._mythified = true;
+        const hero = rng() < 0.5 ? "the returning immortal" : "the rival";
+        const mythTitles = ["The Fall of Heaven", "The War of Two Devils", "The Deliverance", "The First Return",
+                            "The Catastrophe", "The Broken Century", "The Western Calamity", "The Mercy of the Immortal",
+                            "The Second Sundering", "The Day the Gods Missed"];
+        const title = mythTitles[(rng() * mythTitles.length) | 0];
+        const myth = { year: state.year, subject: lmRef.name, title: title, text: `A myth about '${lmRef.name}': ${title}.`, heroToldAs: hero };
+        m.myths.push(myth);
+        logEvent(state, "myth", state.year, `A myth forms around the ${lmRef.name}: '${title}'.`, { lm: lmRef.id });
+      }
+    }
+  }
+
+  // name a place if unnamed; store in naming map by coordinate seed
+  function ensureNamedPlace(state, key, base, rng) {
+    const m = state.memory.naming;
+    if (!m[key]) m[key] = base;
+    return nameDrift(state, m[key], rng || makeRng(state));
+  }
+
+  // ------------------------------------------------------ Technology  ------
+  const ERA_DEF = [
+    { name: "Founding Era",        start: 0,     color: "#8c6", power: 1 },
+    { name: "Early Industrial",    start: 900,   color: "#d80", power: 1.5 },
+    { name: "Dense Industrial",    start: 2200,  color: "#c55", power: 2 },
+    { name: "Electrified Metro",   start: 4200,  color: "#57a", power: 2.6 },
+    { name: "High-Rise Era",       start: 6800,  color: "#66b", power: 3.2 },
+    { name: "Battle-Adapted Urban",start: 10500, color: "#a9b", power: 3.8 },
+    { name: "Post-Collapse",       start: 14000, color: "#7a7a5a", power: 2.2 },
+    { name: "Successor Civilization", start: 16500, color: "#8af", power: 3.4 },
+    { name: "Advanced Resilience", start: 26000, color: "#b6f", power: 4.4 },
+    { name: "Heritage / Archaeo",  start: 38000, color: "#eadfa0", power: 4.0 },
+    { name: "Deep-Time Variant",   start: 62000, color: "#4ce", power: 5.2 },
+  ];
+
+  function technologyEra(state) {
+    // path-dependent: derive from surviving knowledge, institutions, trade, stability
+    const tm = state.memory;
+    const inst = tm.carriers.length;
+    const literacy = state.culture.literacy;
+    const econ = state.economy.centers.length;
+    const continuity = clamp(inst / 2 + literacy * 0.4 + econ * 0.08, 0, 2);
+    const collapse = state.politics.stability < 0.2 ? 0.5 : 0;
+    // build a "knowledge" score
+    let level = 1 + continuity * 0.8;
+    if (state.counters.catastrophic > 3) level *= 0.7;
+    // long-lived societies accumulate
+    level *= 1 + Math.min(0.9, state.year / 80000);
+    level = clamp(level, 1, 6);
+    // pick era based on level + year
+    let era = 0;
+    for (let i = 0; i < ERA_DEF.length; i++) if (state.year >= ERA_DEF[i].start) era = i;
+    // but also allow "level" to suppress or advance; find best-fitting by start year <= year
+    state.technology.level = level;
+    state.technology.era = era;
+    state.technology.eras = ERA_DEF;
+    return ERA_DEF[era];
+  }
+
+  // -------------------------------------------------- Environment step  -----
+  function stepEnvironment(state, rng, dt) {
+    const env = state.environment;
+    // slow climate drift
+    env.climate += (rng() - 0.5) * 0.004 * dt;
+    env.climate = clamp(env.climate, -1, 1);
+    env.precip = clamp(0.5 + env.climate * 0.25 + (rng() - 0.5) * 0.02 * dt, 0, 1);
+    const cyc = dt / 100;
+    env.seaLevel = clamp(env.seaLevel + (env.climate > 0 ? 0.02 : -0.015) * cyc, -0.3, 0.5);
+    env.forest = clamp(env.forest + (env.precip > 0.5 ? 0.015 : -0.01) * cyc, 0, 1);
+    // river migration (meander drift), deep-time slow
+    env.riverShift += (env.climate * 1.5 + (rng() - 0.5) * 0.5) * 0.02 * cyc;
+    env.riverShift = clamp(env.riverShift, -16, 16);
+    const riverSet = new Set(riverCellsFor(state, true));
+    const { W, H } = state;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      const isR = riverSet.has(i);
+      if (isR && c.t !== TER.WATER) {
+        // river has migrated here -> submerge (flood); log sparingly and only for real settlement
+        if ((c.u === USE.BUILDING || c.u === USE.MONUMENT) && rng() < 0.15) logEvent(state, "flooded", state.year, `The shifting river submerges a settlement near ${describeDistrict(state)}.`);
+        c.t = TER.WATER; c.elev = 0.06; c.u = USE.OPEN; c.build = null; c.integ = 0;
+      } else if (!isR && c.t === TER.WATER && c.elev < 0.15 && c.elev > 0.05 && state.year > 1200 && rng() < 0.02 * cyc) {
+        // old channel silts up into marsh/ground
+        c.t = TER.MARSH; c.elev = 0.18; c.u = USE.OPEN;
+      }
+    }
+    // sea level along south coast
+    const coastLine = H * 0.86;
+    for (let x = 0; x < W; x++) for (let y = H - 1; y >= Math.floor(H * 0.8); y--) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (env.seaLevel > 0 && y > coastLine - env.seaLevel * 18) {
+        if (c.t !== TER.WATER) { c.t = TER.WATER; c.elev = 0.04; c.u = USE.OPEN; c.build = null; }
+      } else if (env.seaLevel < 0 && c.t === TER.WATER && y < coastLine - env.seaLevel * 18 && c.elev < 0.08 && rng() < 0.02 * cyc) {
+        c.t = TER.SAND; c.elev = 0.24;
+      }
+    }
+    // vegetation growth in forest cells / spread
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (c.t === TER.FOREST) { c.veg = clamp(c.veg + 0.05 * cyc, 0, 1); }
+      else if (c.t === TER.GROUND && c.u === USE.OPEN && env.forest > 0.6 && rng() < 0.004 * cyc) { c.veg = clamp(c.veg + 0.08, 0, 1); if (c.veg > 0.6) c.t = TER.FOREST; }
+    }
+  }
+
+  // ------------------------------------------------- Urban development  -----
+  // Reconstruction + growth driven by state (population pressure, roads, water,
+  // land value, battle risk, politics, heritage, religion).
+  function stepDevelopment(state, rng, dt) {
+    const { W, H } = state;
+    const popDensity = state.pop.total / 16000; // relative
+    const tech = state.technology.level;
+
+    // iterate a sample of cells (deterministic seeded order over the grid)
+    // First: recovery of rubble -> repurpose / clear / rebuild based on context
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (c.t === TER.WATER) continue;
+      c.dmgAge += dt;
+      // agriculture regrow on farm
+      if (c.u === USE.FARM && state.year > 0 && rng() < 0.04 * dt) c.u = USE.OPEN;
+      // ruin recovery
+      if (c.u === USE.RUIN || c.u === USE.CRATER) {
+        const clearish = clamp(0.35 + state.politics.stability * 0.4 + tech * 0.03 + popDensity * 0.08, 0, 1);
+        // heritage: keep some ruins as monuments if cultural value strong
+        const nearMonument = c.layers.length && c.layers[c.layers.length - 1].kind === "c" && c.dmgReturn < state.returnCount;
+        if (rng() < clearish * 0.02 * dt) {
+          // decide fate: cleared+rebuilt OR preserved OR water-filled OR quarry
+          if (c.u === USE.CRATER && c.elev < 0.22 && (c.t === TER.SAND || c.t === TER.MARSH || c.elev < 0.2)) {
+            // crater fills with water -> lake
+            if (rng() < 0.4) { c.t = TER.WATER; c.u = USE.OPEN; }
+          }
+          if (c.u !== USE.WATER) {
+            const preserve = c.dmgAge < 60 && c.layers.some(l => l.kind === "c") && rng() < (0.12 * state.politics.stability);
+            if (preserve) {
+              c.u = USE.MONUMENT; c.build = { era: 0, value: 0.4, culture: 0.8, heritage: 0.9, owner: "state", integrity: 0.7, name: null, styles: 0 };
+            } else {
+              // rebuild or leave open — high-risk zones (repeatedly struck) are abandoned
+              // rather than rebuilt, teaching the civilization to leave a corridor.
+              // recent damage boosts a *first* rebuild, but cumulative strikes teach
+              // the society to stop rebuilding: high hitReturns leave an empty corridor.
+              const hits = c.hitReturns || 0;
+              let recentBoost = c.dmgReturn < 100 ? 0.2 : 0;
+              if (hits >= 6) recentBoost = 0;                       // no more "helpful" rebuilds
+              let rebuild = clamp(0.4 + popDensity * 0.3 + tech * 0.05 + recentBoost, 0, 1);
+              if (hits >= 6) rebuild *= 0.12;                       // abandonment
+              else if (hits >= 3) rebuild *= 0.6;                   // diminished
+              if (rng() < rebuild) {
+                c.u = USE.BUILDING; c.build = { era: state.technology.era, value: 0.2 + rng() * 0.4, culture: 0.1, heritage: 0, owner: "private", integrity: 1, name: null, styles: state.technology.era };
+                c.integ = 1;
+              } else if (hits >= 6 && rng() < 0.5) {
+                c.u = USE.PARK; c.veg = 0.7; c.integ = 1;           // designated impact-corridor buffer
+              } else { c.u = USE.OPEN; c.veg = clamp(c.veg - 0.2, 0, 1); }
+            }
+          }
+        }
+      }
+      // sediment accumulation over deep time buries ruins
+      if ((c.u === USE.RUIN || c.u === USE.CRATER) && state.year > 4000 && rng() < 0.002 * dt) {
+        c.sed += 0.05;
+        if (c.sed > 1.2) { c.u = USE.OPEN; c.sed = 0.5; c.build = null; }
+      }
+    }
+
+    // Growth: expand buildings from existing built/road cells (spread).
+    // Choose random seed cells and attempt development outward.
+    const growthBudget = Math.min(4000, Math.round((state.pop.total / 1800) * (dt / 100)));
+    let built = 0;
+    for (let g = 0; g < growthBudget; g++) {
+      const rxx = (rng() * W) | 0, ryy = (rng() * H) | 0;
+      const si = idx(W, rxx, ryy), sc = state.cells[si];
+      const isUrban = sc.u === USE.BUILDING || sc.u === USE.MONUMENT || sc.u === USE.SHELTER || sc.u === USE.ROAD || sc.u === USE.PARK;
+      if (!isUrban && sc.u !== USE.FARM) continue;
+      // pick random neighbor
+      const dx = (rng() * 3) | 0 - 1, dy = (rng() * 3) | 0 - 1;
+      const nx = clamp(rxx + ((rng() * 3) | 0) - 1, 0, W - 1), ny = clamp(ryy + ((rng() * 3) | 0) - 1, 0, H - 1);
+      const ni = idx(W, nx, ny), nc = state.cells[ni];
+      if (nc.t === TER.WATER) continue;
+      if (nc.u === USE.OPEN || nc.u === USE.SHELTER || nc.u === USE.PARK) {
+        // battle-risk aversion: don't build deep in repeatedly-hit zones if society adapted
+        const battleRisk = (nc.hitReturns || 0) >= 4 ? 0.8 : (nc.dmgReturn > 4 ? 0.6 : 0);
+        const heritageZone = (nc.u === USE.MONUMENT && nc.build && nc.build.heritage > 0.6);
+        const dev = clamp(0.3 + popDensity * 0.5 + tech * 0.04 + (nc.u === USE.ROAD ? 0.2 : 0) - battleRisk, 0, 1);
+        if (!heritageZone && rng() < dev * 0.2) {
+          nc.u = USE.BUILDING; nc.build = { era: state.technology.era, value: 0.2 + rng() * 0.4, culture: 0.1, heritage: 0, owner: "private", integrity: 1, name: null, styles: state.technology.era };
+          built++;
+        }
+      }
+    }
+    // roads grow from existing roads
+    const roadBudget = Math.min(2000, Math.round((state.pop.total / 6000) * (dt / 100)));
+    for (let g = 0; g < roadBudget; g++) {
+      const rx = (rng() * W) | 0, ry = (rng() * H) | 0;
+      const ri = idx(W, rx, ry), rc = state.cells[ri];
+      if (rc.u !== USE.ROAD) continue;
+      const nx = clamp(rx + ((rng() * 3) | 0) - 1, 0, W - 1), ny = clamp(ry + ((rng() * 3) | 0) - 1, 0, H - 1);
+      const ni = idx(W, nx, ny), nc = state.cells[ni];
+      if (nc.u === USE.OPEN && nc.t !== TER.WATER && nc.t !== TER.HILL) { nc.u = USE.ROAD; nc.build = null; }
+    }
+
+    // Districts recompute; population re-buckets proportional to urban cells
+    recomputeDistricts(state);
+    const totalUrbanCells = state.districts.reduce((a, d) => a + d.cells, 0) || 1;
+    let urban = 0;
+    for (const d of state.districts) {
+      d.pop = Math.round(state.pop.total * (d.cells / totalUrbanCells));
+      urban += d.pop;
+    }
+    state.pop.urban = Math.round(state.pop.total * Math.min(0.9, totalUrbanCells / 900));
+    state.pop.rurals = state.pop.total - state.pop.urban;
+  }
+
+  function indexToXY(state, i) { return { x: i % state.W, y: (i / state.W) | 0 }; }
+
+  // ---------------------------------------------------------- Population  ----
+  function stepPopulation(state, rng, dt) {
+    // carrying capacity from available (buildable) land, so we do not explode.
+    let buildable = 0;
+    for (let i = 0; i < state.cells.length; i++) {
+      const t = state.cells[i].t;
+      if (t !== TER.WATER && t !== TER.HILL) buildable++;
+    }
+    const cap = Math.max(2000, Math.round(buildable * 45));
+    // per-year intrinsic rate: climate, stability, famine
+    let r = 0.0034 + (state.environment.climate > 0 ? 0.0011 : -0.0007) +
+            (state.politics.stability - 0.5) * 0.0014;
+    if (state.environment.precip < 0.25) r -= 0.004; // famine
+    // logistic growth
+    const logistic = state.pop.total * r * (1 - state.pop.total / cap);
+    state.pop.total = Math.max(600, Math.round(state.pop.total + logistic * dt));
+    // small random walk in trend
+    state.pop.trend = clamp(state.pop.trend + (rng() - 0.5) * 0.02, -1, 1);
+  }
+
+  // --------------------------------------------------------------- Religion ---
+  function stepReligion(state, rng, dt) {
+    const rel = state.religion;
+    if (rel.sects.length === 0) {
+      rel.sects.push({ id: "river-faith", name: "River Faith", power: 0.6, worship: ["river"] });
+    }
+    // If many landmark myths exist, religion may adopt them
+    const mythsAbout = state.memory.myths.length;
+    if (mythsAbout > 2 && !rel.sects.some(s => s.name === "Cult of the Returning")) {
+      rel.sects.push({ id: "cult-return", name: "Cult of the Returning", power: 0.4, worship: ["immortals"] });
+      logEvent(state, "religion", state.year, "A cult of the Returning Ones emerges from battle myths.", {});
+    }
+    // drift dominant sect
+    for (const s of rel.sects) s.power = clamp(s.power + (rng() - 0.5) * 0.02 * dt, 0, 1);
+    rel.dominant = rel.sects.reduce((a, b) => (b.power > a.power ? b : a), rel.sects[0]).name;
+  }
+
+  // ---------------------------------------------------------------- Politics ---
+  function stepPolitics(state, rng, dt) {
+    const p = state.politics;
+    p.stability = clamp(p.stability + (rng() - 0.5) * 0.01 * dt, 0, 1);
+    // repeated battles destabilize, but institutions buffer
+    if (state.counters.destructions > 0 && rng() < 0.04 * dt) p.stability = clamp(p.stability - (p.stability - 0.5) * 0.1, 0, 1);
+    // occasional regime change
+    if (p.stability < 0.3 && rng() < 0.02 * dt) {
+      const regimes = ["city-state", "merchant republic", "theocracy", "military protectorate", "bureaucratic order", "free commune", "supreme court"];
+      p.regime = regimes[(rng() * regimes.length) | 0];
+      logEvent(state, "politics", state.year, `A new regime emerges: ${p.regime}.`, {});
+      p.stability = 0.45;
+    }
+    // faction formation based on recurring returns
+    if (state.returnCount > 4 && !p.factions.length) {
+      p.factions = [
+        { name: "Rebuilders", power: 0.5, lean: "rebuild near scars" },
+        { name: "Preservationists", power: 0.4, lean: "protect ancient ruins" },
+        { name: "Evacuation Advocates", power: 0.4, lean: "build away from battle zones" },
+        { name: "Fatalists", power: 0.2, lean: "accept the return" },
+      ];
+    }
+  }
+
+  // -------------------------------------------------------- Deep-time  -------
+  // Over the millennia, sediment buries old battle layers and later eras can
+  // get excavated. Late civilizations can rediscover old impact strata.
+  function stepDeepTime(state, rng, dt) {
+    const { W, H } = state;
+    // Build archaeology potential: if a cell has multiple "c" layers and is now open/ruin,
+    // it becomes an identified excavation site at an archaeological-era civilization.
+    if (state.year > 20000 && state.year % 5000 === 0 && state.excSites.length < 6) {
+      // look for cells with old layers in open ground
+      const cand = [];
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = idx(W, x, y), c = state.cells[i];
+        if (c.layers.length >= 2 && (c.u === USE.OPEN || c.u === USE.RUIN)) cand.push([x, y]);
+      }
+      if (cand.length) {
+        const pick = cand[(rng() * cand.length) | 0];
+        const site = { id: state.excSites.length, x: pick[0], y: pick[1], foundYear: state.year, layers: state.cells[idx(W, pick[0], pick[1])].layers.slice() };
+        state.excSites.push(site);
+        state.cells[idx(W, pick[0], pick[1])].u = USE.EXCAVATION;
+        logEvent(state, "archaeology", state.year, `Archaeologists uncover an ancient destruction layer and misread it as ritual demolition.`, { x: pick[0], y: pick[1] });
+      }
+    }
+  }
+
+  // ---------------------------------------------------------- Generation  ----
+  // Generate a mythic / misunderstanding text tied to actual state for a passage.
+  function describeDistrict(state) {
+    const d = state.districts[0];
+    if (!d) return "A settlement";
+    return `${d.name}`;
+  }
+
+  // ------------------------------------------------------------ Serialize ---
+  function serialize(state) {
+    // Keep it plain JSON-able (already is). Mark version.
+    const out = JSON.parse(JSON.stringify(state));
+    out.__version = 1;
+    return out;
+  }
+  function rehydrate(obj) {
+    // any needed reconstruction (pointers) 
+    return obj;
+  }
+
+  // ------------------------------------------------------------ Checkpoint ---
+  function makeCheckpoint(state) {
+    const { W } = state;
+    // compress landuse+terrain into a Uint8 grid
+    const grid = new Uint8Array(state.W * state.H * 2);
+    for (let i = 0; i < state.cells.length; i++) {
+      grid[i * 2] = state.cells[i].t;
+      grid[i * 2 + 1] = state.cells[i].u;
+    }
+    return {
+      year: state.year, returnCount: state.returnCount,
+      rng: state.worldRngState, grid, // interleaved [t,u]
+      pop: state.pop.total, era: state.technology.era,
+      summarized: true,
+    };
+  }
+
+  // ------------------------------------------------------------- Init run ---
+  function initWorld(seed) {
+    const state = makeWorld(seed >>> 0);
+    // terrain
+    const noise = makeNoise(seed >>> 0);
+    for (let y = 0; y < state.H; y++) for (let x = 0; x < state.W; x++) {
+      const cell = state.cells[idx(state.W, x, y)];
+      const t = terrainFor(x, y, noise, state.W, state.H);
+      cell.t = t.t; cell.elev = t.elev;
+    }
+    // carve river
+    state.river.cells = riverCellsFor(state, false);
+    carveWaterToCells(state);
+    seedCity(state);
+    technologyEra(state);
+    // initial checkpoints
+    return state;
+  }
+
+  // ------------------------------------------------- Landmark lineage ------
+  function localContext(state, lm) {
+    const religionPower = state.religion.sects.reduce((a, s) => a + s.power, 0) || 0.3;
+    return {
+      heritageCulture: lm.heritage,
+      stability: state.politics.stability,
+      religionPower,
+      tech: state.technology.level,
+      econ: state.economy.centers.length > 0 ? 1 : 0.4,
+      battleRisk: lm.hitCount,
+      age: state.year - lm.originYear,
+      worldYear: state.year,
+    };
+  }
+
+  function applyLandmarkState(state, lm) {
+    const { W } = state;
+    if (!lm.footprintCells) return;
+    lm.footprintCells.forEach(([x, y]) => {
+      const i = idx(W, x, y); if (i < 0 || i >= state.cells.length) return;
+      const c = state.cells[i];
+      if (c.t === TER.WATER) return;
+      switch (lm.status) {
+        case "rebuilt":
+          c.u = USE.BUILDING; c.integ = 1;
+          c.build = { era: state.technology.era, value: 0.45, culture: lm.heritage * 0.4, heritage: lm.heritage * 0.5, owner: "state", integrity: 1, name: null, styles: state.technology.era };
+          break;
+        case "shrine":
+        case "heritage":
+          c.u = USE.MONUMENT; c.integ = 0.9;
+          c.build = { era: state.technology.era, value: 0.4, culture: lm.heritage, heritage: lm.heritage, owner: "religion", integrity: 0.85, name: null, styles: state.technology.era };
+          break;
+        case "civic":
+        case "archive":
+        case "market":
+        case "repurposed":
+          c.u = USE.BUILDING; c.integ = 0.9;
+          c.build = { era: state.technology.era, value: 0.5, culture: Math.max(lm.heritage, 0.35), heritage: lm.heritage, owner: "state", integrity: 0.9, name: null, styles: state.technology.era };
+          break;
+        case "abandoned":
+          c.u = USE.OPEN; c.build = null; c.integ = 0.4; break;
+        case "buried":
+          c.u = USE.OPEN; c.build = null; c.sed += 0.7; c.integ = 0.2; break;
+        case "excavation":
+          c.u = USE.EXCAVATION; c.build = null; c.integ = 0.3; break;
+        case "preserved-ruin":
+          c.u = USE.MONUMENT; c.integ = 0.5;
+          c.build = { era: 0, value: 0.3, culture: lm.heritage, heritage: lm.heritage, owner: "state", integrity: 0.5, name: null, styles: 0 };
+          break;
+        default: break;
+      }
+    });
+  }
+
+  function afterDmgEvolve(state, lm, rng) {
+    // heritage grows when a building survives being struck and is still standing
+    const recent = state.year - lm.lastHitYear < 400 && lm.lastHitYear >= 0;
+    if (lm.status !== "ruin" && lm.status !== "buried" && lm.hitCount >= 1 && recent) {
+      lm.heritage = clamp(lm.heritage + 0.05, 0, 1);
+      if (lm.hitCount >= 4) {
+        pushHistory(lm, state.year, `Withstands another return; gains a reputation for being hard to destroy.`);
+        logEvent(state, "survivor", state.year, `The ${lm.name} survives repeated returns and is spoken of as nearly indestructible.`, { lm: lm.id });
+      }
+    }
+  }
+
+  function advanceLandmark(state, lm, rng) {
+    const c = localContext(state, lm);
+    const cur = lm.status;
+    let next = null, note = "";
+    if (cur === "intact") {
+      if (c.heritageCulture > 0.5 && c.religionPower > 0.4 && rng() < 0.05) { next = "heritage"; note = "Ages into a protected heritage structure."; }
+    } else if (cur === "damaged") {
+      if (c.stability > 0.5 && rng() < 0.6) { next = "rebuilt"; note = "Repaired and restored."; }
+      else if (c.heritageCulture > 0.55 && c.religionPower > 0.5) { next = "preserved-ruin"; note = "Preserved as a monument of the return."; }
+    } else if (cur === "ruin" || cur === "preserved-ruin") {
+      const buildP = 0.20 * c.stability + 0.12 * (c.tech / 6) + 0.08 * c.econ;
+      const worshipP = c.religionPower * 0.55 + c.heritageCulture * 0.5;
+      const roll = rng();
+      if (cur === "ruin") {
+        if (roll < buildP) { next = "rebuilt"; note = "Rebuilt upon the ruin."; }
+        else if (roll < buildP + worshipP) { next = "shrine"; note = "Surviving wall becomes a shrine."; }
+        else if (roll < buildP + worshipP + 0.18) { next = "repurposed"; note = "Cleared and repurposed."; }
+        else { next = "abandoned"; note = "Left bare."; }
+      } else {
+        if (c.stability > 0.5 && rng() < 0.45) { next = "shrine"; note = "A pilgrimage grows around the ruin."; }
+        else if (c.religionPower < 0.25 && c.tech > 2) { next = "excavation"; note = "Secularized and excavated."; }
+        else if (rng() < 0.3) { next = "abandoned"; note = "The ruin is left empty."; }
+      }
+    } else if (cur === "shrine") {
+      if (c.religionPower < 0.2 || c.stability < 0.18) { next = "abandoned"; note = "The shrine's community disperses."; }
+      else if (rng() < 0.3) { next = "civic"; note = "Shrine grounds become a civic institution."; }
+      else if (c.battleRisk > 0 && rng() < 0.3) { next = "rebuilt"; note = "Reconsecrated and reinforced."; }
+    } else if (cur === "civic") {
+      if (rng() < 0.3) { next = "archive"; note = "The complex becomes an archive."; }
+      else if (rng() < 0.18) { next = "market"; note = "The complex becomes a market."; }
+      else if (c.stability < 0.2) { next = "abandoned"; note = "The complex is abandoned."; }
+    } else if (cur === "archive") {
+      if (c.stability < 0.2) next = "abandoned";
+      else if (rng() < 0.3) { next = "buried"; note = "The archives decay and are buried."; }
+      else if (rng() < 0.2) next = "civic";
+    } else if (cur === "market") {
+      if (rng() < 0.3) next = "civic";
+      else if (c.stability < 0.2) next = "abandoned";
+    } else if (cur === "abandoned") {
+      if (rng() < 0.3) { next = "buried"; note = "The empty site is buried by later settlement."; }
+      else if (c.stability > 0.5 && rng() < 0.25) next = "rebuilt";
+      else if (c.religionPower > 0.4 && rng() < 0.2) next = "shrine";
+    } else if (cur === "buried") {
+      if (state.year > 20000 && rng() < 0.15) { next = "excavation"; note = "Excavators uncover the buried site."; }
+      else if (rng() < 0.1) next = "rebuilt";
+    } else if (cur === "excavation") {
+      if (rng() < 0.3) { next = "heritage"; note = "The dig becomes an archaeological park."; }
+      else if (rng() < 0.18) { next = "buried"; note = "Backfilled and covered again."; }
+    } else if (cur === "heritage") {
+      if (rng() < 0.2) next = "civic";
+      else if (rng() < 0.2) next = "shrine";
+    } else if (cur === "repurposed") {
+      if (rng() < 0.4) next = "civic";
+      else if (rng() < 0.3) next = "market";
+    }
+
+    if (next && next !== cur) {
+      lm.status = next;
+      pushLineage(lm, state.year, next, note);
+      pushHistory(lm, state.year, note);
+      if (next === "shrine" || next === "heritage" || next === "civic") lm.heritage = clamp(lm.heritage + 0.2, 0, 1);
+      if (next === "excavation") { lm.excavated = true; logEvent(state, "archaeology", state.year, `Excavation uncovers the ${lm.originName || lm.name}.`, { lm: lm.id }); }
+      if (next === "buried") { lm.buried = true; }
+      // occasionally rename the place / drift the name
+      if ((next === "shrine" || next === "civic" || next === "heritage") && rng() < 0.4) {
+        const drifted = nameDrift(state, lm.name, rng);
+        lm.name = drifted;
+      }
+      applyLandmarkState(state, lm);
+    }
+  }
+
+  function stepLandmarks(state, rng, cyc) {
+    for (const lm of state.landmarks) {
+      afterDmgEvolve(state, lm, rng);
+      // a landmark only changes once on average every ~10-15 centuries, gated on state
+      if (rng() < 0.07 * cyc) advanceLandmark(state, lm, rng);
+    }
+  }
+
+  // ------------------------------------------------------- Economy step ----
+  function stepEconomy(state, rng) {
+    // Track economic centers as districts with the most roads + docks.
+    const { W, H } = state;
+    const roads = Object.create(null), docks = Object.create(null);
+    for (const d of state.districts) { roads[d.id] = 0; docks[d.id] = 0; }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = idx(W, x, y), c = state.cells[i];
+      if (c.u !== USE.ROAD) continue;
+      const key = (x < W / 2 ? (y < H / 2 ? "NW" : "SW") : (y < H / 2 ? "NE" : "SE"));
+      if (roads[key] != null) roads[key]++;
+    }
+    const centers = state.districts
+      .map(d => ({ id: d.id, name: d.name, score: (roads[d.id] || 0) * 1 + (d.cells * 0.1) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, Math.max(1, Math.round(state.districts.length * 0.5)));
+    const prevIds = (state.economy.centers || []).map(c => c.id).join(",");
+    const newIds = centers.map(c => c.id).join(",");
+    if (prevIds && prevIds !== newIds && state.year > 0) {
+      logEvent(state, "trade", state.year, `Trade concentrates in ${centers[0].name}.`, {});
+    }
+    state.economy.centers = centers;
+    // trade corridors derived from river + roads; just record dominant direction change on bridge destruction once
+  }
+
+  // =========================================================== ADVANCE  =====
+  // Advance the world by `years` in bounded steps (mainly century cadence).
+  function advanceYears(state, years) {
+    const startYear = state.year;
+    let target = state.year + years;
+    // We march in "return" cadence: usually 100y. But support deep-time jumps.
+    // For each 100-year span, run a millennial sub-step decomposition so that
+    // recovery scale (years->decades) is distinguishable from deep-time scale.
+    while (state.year < target) {
+      const dt = Math.min(100, target - state.year);
+      // we treat 100y as one "century step"; internally we apply dt=1 as century-units
+      stepCentury(state, dt);
+      state.year += dt;
+      if (state.year % 10000 === 0 && state.year > 0) {
+        state.checkpoints.push(makeCheckpoint(state));
+      }
+    }
+    return state;
+  }
+
+  function stepCentury(state, dt) {
+    const rng = makeRng(state);
+    stepPopulation(state, rng, dt);
+    stepReligion(state, rng, dt);
+    stepPolitics(state, rng, dt);
+    stepEnvironment(state, rng, dt);
+    stepMemory(state, rng, dt / 1); // dt/100 handled inside via cyc
+    stepDeepTime(state, rng, dt);
+    const era = technologyEra(state);
+    stepDevelopment(state, rng, dt);
+    stepLandmarks(state, rng, dt / 100);
+    stepEconomy(state, rng);
+    // record epoch summary occasionally
+    if (state.year % 1000 < dt) {
+      state.epochSummaries.push({ year: state.year, pop: state.pop.total, era: era.name, collapse: state.politics.stability < 0.3 });
+    }
+    // makeRng advancing state.worldRngState on every draw gives deterministic replay.
+  }
+
+  // The rng closures above draw from mulberry32(state.worldRngState) captured at
+  // call time. That means repeated identical draws could recur. We fix by seeding
+  // each step's rng from state.worldRngState (already done) and advancing state.
+  // To ensure the SAME seed yields the SAME history, we never depend on Math.random.
+
+  // --------------------------------------------------------- EXPORT  -------
+  const Core = {
+    TER, USE, LM, ERA_DEF,
+    initWorld, advanceYears, stepCentury,
+    blast, ruptureRoad, fullyDestroy,
+    logEvent, pushLineage, pushHistory,
+    serialize, rehydrate,
+    makeCheckpoint,
+    technologyEra, stepLandmarks,
+    rngFor, mulberry32, makeRng, hash2,
+    idx, clamp, lerp,
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = Core;
+  else root.Core = Core;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+<script>
+/* game.js (inlined) */
+/* ============================================================================
+   EVERY FIGHT IS FOLLOWED BY A CENTURY  —  game.js
+   Loads core.js (the deterministic history engine) and runs the playable game.
+   ============================================================================ */
+(function () {
+  "use strict";
+  const Core = window.Core;
+  const T = Core.TER, U = Core.USE;
+  const TILE = 20;                 // world px per tile
+  const W = 120, H = 120;          // world tiles
+  const WORLD_W = W * TILE, WORLD_H = H * TILE;
+
+  const cv = document.getElementById("world");
+  const fx = document.getElementById("fx");
+  const ctx = cv.getContext("2d");
+  const fctx = fx.getContext("2d");
+  let cw = 0, ch = 0, dpr = 1;
+
+  // ---------- world offscreen raster ----------
+  const worldCanvas = document.createElement("canvas");
+  worldCanvas.width = WORLD_W; worldCanvas.height = WORLD_H;
+  const wctx = worldCanvas.getContext("2d");
+  let worldDirty = true;               // rebuild everything
+
+  // ---------- game state ----------
+  let state = null;
+  let cam = { x: WORLD_W / 2, y: WORLD_H / 2, zoom: 1.6 };
+  let phase = "title";                 // title | explore | combat | century | results
+  let returnNo = 0;
+  let player = null;
+  let rival = null;
+  let civilians = [];
+  let debris = [];                     // [{x,y,vx,vy,z,vz,life,size,col}]
+  let shockwaves = [];                 // [{x,y,t,max,power,cause}]
+  let fightSparks = [];
+  let combat = { active: false, protectedId: null, protectedStruck: false, lastHit: 0, time: 0 };
+  let rivalMemory = { wins: 0, losses: 0, grudge: null, lastOutcome: "" };
+  let rep = { savesInWorld: 0, casualties: 0, destruction: 0, protected: 0, honored: 0 };
+  let selectedYear = 0;
+  let cards = null;                    // overlay card state
+
+  // ---------- input ----------
+  let keys = {};
+  let mouse = { x: 0, y: 0, worldX: 0, worldY: 0, aimCol: 0, aimRow: 0, down: false, lastClick: 0 };
+
+  // ============================================================ UTIL ========
+  const clamp = Core.clamp, lerp = Core.lerp;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randi = (a, b) => (a + Math.random() * (b - a + 1)) | 0;
+
+  function cellAtPx(x, y) { const i = Core.idx(W, clamp((x / TILE) | 0, 0, W - 1), clamp((y / TILE) | 0, 0, H - 1)); return state.cells[i]; }
+  function getCell(col, row) { return state.cells[Core.idx(W, col, row)]; }
+
+  // ============================================================ PALETTE =====
+  const ERA_COLORS = ["#caa96b", "#b3a07c", "#9aa08a", "#7f9bb0", "#7d95c0", "#9e86c4",
+                      "#8a8877", "#6f9ad3", "#b79ef0", "#e6d9a6", "#5ad0e8"];
+  function useColor(c) {
+    if (!c) return "#1a2027";
+    switch (c.u) {
+      case U.ROAD: return "#2b3039";
+      case U.CRATER: return "#2c2f37";
+      case U.RUIN: return "#39373b";
+      case U.FARM: return "#5a8a4a";
+      case U.PARK: return "#4f7d5a";
+      case U.EXCAVATION: return "#6c6353";
+      case U.SHELTER: return "#4a5d78";
+      case U.MONUMENT: return "#d9b45a";
+      case U.BUILDING: {
+        const era = (c.build && c.build.styles) || 0;
+        let col = ERA_COLORS[clamp(era, 0, ERA_COLORS.length - 1)];
+        // shade by value
+        const v = c.build ? c.build.value : 0.4;
+        col = shade(col, 0.9 + v * 0.5);
+        return col;
+      }
+      default: return "#20262e";
+    }
+  }
+  function terrainColor(c) {
+    const e = c.elev;
+    switch (c.t) {
+      case T.WATER: return e < 0.05 ? "#1b3a58" : "#22496e";
+      case T.MARSH: return "#33504a";
+      case T.FOREST: return "#2c5a34";
+      case T.HILL: return "#5a4a3d";
+      case T.SAND: return "#c6b884";
+      case T.ROCK: return "#4a4a50";
+      default: return e < 0.35 ? "#5a6649" : (e > 0.65 ? "#6a6a54" : "#6f7a55");
+    }
+  }
+  function shade(hex, f) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    r = clamp(Math.round(r * f), 0, 255); g = clamp(Math.round(g * f), 0, 255); b = clamp(Math.round(b * f), 0, 255);
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+
+  // ========================================================= RENDER WORLD ==
+  function drawCell(col, row) {
+    col = Math.floor(col); row = Math.floor(row);
+    if (col < 0 || col >= W || row < 0 || row >= H) return;
+    const c = getCell(col, row);
+    if (!c) return;
+    const x = col * TILE, y = row * TILE;
+    // terrain base
+    let base = terrainColor(c);
+    wctx.fillStyle = base;
+    wctx.fillRect(x, y, TILE, TILE);
+    // use overlay
+    if (c.u !== U.OPEN) {
+      wctx.fillStyle = useColor(c);
+      wctx.globalAlpha = c.u === U.BUILDING || c.u === U.MONUMENT ? 0.94 : 0.85;
+      wctx.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
+      wctx.globalAlpha = 1;
+    }
+    if (c.u === U.BUILDING || c.u === U.MONUMENT) {
+      // roof highlight + shadow
+      wctx.fillStyle = "rgba(255,255,255,.12)";
+      wctx.fillRect(x + 1, y + 1, TILE - 2, 3);
+      wctx.fillStyle = "rgba(0,0,0,.22)";
+      wctx.fillRect(x + 1, y + TILE - 4, TILE - 2, 3);
+    }
+    if (c.u === U.EXCAVATION) {
+      wctx.strokeStyle = "rgba(0,0,0,.35)";
+      wctx.lineWidth = 1;
+      wctx.beginPath();
+      for (let i = -TILE; i < TILE * 2; i += 5) { wctx.moveTo(x + i, y + TILE); wctx.lineTo(x + i + TILE, y); }
+      wctx.stroke();
+    }
+    // vegetation
+    if (c.t === T.FOREST && c.u === U.OPEN) {
+      wctx.fillStyle = c.veg > 0.5 ? "#3e7a45" : "#2c5a34";
+      wctx.beginPath(); wctx.arc(x + TILE / 2, y + TILE / 2, TILE * 0.36, 0, 6.283); wctx.fill();
+      wctx.fillStyle = "rgba(0,0,0,.15)";
+      wctx.beginPath(); wctx.arc(x + TILE / 2 + 2, y + TILE / 2 + 2, TILE * 0.2, 0, 6.283); wctx.fill();
+    }
+    // damage shading
+    if (c.integ < 1 && (c.u === U.BUILDING || c.u === U.MONUMENT)) {
+      wctx.fillStyle = "rgba(0,0,0," + (0.4 * (1 - c.integ)).toFixed(2) + ")";
+      wctx.fillRect(x, y, TILE, TILE);
+    }
+    // cell grid line
+    wctx.strokeStyle = "rgba(0,0,0,.14)";
+    wctx.lineWidth = 1;
+    wctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+  }
+
+  function renderWorldFull() {
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) drawCell(x, y);
+    worldDirty = false;
+    // bake subtle vignette? no—keep crisp.
+  }
+  function renderWorldRect(col0, row0, col1, row1) {
+    col0 = Math.max(0, Math.floor(col0)); row0 = Math.max(0, Math.floor(row0));
+    col1 = Math.min(W - 1, Math.ceil(col1)); row1 = Math.min(H - 1, Math.ceil(row1));
+    for (let y = row0; y <= row1; y++) for (let x = col0; x <= col1; x++) drawCell(x, y);
+  }
+
+  // ============================================================ CIVILIANS ===
+  function spawnInhabitants(count) {
+    civilians = [];
+    const ppl = Math.min(count == null ? 60 : count, 90);
+    let tries = 0;
+    while (civilians.length < ppl && tries < 3000) {
+      tries++;
+      const col = randi(0, W - 1), row = randi(0, H - 1);
+      const c = getCell(col, row);
+      if (c.t === T.WATER || c.u === U.OPEN || c.u === U.ROAD || c.u === U.RUIN) continue;
+      const x = (col + 0.5) * TILE, y = (row + 0.5) * TILE;
+      civilians.push({ x, y, vx: 0, vy: 0, sp: rand(14, 30), dir: rand(0, 6.28), home: { x, y }, flee: 0 });
+    }
+  }
+  function updateCivilians(dt) {
+    const pc = playerPx();
+    const rc = rival ? rivalPx() : null;
+    for (const m of civilians) {
+      let tt = 1e9, tx = m.x, ty = m.y;
+      // flee from player (60px) and rival (90px)
+      const dP = Math.hypot(m.x - pc.x, m.y - pc.y);
+      if (dP < 60) m.flee = Math.max(m.flee, (1 - dP / 60) * 3);
+      if (rc) { const dR = Math.hypot(m.x - rc.x, m.y - rc.y); if (dR < 90) m.flee = Math.max(m.flee, (1 - dR / 90) * 3); }
+      if (m.flee > 0.2) { tx = m.x + (m.x - pc.x) * 2; ty = m.y + (m.y - pc.y) * 2; }
+      const dx = tx - m.x, dy = ty - m.y, dl = Math.hypot(dx, dy) || 1;
+      m.vx += (dx / dl) * m.sp * dt * 2; m.vy += (dy / dl) * m.sp * dt * 2;
+      m.vx *= 0.9; m.vy *= 0.9;
+      m.x += m.vx * dt; m.y += m.vy * dt;
+      m.flee = Math.max(0, m.flee - dt);
+      // wander
+      if (Math.random() < 0.004) m.dir += rand(-0.8, 0.8);
+      if (m.flee < 0.1 && Math.random() < 0.02) { m.x += Math.cos(m.dir) * m.sp * dt; m.y += Math.sin(m.dir) * m.sp * dt; }
+      m.x = clamp(m.x, 4, WORLD_W - 4); m.y = clamp(m.y, 4, WORLD_H - 4);
+    }
+  }
+
+  // ============================================================ PLAYER ======
+  function playerPx() { return { x: player.x, y: player.y }; }
+  function rivalPx() { return rival ? { x: rival.x, y: rival.y } : null; }
+  function spawnPlayer() {
+    player = { x: WORLD_W / 2, y: WORLD_H / 2, vx: 0, vy: 0, hp: 100, maxHp: 100,
+      fx: 1, fy: -1, // facing
+      dashCd: 0, leapCd: 0, punchCd: 0, shockCd: 0,
+      z: 0, zv: 0, leaping: false, leapT: 0, aimA: 0 };
+  }
+  function spawnRival() {
+    // arrive near the player but at a spot with an open ring
+    const r = 180;
+    rival = { x: clamp(player.x + rand(-r, r), 40, WORLD_W - 40), y: clamp(player.y - r - 60, 40, WORLD_H - 40),
+      vx: 0, vy: 0, hp: 120, maxHp: 120, punchCd: 0, throwCd: 0, chargeCd: 0, state: "approach",
+      hitFlash: 0, memory: rivalMemory };
+  }
+
+  // ============================================================ BLAST =======
+  // apply damage in tile space and feed the history engine
+  function blastTile(cx, cy, radiusTiles, power, who) {
+    const col = Math.round(cx / TILE), row = Math.round(cy / TILE);
+    const res = Core.blast(state, col, row, radiusTiles, power, who, Math.max(0, returnNo));
+    recoilWorld(col, row, radiusTiles);
+    // spawn debris + shockwave
+    spawnDebris(col, row, radiusTiles, power);
+    shockwaves.push({ x: cx, y: cy, t: 0, max: radiusTiles * TILE, power, cause: who });
+    // civilian casualties
+    let killed = 0;
+    for (let i = civilians.length - 1; i >= 0; i--) {
+      const m = civilians[i];
+      if (Math.hypot(m.x - cx, m.y - cy) < radiusTiles * TILE) { civilians.splice(i, 1); killed++; }
+    }
+    if (who === "player") { rep.destruction += res.destroyed; }
+    else { rep.destruction += res.destroyed; }
+    state.counters.deaths += killed;
+    rep.casualties += killed;
+    if (killed > 0 && who === "player") rep.savesInWorld -= killed; // more damage
+    return res;
+  }
+  function recoilWorld(col, row, radius) {
+    renderWorldRect(col - radius - 1, row - radius - 1, col + radius + 1, row + radius + 1);
+  }
+  function spawnDebris(col, row, radius, power) {
+    const cx = (col + 0.5) * TILE, cy = (row + 0.5) * TILE;
+    const n = Math.min(340, Math.round(20 + radius * radius * power * 3));
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * 6.283, d = Math.pow(Math.random(), 0.5) * radius * TILE * 1.15;
+      debris.push({ x: cx, y: cy, vx: Math.cos(a) * d * 3, vy: Math.sin(a) * d * 3,
+        z: 0, vz: rand(2, 9) * power * 0.4, life: rand(0.4, 1.2), size: rand(1.5, 4.5),
+        col: randomDebrisColor() });
+      if (debris.length > 620) debris.shift();
+    }
+  }
+  function randomDebrisColor() {
+    const cols = ["#6b6258", "#8a8277", "#c2b694", "#7a6a55", "#4a4a52", "#7d95c0", "#d9b45a"];
+    return cols[(Math.random() * cols.length) | 0];
+  }
+  function updateDebris(dt) {
+    for (let i = debris.length - 1; i >= 0; i--) {
+      const p = debris[i];
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.6; p.vy *= 0.6;
+      p.z += p.vz * dt; p.vz -= 22 * dt; p.life -= dt;
+      if (p.z < 0) { p.z = 0; p.vz *= -0.35; if (Math.abs(p.vz) < 1) p.vz = 0; }
+      if (p.life <= 0) debris.splice(i, 1);
+    }
+  }
+
+  // ============================================================ SHOCKWAVE ===
+  function playerPunch() {
+    if (phase !== "combat") return;
+    if (player.punchCd > 0) return;
+    player.punchCd = 0.28;
+    const a = player.aimA;
+    const range = 2.2 * TILE, ang = 0.9;
+    const hx = player.x + Math.cos(a) * range * 0.5, hy = player.y + Math.sin(a) * range * 0.5;
+    blastTile(hx, hy, 1.8, 1.5, "player");
+    // knockback on rival
+    if (rival) {
+      const dx = rival.x - player.x, dy = rival.y - player.y, dl = Math.hypot(dx, dy) || 1;
+      const dot = (dx * Math.cos(a) + dy * Math.sin(a)) / dl;
+      if (dl < range + 30 && dot > 0.3) {
+        rival.vx += (dx / dl) * 360; rival.vy += (dy / dl) * 360; rival.hitFlash = 0.2;
+        if (dot > 0.7) { rival.hp -= 6; }
+      }
+    }
+    // player recoil
+    player.vx -= Math.cos(a) * 60; player.vy -= Math.sin(a) * 60;
+    fightSparks.push({ x: hx, y: hy, t: 0, a });
+  }
+  function playerShockwave() {
+    if (phase !== "combat") return;
+    if (player.shockCd > 0) return;
+    player.shockCd = 1.7;
+    blastTile(player.x, player.y, 3.4, 1.9, "player");
+    if (rival) { const d = Math.hypot(rival.x - player.x, rival.y - player.y) || 1;
+      const dx = (rival.x - player.x) / d, dy = (rival.y - player.y) / d;
+      rival.vx += dx * 520; rival.vy += dy * 520; rival.hp -= 12; rival.hitFlash = 0.3; }
+    player.vx += rand(-80, 80); player.vy += rand(-80, 80);
+    fightSparks.push({ x: player.x, y: player.y, t: 0, a: 0, ring: true });
+  }
+  function norm(a, b) { return Math.hypot(a, b); }
+
+  function playerDash() {
+    if (player.dashCd > 0) return;
+    player.dashCd = 0.7;
+    const a = Math.atan2(mouse.worldY - player.y, mouse.worldX - player.x);
+    player.vx += Math.cos(a) * 720; player.vy += Math.sin(a) * 720;
+    shockwaves.push({ x: player.x, y: player.y, t: 0, max: 50, power: 1, cause: "dash" });
+  }
+  function playerLeap() {
+    if (player.leapCd > 0) return;
+    player.leapCd = 0.9;
+    const a = Math.atan2(mouse.worldY - player.y, mouse.worldX - player.x);
+    player.vx += Math.cos(a) * 560; player.vy += Math.sin(a) * 560;
+    player.z = 1.0; player.zv = 6.4; player.leaping = true; player.leapT = 0.7;
+  }
+
+  // ============================================================ UPDATE ======
+  function updatePlayer(dt) {
+    const sp = (keys["shift"] ? 300 : 175);
+    let ax = 0, ay = 0;
+    if (keys["w"]) ay -= 1; if (keys["s"]) ay += 1; if (keys["a"]) ax -= 1; if (keys["d"]) ax += 1;
+    const al = Math.hypot(ax, ay);
+    if (al > 0) { ax /= al; ay /= al; }
+    player.vx += ax * 1100 * dt; player.vy += ay * 1100 * dt;
+    // friction
+    const fr = player.leaping ? 0.985 : 0.86;
+    player.vx *= fr; player.vy *= fr;
+    // wall-run boost when tiles beside are buildings
+    const col = (player.x / TILE) | 0, row = (player.y / TILE) | 0;
+    let wall = 0;
+    if (getCell(col + 1, row).u === U.BUILDING || getCell(col - 1, row).u === U.BUILDING) wall = 1;
+    if (wall && Math.abs(player.vx) + Math.abs(player.vy) > 180) { player.vx *= 1.06; player.vy *= 1.06; }
+    // cap
+    const vmax = (keys["shift"] ? 380 : 260);
+    const v = Math.hypot(player.vx, player.vy);
+    if (v > vmax) { player.vx *= vmax / v; player.vy *= vmax / v; }
+    player.x += player.vx * dt; player.y += player.vy * dt;
+    player.x = clamp(player.x, TILE, WORLD_W - TILE); player.y = clamp(player.y, TILE, WORLD_H - TILE);
+    // facing/aim
+    player.aimA = Math.atan2(mouse.worldY - player.y, mouse.worldX - player.x);
+    player.fx = Math.cos(player.aimA); player.fy = Math.sin(player.aimA);
+    // cooldowns
+    player.punchCd -= dt; player.shockCd -= dt; player.dashCd -= dt; player.leapCd -= dt;
+    // leap z
+    if (player.leaping) {
+      player.z += player.zv * dt; player.zv -= 14 * dt; player.leapT -= dt;
+      if (player.zv < 0 && player.z <= 0) { player.z = 0; player.zv = 0; player.leaping = false; }
+      if (player.leapT <= 0) { player.z = 0; player.zv = 0; player.leaping = false; }
+    }
+    // stamina regen
+    player.hp = clamp(player.hp + (keys["shift"] ? 4 : 9) * dt, 0, player.maxHp);
+  }
+
+  function updateRival(dt) {
+    if (!rival) return;
+    rival.punchCd -= dt; rival.throwCd -= dt; rival.chargeCd -= dt; rival.hitFlash -= dt;
+    const d = Math.hypot(player.x - rival.x, player.y - rival.y);
+    const a = Math.atan2(player.y - rival.y, player.x - rival.x);
+    // state machine
+    if (d > 250) rival.state = "charge";
+    else if (d < 80) rival.state = "strike";
+    else rival.state = "circle";
+    let mx = 0, my = 0;
+    if (rival.state === "charge") { mx = Math.cos(a); my = Math.sin(a); }
+    else if (rival.state === "circle") { const t = a + Math.PI / 2; mx = Math.cos(t) * 0.6 + Math.cos(a) * 0.2; my = Math.sin(t) * 0.6 + Math.sin(a) * 0.2; }
+    else { mx = -Math.cos(a); my = -Math.sin(a); }
+    const vmax = rival.state === "charge" ? 240 : 130;
+    rival.vx += mx * 620 * dt; rival.vy += my * 620 * dt;
+    const v = Math.hypot(rival.vx, rival.vy); if (v > vmax) { rival.vx *= vmax / v; rival.vy *= vmax / v; }
+    rival.vx *= 0.88; rival.vy *= 0.88;
+    rival.x += rival.vx * dt; rival.y += rival.vy * dt;
+    rival.x = clamp(rival.x, TILE, WORLD_W - TILE); rival.y = clamp(rival.y, TILE, WORLD_H - TILE);
+    // strikes
+    if (rival.state === "strike" && rival.punchCd <= 0) {
+      rival.punchCd = 0.75;
+      blastTile(rival.x + Math.cos(a) * 40, rival.y + Math.sin(a) * 40, 1.7, 1.5, "rival");
+      if (d < 110) { player.vx += Math.cos(a) * 380; player.vy += Math.sin(a) * 380; damagePlayer(9); }
+    }
+    if (rival.throwCd <= 0 && d > 120) {
+      rival.throwCd = 1.9;
+      throwProjectile(rival.x, rival.y, a);
+    }
+  }
+  function throwProjectile(x, y, a) {
+    shockwaves.push({ x, y, t: 0, max: 26, power: 1, cause: "throw" });
+    fightSparks.push({ x, y, t: 0, a, proj: true, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420 });
+  }
+  function updateProjectiles(dt) {
+    for (let i = fightSparks.length - 1; i >= 0; i--) {
+      const s = fightSparks[i];
+      if (s.proj) {
+        s.x += s.vx * dt; s.y += s.vy * dt;
+        let landed = false;
+        const t = getCell((s.x / TILE) | 0, (s.y / TILE) | 0);
+        if (s.x < 0 || s.x > WORLD_W || s.y < 0 || s.y > WORLD_H) { fightSparks.splice(i, 1); continue; }
+        if (Math.hypot(s.x - player.x, s.y - player.y) < 34) { blastTile(s.x, s.y, 2.0, 1.6, "rival"); damagePlayer(12); fightSparks.splice(i, 1); continue; }
+        if (t.u === U.BUILDING || t.u === U.MONUMENT || t.u === U.RUIN) { blastTile(s.x, s.y, 1.8, 1.4, "rival"); fightSparks.splice(i, 1); continue; }
+        s.t += dt; if (s.t > 3) fightSparks.splice(i, 1);
+      } else {
+        s.t += dt;
+      }
+    }
+  }
+  function damagePlayer(d) {
+    if (player.leaping) return; // i-frames in flight
+    player.hp -= d; player.vx *= 0.6;
+    rep.savesInWorld -= 0; 
+  }
+
+  // ============================================================ RENDER ======
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cw = cv.clientWidth; ch = cv.clientHeight;
+    cv.width = cw * dpr; cv.height = ch * dpr;
+    fx.width = cw * dpr; fx.height = ch * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // fit zoom so we see a nice chunk
+    cam.zoom = clamp(Math.min(cw, ch) / 560, 1.1, 2.4);
+  }
+
+  function worldToScreen(wx, wy) {
+    return [ (wx - cam.x) * cam.zoom + cw / 2, (wy - cam.y) * cam.zoom + ch / 2 ];
+  }
+  function screenToWorld(sx, sy) {
+    return [ (sx - cw / 2) / cam.zoom + cam.x, (sy - ch / 2) / cam.zoom + cam.y ];
+  }
+
+  function drawPlayer(g) {
+    const [sx, sy] = worldToScreen(player.x, player.y);
+    const col = getCell((player.x / TILE) | 0, (player.y / TILE) | 0);
+    // shadow
+    g.fillStyle = "rgba(0,0,0,.35)";
+    g.beginPath(); g.ellipse(sx, sy, 9, 5, 0, 0, 6.283); g.fill();
+    const lift = player.z * 26;
+    // aura
+    if (player.leaping) { g.strokeStyle = "rgba(66,195,230,.6)"; g.lineWidth = 3; g.beginPath(); g.arc(sx, sy - lift, 16, 0, 6.283); g.stroke(); }
+    // body
+    g.save();
+    g.translate(sx, sy - lift);
+    g.rotate(player.aimA);
+    // glow
+    g.shadowColor = "rgba(66,195,230,.9)"; g.shadowBlur = 14;
+    g.fillStyle = "#dff2ff";
+    g.beginPath(); g.moveTo(13, 0); g.lineTo(-8, 8); g.lineTo(-11, 0); g.lineTo(-8, -8); g.closePath(); g.fill();
+    g.shadowBlur = 0;
+    g.fillStyle = "#42c3e6"; g.beginPath(); g.arc(0, 0, 4, 0, 6.283); g.fill();
+    g.restore();
+  }
+
+  function drawRival(g) {
+    const [sx, sy] = worldToScreen(rival.x, rival.y);
+    g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(sx, sy, 11, 6, 0, 0, 6.283); g.fill();
+    const a = Math.atan2(player.y - rival.y, player.x - rival.x);
+    g.save(); g.translate(sx, sy); g.rotate(a);
+    g.shadowColor = rival.hitFlash > 0 ? "rgba(255,102,61,1)" : "rgba(255,64,51,.9)";
+    g.shadowBlur = 16;
+    g.fillStyle = rival.hitFlash > 0 ? "#ffd0c0" : "#e04a3a";
+    g.beginPath(); g.moveTo(15, 0); g.lineTo(-9, 9); g.lineTo(-12, 0); g.lineTo(-9, -9); g.closePath(); g.fill();
+    g.shadowBlur = 0;
+    g.fillStyle = "#ff6a3d"; g.beginPath(); g.arc(0, 0, 5, 0, 6.283); g.fill();
+    g.restore();
+  }
+
+  function drawCivilians(g) {
+    for (const m of civilians) {
+      const [sx, sy] = worldToScreen(m.x, m.y);
+      g.fillStyle = "rgba(0,0,0,.25)"; g.beginPath(); g.ellipse(sx, sy + 4, 3, 1.8, 0, 0, 6.283); g.fill();
+      g.fillStyle = m.flee > 0.2 ? "#ffd27a" : "#c7d8e8";
+      g.fillRect(sx - 2, sy - 3, 4, 6);
+    }
+  }
+
+  function drawLayerGhost(g) {
+    // grid is interleaved [t,u]; ghost the past settlement over the present.
+    const grid = layerOverlay.grid;
+    g.save();
+    for (let i = 0; i < state.cells.length; i++) {
+      const pastU = grid[i * 2 + 1];
+      const present = state.cells[i];
+      const x = (i % W) * TILE, y = ((i / W) | 0) * TILE;
+      const isSettlement = pastU === U.BUILDING || pastU === U.MONUMENT || pastU === U.ROAD || pastU === U.RUIN;
+      const pastWater = grid[i * 2] === T.WATER && present.t !== T.WATER;
+      if (isSettlement) { g.fillStyle = "rgba(232,236,239,.22)"; g.fillRect(x, y, TILE, TILE); }
+      else if (pastWater) { g.fillStyle = "rgba(66,195,230,.22)"; g.fillRect(x, y, TILE, TILE); }
+    }
+    g.restore();
+  }
+
+  function render(dt) {
+    ctx.clearRect(0, 0, cw, ch);
+    // world
+    ctx.save();
+    ctx.translate(cw / 2, ch / 2); ctx.scale(cam.zoom, cam.zoom); ctx.translate(-cam.x, -cam.y);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(worldCanvas, 0, 0);
+    ctx.restore();
+
+    // FX canvas (world space)
+    fctx.clearRect(0, 0, cw, ch);
+    fctx.save();
+    fctx.translate(cw / 2, ch / 2); fctx.scale(cam.zoom, cam.zoom); fctx.translate(-cam.x, -cam.y);
+    // past-layer ghost (from the history scrubber) — read-only compare
+    if (layerOverlay) drawLayerGhost(fctx);
+    // time-lapse flash while a century passes
+    if (tlFlash > 0) {
+      fctx.globalAlpha = tlFlash * 0.35;
+      fctx.strokeStyle = "#d9b45a"; fctx.lineWidth = 2;
+      for (let i = 0; i < 50; i++) {
+        const yy = ((i * 83 + performance.now() * 0.03) % ch);
+        const x0 = Math.random() * cw;
+        fctx.beginPath(); fctx.moveTo((x0 - cam.x) * cam.zoom + cw / 2, yy); fctx.lineTo((x0 - cam.x) * cam.zoom + cw / 2, yy + 120); fctx.stroke();
+      }
+      fctx.globalAlpha = 1;
+    }
+    // debris
+    for (const p of debris) {
+      const [sx, sy] = worldToScreen(p.x, p.y);
+      fctx.globalAlpha = clamp(p.life, 0, 1);
+      fctx.fillStyle = p.col;
+      fctx.fillRect(sx - p.size / 2, sy - p.size / 2 - p.z * 15, p.size, p.size);
+    }
+    fctx.globalAlpha = 1;
+    // shockwaves
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      const s = shockwaves[i]; s.t += dt;
+      const r = lerp(2, s.max, clamp(s.t / 0.5, 0, 1));
+      fctx.strokeStyle = s.cause === "rival" ? "rgba(255,102,61," + (1 - s.t / 0.6) + ")" : "rgba(66,195,230," + (1 - s.t / 0.6) + ")";
+      fctx.lineWidth = 3 * (1 - s.t / 0.6) + 1;
+      fctx.beginPath(); fctx.arc(s.x, s.y, r, 0, 6.283); fctx.stroke();
+      if (s.t > 0.6) shockwaves.splice(i, 1);
+    }
+    // fight sparks / projectiles
+    for (const s of fightSparks) {
+      const [sx, sy] = worldToScreen(s.x, s.y);
+      if (s.proj) {
+        fctx.fillStyle = "rgba(255,102,61,.95)"; fctx.beginPath(); fctx.arc(sx, sy, 6, 0, 6.283); fctx.fill();
+        fctx.fillStyle = "rgba(255,210,160,.5)"; fctx.beginPath(); fctx.arc(sx, sy, 11, 0, 6.283); fctx.fill();
+      } else if (s.ring) {
+        fctx.strokeStyle = "rgba(255,230,210," + (1 - s.t / 0.5) + ")"; fctx.lineWidth = 4;
+        fctx.beginPath(); fctx.arc(sx, sy, 10 + s.t * 260, 0, 6.283); fctx.stroke();
+      } else {
+        fctx.strokeStyle = "rgba(210,250,255," + (1 - s.t / 0.4) + ")"; fctx.lineWidth = 3;
+        fctx.beginPath(); fctx.arc(sx, sy, 6 + s.t * 120, 0, 6.283); fctx.stroke();
+      }
+    }
+    // entities
+    if (phase === "combat" || phase === "explore" || phase === "century" || phase === "results") {
+      drawCivilians(fctx);
+      if (player) drawPlayer(fctx);
+      if (rival) drawRival(fctx);
+    }
+    // protected landmark ring
+    if (combat.active && combat.protectedId != null) {
+      const lm = state.landmarks.find(l => l.id === combat.protectedId);
+      if (lm) { const [sx, sy] = worldToScreen(lm.cx * TILE, lm.cy * TILE);
+        fctx.strokeStyle = "rgba(217,180,90,.9)"; fctx.lineWidth = 2; fctx.setLineDash([5, 4]);
+        fctx.beginPath(); fctx.arc(sx, sy, lm.size * TILE * cam.zoom, 0, 6.283); fctx.stroke(); fctx.setLineDash([]); }
+    }
+    fctx.restore();
+  }
+
+  // ============================================================ HUD =========
+  const el = (id) => document.getElementById(id);
+  function syncHUD() {
+    el("yearV").textContent = state.year;
+    el("returnV").textContent = returnNo;
+    el("popV").textContent = state.pop.total.toLocaleString();
+    el("eraV").textContent = Core.technologyEra(state).name;
+    el("pHP").style.width = (player ? player.hp / player.maxHp * 100 : 100) + "%";
+    el("rHP").style.width = (rival ? clamp(rival.hp / rival.maxHp, 0, 1) * 100 : 0) + "%";
+    el("modeTag").textContent = phase.toUpperCase();
+  }
+
+  // ============================================================ CARDS =======
+  function showCard(opts, onDone) {
+    cards = { onDone };
+    el("cardKicker").textContent = opts.kicker || "";
+    el("cardTitle").textContent = opts.title || "";
+    el("cardYear").textContent = opts.year != null ? opts.year : "";
+    el("cardText").innerHTML = opts.text || "";
+    const btnRow = el("cardBtns"); btnRow.innerHTML = "";
+    (opts.buttons || [{ label: "Continue" }]).forEach((b, i) => {
+      const btn = document.createElement("button");
+      btn.className = "hbtn" + (b.primary ? " primary" : "");
+      btn.textContent = b.label;
+      btn.onclick = () => { if (b.fn) b.fn(); callbackCard(); };
+      btnRow.appendChild(btn);
+    });
+    // draw mini art
+    drawCardArt();
+    el("overlay").classList.add("show");
+  }
+  function callbackCard() { el("overlay").classList.remove("show"); if (cards && cards.onDone) { const d = cards.onDone; cards = null; d(); } }
+  function drawCardArt() {
+    const c = el("cardCanvas"); const g = c.getContext("2d");
+    const w = c.width, h = c.height;
+    g.clearRect(0, 0, w, h);
+    // silhouette skyline + a rising century glyph
+    g.fillStyle = "#0b0f15"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "rgba(20,25,34,1)";
+    // horizon
+    const horizon = h * 0.62;
+    g.fillStyle = "rgba(40,48,62,1)"; g.fillRect(0, horizon, w, h - horizon);
+    for (let i = 0; i < 40; i++) {
+      const bw = 6 + Math.random() * 26, bx = Math.random() * w, bh = 8 + Math.random() * 52;
+      g.fillStyle = ["rgba(120,110,90,.5)", "rgba(90,110,130,.5)", "rgba(120,100,150,.45)", "rgba(90,90,70,.5)"][i % 4];
+      g.fillRect(bx, horizon - bh, bw, bh);
+      if (Math.random() < 0.3) { g.fillStyle = "rgba(255,230,160,.8)"; g.fillRect(bx + bw / 2 - 1, horizon - bh + 2, 2, 2); }
+    }
+    // sky glow
+    const rg = g.createLinearGradient(0, 0, 0, horizon);
+    rg.addColorStop(0, "rgba(20,25,40,1)"); rg.addColorStop(1, "rgba(60,70,100,.4)");
+    g.fillStyle = rg; g.fillRect(0, 0, w, horizon);
+    // big ring (century) 
+    g.strokeStyle = "rgba(217,180,90,.85)"; g.lineWidth = 2;
+    g.beginPath(); g.arc(w / 2, horizon, 40, 0, 6.283); g.stroke();
+    g.beginPath(); g.arc(w / 2, horizon, 26, 0, 6.283); g.stroke();
+    // star dots
+    for (let i = 0; i < 60; i++) { g.fillStyle = "rgba(255,255,255," + (Math.random() * 0.5) + ")"; g.fillRect(Math.random() * w, Math.random() * horizon * 0.7, 1, 1); }
+  }
+
+  // ============================================================ PHASE FLOW ===
+  function start() {
+    phase = "title";
+    showCard({
+      kicker: "A GAME ABOUT IMMORTAL VIOLENCE AND MORTAL TIME",
+      title: "EVERY FIGHT IS FOLLOWED BY A CENTURY",
+      year: state.year,
+      text: "You are immortal. Your enemy is immortal. You fight roughly once a century.<br><br>" +
+        "To you, a century is the gap between encounters. To civilization, a century is enough time to " +
+        "forget you, worship you, forgive you, and build a city around the crater you left.<br><br>" +
+        "Nothing you destroy returns to normal. It becomes history." +
+        "<br><br><span style='color:var(--dim);font-size:12px;'>Move: WASD · Aim: mouse · Punch: click / Space-leap · Sprint: Shift · Shockwave: F · Dash: Q · Inspect: right-click</span>",
+      buttons: [{ label: "Begin the First Return", primary: true, fn: () => { enterExplore(); pendingSummon = true; } }],
+    }, () => {});
+    syncHUD();
+  }
+
+  let pendingSummon = false;
+
+  function enterExplore() {
+    phase = "explore";
+    if (!player) spawnPlayer();
+    syncHUD();
+    setHint("<b style='color:var(--gold);'>Explore.</b> The world has moved on without you. " +
+      "Right-click a structure or the ground to read its history. <button data-x='summon' class='hbtn primary'>Summon the Next Return</button>");
+    wireHint();
+    cam.x = player.x; cam.y = player.y;
+  }
+
+  function setHint(html) { el("hint").innerHTML = html; el("hint").style.opacity = "1"; }
+  function wireHint() {
+    el("hint").querySelectorAll("[data-x]").forEach(b => {
+      b.onclick = () => {
+        const x = b.getAttribute("data-x");
+        if (x === "summon") beginReturn();
+        else if (x === "y100") { advanceTime(100); }
+        else if (x === "y1000") { advanceTime(1000); }
+        else if (x === "y10000") { advanceTime(10000); }
+        else if (x === "inspect") openHistoryPanel("lineage");
+      };
+    });
+  }
+
+  function beginReturn() {
+    phase = "combat";
+    spawnRival();
+    combat = { active: true, protectedId: pickProtectedLandmark(), protectedStruck: false, time: 0 };
+    showCard({
+      kicker: "THE NEXT IMMORTAL ARRIVES",
+      title: rivalHeadline(),
+      year: state.year,
+      text: combatTargetText(),
+      buttons: [{ label: "Fight", primary: true }],
+    }, () => { pendingSummon = false; syncHUD(); setCombatHint(); });
+  }
+  function rivalHeadline() {
+    if (rivalMemory.wins > rivalMemory.losses) return "An old enemy, carrying memory";
+    if (rivalMemory.grudge != null) return "The one who remembers what you spared";
+    return "Another immortal, another conflict";
+  }
+  function combatTargetText() {
+    if (combat.protectedId != null) {
+      const lm = state.landmarks.find(l => l.id === combat.protectedId);
+      if (lm) return "The <b>" + lm.name + "</b> still stands. It is marked in gold — if the fight drifts there and you " +
+        "protect it, the world will remember. Fists can be aimed; history cannot be un-made.";
+    }
+    return "The city is the battlefield and the collateral.";
+  }
+  function pickProtectedLandmark() {
+    const lms = state.landmarks.filter(l => l.status !== "ruin" && l.status !== "buried");
+    // prefer the one you've built the most heritage on
+    lms.sort((a, b) => b.heritage - a.heritage);
+    return lms.length ? lms[0].id : null;
+  }
+  function setCombatHint() {
+    setHint("<b style='color:var(--rred);'>COMBAT.</b> Punch: click · Shockwave: F · Dash: Q · Leap: Space/Sprint · " +
+      "<button data-x='surrender' class='hbtn'>Yield (lose, becomes history)</button>");
+    wireHint();
+    el("hint").querySelectorAll("[data-x]").forEach(b => { if (b.getAttribute("data-x") === "surrender") b.onclick = () => endFight("loser"); });
+  }
+
+  function endFight(result) {
+    rival = null;
+    combat.active = false;
+    // record memory
+    if (result === "winner") { rivalMemory.wins++; rep.honored += 5; }
+    else { rivalMemory.losses++;
+      // a loss becomes history: worse consequences (extra destruction + instable)
+      state.politics.stability = clamp(state.politics.stability - 0.06, 0, 1);
+      state.counters.catastrophic++;
+    }
+    // reward the protected landmark if it survived
+    if (combat.protectedId != null) {
+      const lm = state.landmarks.find(l => l.id === combat.protectedId);
+      if (lm && lm.status !== "ruin" && lm.status !== "buried") { lm.heritage = clamp(lm.heritage + 0.25, 0, 1); rep.protected++; }
+    }
+    Core.logEvent(state, "battle", state.year, returnHeadline(result), {});
+    phase = "results";
+    setTimeout(() => {
+      showCard({
+        kicker: returnHeadline(result),
+        title: result === "winner" ? "The Century Begins" : "The World Keeps Going",
+        year: state.year,
+        text: resultText(result),
+        buttons: [{ label: "Let the Century Pass (advance 100 years)", primary: true, fn: () => { advanceTime(100); } }],
+      }, () => { enterExplore(); });
+    }, 320);
+    syncHUD();
+  }
+  function returnHeadline(result) {
+    if (result === "winner") return rivalMemory.wins > 1 ? "ANOTHER RETURN CONCLUDES" : "FIRST RETURN";
+    return "A LOSS becomes HISTORY";
+  }
+  function resultText(result) {
+    const cas = rep.casualties;
+    if (result === "winner") return "You fell the immortal. The city mends what it can and remembers what it wills. " +
+      "Some <b>" + cas + "</b> were lost. The scars you carved are now property, politics, theology, and geology.";
+    return "You were driven off. The rival holds the field and <b>more</b> is destroyed. The world will remember a different victor.";
+  }
+
+  function advanceTime(years) {
+    // ensure no rival during deep passage
+    rival = null; combat.active = false;
+    phase = "century";
+    setHint("");
+    Core.advanceYears(state, years);
+    renderWorldFull();
+    spawnInhabitants();
+    syncHUD();
+    tlFlash = 1.0;
+    const era = Core.technologyEra(state).name;
+    showCard({
+      kicker: "A CENTURY HAS PASSED",
+      title: centuryTitle(years),
+      year: state.year.toLocaleString(),
+      text: centuryVignette(years) + "<br><br><span style='color:var(--dim);font-size:12px;'>" + era + "</span>",
+      buttons: [{ label: "Walk the new world", primary: true, fn: () => { pendingSummon = true; } }],
+    }, () => { phase = "explore"; enterExplore(); });
+  }
+  let tlFlash = 0;
+  function centuryTitle(years) {
+    if (years >= 10000) return "The world remakes itself";
+    if (years >= 1000) return "Cities rise and fall";
+    return "The century turns";
+  }
+  function centuryVignette(years) {
+    const since = state.year - years;
+    const parts = [];
+    // changes in landmarks within the window
+    const changed = state.landmarks.filter(l => l.lineage.some(x => x.year >= since));
+    if (changed.length) {
+      const lm = changed[changed.length - 1];
+      const step = lm.lineage[lm.lineage.length - 1];
+      parts.push("The <b>" + lm.name + "</b> is now <b>" + step.state + "</b> — " + (step.note || "transformed."));
+    }
+    // population
+    parts.push("Population: <b>" + state.pop.total.toLocaleString() + "</b>.");
+    // river / environment
+    if (state.environment.riverShift && Math.abs(state.environment.riverShift) > 4) parts.push("The river has migrated.");
+    if (state.environment.seaLevel > 0.1) parts.push("The sea has crept inland.");
+    else if (state.environment.seaLevel < -0.05) parts.push("The coastline has receded.");
+    if (state.memory.myths.length) {
+      const m = state.memory.myths[state.memory.myths.length - 1];
+      if (m.year >= since) parts.push("A new myth spreads: <b>" + m.title + "</b>.");
+    }
+    if (state.excSites.length && state.excSites[state.excSites.length - 1].foundYear >= since) parts.push("Archaeologists found an ancient destruction layer.");
+    return parts.join(" ");
+  }
+
+  function runTimeLapse(years, done) {
+    // quick accelerated vertical speed-lines + rising horizon, then fade
+    el("hint").style.opacity = "0";
+    const start = performance.now(), dur = 850;
+    function frame(now) {
+      const p = clamp((now - start) / dur, 0, 1);
+      if (document.getElementById("overlay").classList.contains("show")) { /* keep */ }
+      // draw a transient overlay on fx
+      fctx.save();
+      fctx.globalAlpha = p * 0.5;
+      for (let i = 0; i < 40; i++) {
+        const y = ((i * 47 + now * 0.02) % ch);
+        fctx.strokeStyle = "rgba(217,180,90,.4)"; fctx.lineWidth = 1;
+        fctx.beginPath(); fctx.moveTo(Math.random() * cw, y); fctx.lineTo(Math.random() * cw, y + 90); fctx.stroke();
+      }
+      fctx.restore();
+      if (p < 1) requestAnimationFrame(frame); else done();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function advanceTimeDirect(years) {
+    rival = null; combat.active = false;
+    Core.advanceYears(state, years);
+    renderWorldFull(); spawnInhabitants(); syncHUD();
+  }
+
+  // ============================================================ HISTORY UI ==
+  function openHistoryPanel(tab) {
+    el("panel").classList.add("open");
+    setPanelTab(tab || "timeline");
+    renderTimeline(); renderEvents(); renderLineage(); renderRep();
+  }
+  function closePanel() { el("panel").classList.remove("open"); }
+  function setPanelTab(tab) {
+    el("panelTab").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    el("panelBody").querySelectorAll(".tabBody").forEach(b => b.classList.toggle("active", b.id === "tab-" + tab));
+  }
+
+  function renderTimeline() {
+    const tl = el("tl"); tl.innerHTML = "";
+    const maxY = Math.max(100000, state.year, 1);
+    // draw marks: checkpoints (big) + events (small)
+    const marks = [];
+    state.checkpoints.forEach(cp => marks.push({ y: cp.year, big: true }));
+    state.eventLog.forEach(e => marks.push({ y: e.year }));
+    marks.forEach(m => {
+      const x = (m.y / maxY) * 100;
+      const elm = document.createElement("div");
+      elm.className = "mark" + (m.big ? " big" : "");
+      elm.style.left = x + "%";
+      elm.style.marginLeft = "-0.5px";
+      elm.title = "Year " + m.y;
+      tl.appendChild(elm);
+    });
+    // cursor
+    const cur = document.createElement("div"); cur.className = "cursor"; cur.id = "tlCursor";
+    tl.appendChild(cur);
+    const setCursor = (y) => {
+      const x = clamp(y / maxY, 0, 1) * 100;
+      cur.style.left = x + "%";
+      el("tlReadout").textContent = "Year " + y + (state.checkpoints.some(c => c.year === y) ? "  ·  snapshot available" : "");
+      selectedYear = y;
+      if (state.checkpoints.some(c => c.year === y)) drawLayerOverlay(findCheckpoint(y));
+      else drawLayerOverlay(null);
+    };
+    // click / drag
+    let drag = false;
+    const pick = (ev) => { const r = tl.getBoundingClientRect(); const x = clamp((ev.clientX - r.left) / r.width, 0, 1); setCursor(Math.round(x * maxY)); };
+    tl.onmousedown = (ev) => { drag = true; pick(ev); };
+    window.onmouseup = () => drag = false;
+    tl.onmousemove = (ev) => { if (drag) pick(ev); };
+    setCursor(selectedYear);
+    // scale buttons
+    el("tlScale").querySelectorAll("button").forEach(b => {
+      b.classList.toggle("active", b.dataset.scale === "millennia");
+      b.onclick = () => { el("tlScale").querySelectorAll("button").forEach(x => x.classList.remove("active")); b.classList.add("active"); };
+    });
+  }
+  function findCheckpoint(year) { return state.checkpoints.find(c => c.year === year); }
+
+  // ghost a past snapshot over the present (read-only). We temporarily overlay a
+  // translucent raster of the old land-use on the fx canvas via a data surface.
+  function drawLayerOverlay(cp) {
+    layerOverlay = cp; // consumed in render()
+  }
+  let layerOverlay = null;
+
+  function renderEvents() {
+    const list = el("eventList"); list.innerHTML = "";
+    const evs = state.eventLog.slice(-120).reverse();
+    const typeBadge = {
+      "landmark-destroyed":"DESTRUCTION", "myth":"MYTH", "trade":"TRADE", "trade-severed":"TRADE",
+      "archaeology":"ARCHAEOLOGY", "flooded":"ENVIRONMENT", "politics":"POLITICS", "religion":"RELIGION",
+      "institution":"INSTITUTION", "battle":"BATTLE", "survivor":"MEMORY",
+    };
+    evs.forEach(e => {
+      const d = document.createElement("div"); d.className = "ev";
+      d.innerHTML = "<span class='y'>" + e.year.toLocaleString() + "</span><span class='x'>" + e.text +
+        "<span class='badge'>" + (typeBadge[e.type] || e.type.toUpperCase()) + "</span></span>";
+      list.appendChild(d);
+    });
+    if (!evs.length) list.innerHTML = "<div style='color:var(--dim);'>No recorded events yet.</div>";
+  }
+
+  function renderLineage() {
+    const wrap = el("lineageWrap"); wrap.innerHTML = "";
+    if (inspectTarget && inspectTarget.lm) {
+      const lm = inspectTarget.lm;
+      wrap.innerHTML = "<div style='margin-bottom:10px;'><b style='color:var(--gold);'>" + lm.name + "</b>" +
+        " <span style='color:var(--dim);font-size:11px;'>(original: " + (lm.originName || lm.name) + ")</span><br>" +
+        "Heritage: " + lm.heritage.toFixed(2) + " · Status: " + lm.status + " · Hits: " + lm.hitCount + "</div>";
+      const ch = document.createElement("div"); ch.className = "chain";
+      lm.lineage.forEach((s, i) => {
+        const st = document.createElement("div"); st.className = "step" + (i % 2 ? " alt" : "");
+        st.innerHTML = "<span class='y'>" + s.year.toLocaleString() + "</span> <span class='s'>" + s.state + "</span> " +
+          "<span class='n'>" + (s.note || "") + "</span>";
+        ch.appendChild(st);
+      });
+      wrap.appendChild(ch);
+      // cell strata
+      const cell = inspectTarget.tile;
+      if (cell && !inspectTarget.tileIsLandmark) {
+        wrap.innerHTML += "<div style='margin-top:12px;color:var(--dim);font-size:12px;'>This tile's destruction strata: " +
+          (cell.layers && cell.layers.length ? cell.layers.map(l => "Y" + l.y).join(", ") : "none recorded.") + "</div>";
+      }
+    } else {
+      wrap.innerHTML = "<div style='color:var(--dim);'>Right-click a structure or tile in the world to inspect its lineage.</div>";
+    }
+  }
+  function renderRep() {
+    const wrap = el("repWrap");
+    const chips = [
+      ["Destruction caused", rep.destruction],
+      ["Casualties", rep.casualties],
+      ["Structures protected", rep.protected],
+      ["Lost to you", rep.savesInWorld],
+      ["Honor from victories", rep.honored],
+      ["Rival wins", rivalMemory.wins],
+      ["Rival losses", rivalMemory.losses],
+    ];
+    wrap.innerHTML = "<div style='color:var(--dim);font-size:12px;'>Reputation is not one number. Different eras, " +
+      "districts and institutions read you differently.</div><div class='rep'>" +
+      chips.map(c => "<div class='chip'><div style='color:var(--dim);font-size:11px;'>" + c[0] + "</div><b>" + c[1] + "</b></div>").join("") +
+      "</div>" +
+      "<div style='margin-top:12px;color:var(--dim);font-size:12px;'>You are remembered as: " + titleFor() + "</div>";
+  }
+  function titleFor() {
+    if (rep.protected > rep.destruction && rep.protected > 0) return "a guardian of old stone";
+    if (rep.casualties > 3000) return "the Western Devil";
+    if (rep.destruction > 500) return "a recurring catastrophe";
+    return "the Returning One";
+  }
+
+  // ============================================================ INSPECT =====
+  let inspectTarget = null;
+  function inspectAt(wx, wy) {
+    const col = clamp((wx / TILE) | 0, 0, W - 1), row = clamp((wy / TILE) | 0, 0, H - 1);
+    // nearest landmark
+    let best = null, bestD = 3;
+    const cell = getCell(col, row);
+    for (const lm of state.landmarks) {
+      const d = Math.hypot(lm.cx - col, lm.cy - row);
+      if (d < bestD) { bestD = d; best = lm; }
+    }
+    inspectTarget = best ? { lm: best, tile: cell, tileIsLandmark: !!best } : { lm: null, tile: cell, tileIsLandmark: false };
+    openHistoryPanel("lineage");
+  }
+
+  // ============================================================ SAVE/LOAD ===
+  const LS_KEY = "effac-save-v1";
+  function saveGame() {
+    const data = {
+      core: Core.serialize(state),
+      game: { returnNo, phase: "explore", player, rivalMemory, rep, cam, selectedYear },
+    };
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); toast("Saved."); }
+    catch (e) { toast("Saving unavailable (sandboxed). Try Export."); }
+  }
+  function loadGame() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) { toast("No save found."); return; }
+      const data = JSON.parse(raw);
+      state = Core.rehydrate(data.core);
+      returnNo = data.game.returnNo; rivalMemory = data.game.rivalMemory; rep = data.game.rep;
+      cam = data.game.cam; selectedYear = data.game.selectedYear || 0;
+      player = data.game.player || null;
+      renderWorldFull(); spawnInhabitants(); syncHUD();
+      enterExplore(); toast("Loaded.");
+    } catch (e) { toast("Could not load save."); }
+  }
+  function exportJSON() {
+    const d = JSON.stringify({ core: Core.serialize(state), game: { returnNo, phase, player, rivalMemory, rep, cam, selectedYear, civilians: null } });
+    const blob = new Blob([d], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "effac-history.json"; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("Exported.");
+  }
+  function importJSON() {
+    try {
+      const raw = prompt("Paste a previously exported history JSON:");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      state = Core.rehydrate(data.core);
+      returnNo = data.game.returnNo || 0; rivalMemory = data.game.rivalMemory || { wins: 0, losses: 0, grudge: null };
+      rep = data.game.rep || rep; cam = data.game.cam || cam; selectedYear = data.game.selectedYear || 0;
+      player = data.game.player || null;
+      renderWorldFull(); spawnInhabitants(); syncHUD(); enterExplore(); toast("Imported.");
+    } catch (e) { toast("Import failed — invalid JSON."); }
+  }
+  function toast(msg) {
+    const h = el("hint"); if (h) { h.textContent = msg; h.style.opacity = "1"; setTimeout(() => h.style.opacity = "0", 1400); }
+  }
+
+  // ============================================================ NEW WORLD ===
+  function newWorld() {
+    const seed = (parseInt(el("seed").value, 10) || (Math.random() * 1e9) | 0) >>> 0;
+    const startYear = clamp(parseInt(el("startYear").value, 10) || 0, 0, 100000);
+    const scenario = el("scenario").value;
+    state = Core.initWorld(seed);
+    if (scenario === "wasteland") preDestr("west");
+    else if (scenario === "eastdev") preDestr("east");
+    if (startYear > 0) Core.advanceYears(state, startYear);
+    returnNo = state.returnCount;
+    rep = { savesInWorld: 0, casualties: 0, destruction: 0, protected: 0, honored: 0 };
+    rivalMemory = { wins: 0, losses: 0, grudge: null, lastOutcome: "" };
+    player = null; spawnPlayer();
+    renderWorldFull(); spawnInhabitants(); syncHUD();
+    closePanel(); cam.x = player.x; cam.y = player.y;
+    start();
+  }
+  function preDestr(side) {
+    const lms = state.landmarks.filter(l => (side === "west" ? l.cx < W / 2 : l.cx >= W / 2));
+    lms.forEach(lm => { if (lm.type === Core.LM.BRIDGE) { Core.blast(state, lm.cx, lm.cy, 3, 2.2, "player", 0); } });
+    // big craters
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (x < W / 2 && side === "west") { if (Math.random() < 0.004) Core.blast(state, x, y, 3, 1.8, "player", 0); }
+      else if (x >= W / 2 && side === "east") { if (Math.random() < 0.004) Core.blast(state, x, y, 3, 1.8, "player", 0); }
+    }
+    renderWorldFull();
+  }
+
+  // ============================================================ EVENT LOOP ===
+  let last = performance.now();
+  function loop(now) {
+    let dt = (now - last) / 1000; last = now;
+    if (dt > 0.05) dt = 0.05;
+
+    if (phase === "combat") {
+      updatePlayer(dt); updateRival(dt); updateProjectiles(dt); updateCivilians(dt);
+      if (player && player.hp <= 0) endFight("loser");
+      else if (rival && rival.hp <= 0) endFight("winner");
+    }
+    if (phase === "explore") { updatePlayer(dt); updateCivilians(dt); }
+    updateDebris(dt);
+    if (tlFlash > 0) tlFlash = Math.max(0, tlFlash - dt * 1.4);
+    // camera follow
+    if (player) {
+      const k = 3.5;
+      cam.x = lerp(cam.x, player.x, clamp(k * dt, 0, 1));
+      cam.y = lerp(cam.y, player.y, clamp(k * dt, 0, 1));
+      cam.x = clamp(cam.x, (cw / 2) / cam.zoom, WORLD_W - (cw / 2) / cam.zoom);
+      cam.y = clamp(cam.y, (ch / 2) / cam.zoom, WORLD_H - (ch / 2) / cam.zoom);
+      if (cw / cam.zoom > WORLD_W) cam.x = WORLD_W / 2;
+      if (ch / cam.zoom > WORLD_H) cam.y = WORLD_H / 2;
+    }
+    render(dt);
+    syncCrosshair();
+    requestAnimationFrame(loop);
+  }
+
+  function syncCrosshair() {
+    el("crosshair").style.left = mouse.x + "px";
+    el("crosshair").style.top = mouse.y + "px";
+  }
+
+  // ============================================================ INPUT =======
+  function applyMouse(e) {
+    const r = cv.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    const w = screenToWorld(mouse.x, mouse.y);
+    mouse.worldX = w[0]; mouse.worldY = w[1];
+  }
+  window.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    keys[k] = true;
+    if (e.key === "Shift") keys["shift"] = true;
+    // punch on space as leap that also deals a small hit on landing? keep leap for movement
+    if (k === "f" && phase === "combat") playerShockwave();
+    if (k === "q" && phase === "combat") playerDash();
+    if (k === " " && phase === "combat") { e.preventDefault(); playerLeap(); }
+    if (e.key === "Shift" && phase === "combat") { /* sprint held */ }
+    if (k === "i") { openHistoryPanel(inspectTarget && inspectTarget.lm ? "lineage" : "timeline"); }
+    if (k === "escape") { closePanel(); }
+  });
+  window.addEventListener("keyup", (e) => {
+    const k = e.key.toLowerCase(); keys[k] = false;
+    if (e.key === "Shift") keys["shift"] = false;
+  });
+  cv.addEventListener("contextmenu", (e) => { e.preventDefault(); applyMouse(e); inspectAt(mouse.worldX, mouse.worldY); });
+  cv.addEventListener("mousemove", applyMouse);
+  cv.addEventListener("mousedown", (e) => {
+    applyMouse(e);
+    if (e.button === 0) {
+      mouse.down = true;
+      if (phase === "combat") playerPunch();
+      const now = performance.now();
+    }
+  });
+  window.addEventListener("mouseup", () => mouse.down = false);
+
+  // UI wiring
+  el("btnHistory").onclick = () => openHistoryPanel("timeline");
+  el("panelClose").onclick = closePanel;
+  el("panelTab").querySelectorAll("button").forEach(b => b.onclick = () => setPanelTab(b.dataset.tab));
+  el("btnSettings").onclick = () => el("settings").classList.add("show");
+  el("btnNew").onclick = () => { el("settings").classList.remove("show"); newWorld(); };
+  el("btnSave").onclick = () => saveGame();
+  el("btnLoad").onclick = () => loadGame();
+  el("btnExport").onclick = () => exportJSON();
+  el("btnImport").onclick = () => importJSON();
+  document.getElementById("settings").addEventListener("click", (e) => { if (e.target.id === "settings") e.target.classList.remove("show"); });
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  // Public API — lets live tooling, tests and the hosted environment drive the
+  // simulation the same way the player does. Nothing here bypasses the engine.
+  window.EFFAC = {
+    get state() { return state; },
+    get phase() { return phase; },
+    get returnNo() { return returnNo; },
+    get player() { return player; },
+    get rival() { return rival; },
+    blast: (x, y, r, p, who) => blastTile(x, y, r, p, who || "player"),
+    beginReturn, endFight, advanceTime,
+    openHistoryPanel, closePanel, inspectAt,
+    Core,
+  };
+
+  // ============================================================ BOOT ========
+  newWorld();
+  requestAnimationFrame(loop);
+})();
+
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a33081a24b7fe80e',t:'MTc4ODA1ODQxOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
