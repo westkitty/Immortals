@@ -32,6 +32,14 @@ The browser journey reloads after collapse and proves the hidden structure, rest
 
 The same browser journey proves a west/east district policy split after western collapse: west safety falls to 10, east remains 50, and the derived route lengths diverge to 1.05 versus 1.29. The runtime exposes these policy values and renders route meshes; the mature civilization simulator and richer district layouts remain unintegrated.
 
+## Phase 5 incremental boundary
+
+The browser journey presses `H` to open the objective ledger and `A` to recover the first weakened event. It proves that objective history remains present while the public account changes to recovered evidence. The inspected collapse and combat screenshots provide the current visual evidence; a dedicated history panel and richer evidence-carrier workflow remain outside the boundary.
+
+## Phase 6 incremental boundary
+
+The browser journey presses `T` and proves deterministic deep-time state at Year 100,000 with replay hash `1701:100000:199248:100.0000:88.9204:560:10`. The projection is exposed in runtime text and is not yet full campaign-event, snapshot, or mature-simulator integration.
+
 ## Unverified or incomplete
 
 - Wall-to-roof mantle and full multi-wall course completion.

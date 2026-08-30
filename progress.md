@@ -138,3 +138,11 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added two derived district route meshes whose length and color respond to west/east safety and transit state.
 - Extended `render_game_to_text` with district policy values and the browser journey with a west/east divergence assertion after western collapse: safety 10 versus 50 and route length 1.05 versus 1.29.
 - `npm run test:browser` passes with zero console errors; Phase 4 remains partial because the mature civilization simulator and richer district layouts are not integrated.
+
+## Phase 5/6 — history recovery and deep-time browser increment
+
+- Fixed the archaeology control binding so `A` preserves movement-left while also exposing the intended archaeology action.
+- Extended the browser journey to prove `H` opens the objective ledger, `A` recovers a weakened public account, and objective event records remain intact.
+- Extended the browser journey to prove `T` exposes the deterministic Year 100,000 projection and replay hash `1701:100000:199248:100.0000:88.9204:560:10`.
+- Inspected the collapse and deep-time screenshots; the browser run reports zero console errors. `npm run verify` passes with 15 tests.
+- Phase 5 and Phase 6 remain partial: richer evidence carriers, a dedicated visual inspector panel, campaign-event coupling, snapshots, and mature simulator integration are not complete.

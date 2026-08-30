@@ -14,11 +14,12 @@ Prove that the campaign can reach Year 100,000 without rendering 1,000 battles.
 
 # Tests executed
 
-- `npm run verify` — PASS (build, typecheck, 6 tests).
+- `npm run verify` — PASS (build, typecheck, 15 tests).
+- `npm run test:browser` — PASS: `T` exposes Year 100,000 and the deterministic replay hash with zero console errors.
 
 # Known limitations
 
-The projection is not yet coupled to every live campaign event, snapshots, or the mature 2D simulator, so this is a capability proof rather than final campaign-scale integration.
+The projection is not yet coupled to every live campaign event, saved snapshots, or the mature 2D simulator, so this remains a capability proof rather than final campaign-scale integration. Browser proof covers the runtime trigger and exposed state, not a 1,000-step rendered replay.
 
 # Completion status
 

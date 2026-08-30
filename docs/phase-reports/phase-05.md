@@ -24,16 +24,16 @@ History now separates objective event records from public interpretation and sup
 
 # Tests executed
 
-- `npm run verify` — PASS (build, typecheck, 5 tests).
-- Browser journey — blocked by the known Playwright protocol startup hang on this host.
+- `npm run verify` — PASS (build, typecheck, 15 tests).
+- `npm run test:browser` — PASS: history toggle, archaeology recovery, persistence, traversal, destruction, combat, and zero console errors.
 
 # Browser evidence
 
-No fresh browser artifact; the mandated client remains blocked during protocol startup.
+The direct Playwright journey opens the ledger with `H`, recovers the first weakened objective event with `A`, and reports the recovered public account while preserving the objective event. The same run proves the previously recorded collapse and return paths after reload and defeat.
 
 # Visual evidence
 
-The causal inspector now renders objective and public accounts, but browser screenshot validation is pending.
+`output/web-game/repair-2-collapse.png` was inspected and shows the player among four visible rubble chunks after collapse. `output/web-game/repair-2-combat.png` was inspected after the history/deep-time actions and shows the Year 100 state with `DEEP TIME // YEAR 100,000 REACHED` in the HUD.
 
 # Performance evidence if relevant
 
@@ -41,7 +41,7 @@ Not measured.
 
 # Known limitations
 
-Archaeology currently recovers one weakened event; site selection and multiple independent evidence carriers are not yet modeled.
+Archaeology currently recovers the first weakened event; site selection, multiple independent evidence carriers, and a dedicated visual inspector panel are not yet modeled. The current H inspector is represented through runtime status and deterministic text observation.
 
 # Completion status
 

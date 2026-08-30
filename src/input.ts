@@ -31,7 +31,7 @@ export type GameAction = typeof Action[keyof typeof Action];
 const bindings: Record<string, GameAction[]> = {
   w: [Action.MoveForward], arrowup: [Action.MoveForward],
   s: [Action.MoveBack], arrowdown: [Action.MoveBack],
-  a: [Action.MoveLeft], arrowleft: [Action.MoveLeft],
+  a: [Action.MoveLeft, Action.Archaeology], arrowleft: [Action.MoveLeft],
   d: [Action.MoveRight], arrowright: [Action.MoveRight],
   shift: [Action.Sprint], space: [Action.Jump], q: [Action.Dash],
   e: [Action.Grapple], g: [Action.Glide], v: [Action.Dive], x: [Action.Surf],
