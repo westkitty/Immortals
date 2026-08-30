@@ -38,3 +38,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Made development visible: returns reinforce surviving building materials and derive shelter structures from accumulated sheltering pressure; shockwave updates reapply the same policy.
 - Added west/east safety pressure derived from impact location; return-time trade updates and material policy now diverge by district.
 - Added west/east transit capacity, counterfactual divergence helper, and visible district transit routes derived from safety pressure.
+- Added objective/public history separation, evidence-strength decay into disputed memory, `A` archaeology recovery, and inspector output for both accounts.

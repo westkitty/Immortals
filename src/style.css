@@ -18,5 +18,6 @@ button:hover { background: #c4f7ff; }
 .history h2 { margin: 8px 0 14px; font-size: 20px; }
 .history-event { padding: 10px 0; border-top: 1px solid rgba(162, 208, 220, .16); color: #b5c1c7; font-size: 12px; line-height: 1.4; }
 .history-event b { color: #84e4f3; font-family: ui-monospace, monospace; }
+.history-event .objective { color: #e6edf0; }
 .hidden { display: none; }
 @media (max-width: 700px) { .hud { gap: 10px; padding: 10px; } .hud > div:nth-child(2) { display: none; } .help { font-size: 8px; } }

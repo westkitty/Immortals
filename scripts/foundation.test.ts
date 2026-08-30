@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { advanceHistory, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
+import { advanceHistory, archaeologyRecover, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
 
 const root = join(import.meta.dirname, '..');
 
@@ -28,7 +28,7 @@ describe('Phase 0 foundation', () => {
 
   it('records causal events and advances the return clock', () => {
     const history = createHistory();
-    recordEvent(history, { year: 0, type: 'collapse', siteId: 'bridge-west', consequence: 'Bridge becomes inherited ruin.' });
+    recordEvent(history, { year: 0, type: 'collapse', siteId: 'bridge-west', consequence: 'Bridge becomes inherited ruin.', publicAccount: 'The bridge failed in a storm.', evidenceStrength: .7 });
     advanceHistory(history);
     expect(history.year).toBe(100);
     expect(history.events.map((event) => event.type)).toEqual(['collapse', 'return']);
@@ -37,6 +37,11 @@ describe('Phase 0 foundation', () => {
     recordDistrictDamage(history, -20);
     expect(history.development.westSafety).toBeLessThan(history.development.eastSafety);
     expect(history.development.eastTransit).toBeGreaterThan(history.development.westTransit);
+    const event = history.events[0];
+    while (history.year < 500) advanceHistory(history);
+    expect(event.publicAccount).toContain('disputed');
+    archaeologyRecover(history, event.id);
+    expect(event.evidenceStrength).toBe(1);
   });
 
   it('produces different infrastructure futures for west versus east damage', () => {
