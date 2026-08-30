@@ -56,3 +56,8 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added reduced-motion CSS and a responsive mobile HUD/history layout.
 - Added render pixel-ratio and draw-call fields to the deterministic text observation payload.
 - TODO: perform final integrated acceptance in Phase 10; browser protocol startup remains blocked on this host.
+
+## Phase 10 validation
+
+- Added deterministic adversarial checks for west/east divergence at Year 100, 1,000, 10,000, and 100,000; repeated destruction; evidence quality and archaeology; relic lineage; save/load shape; deep-time strata; no-SVG; and offline runtime dependency boundaries.
+- Phase 10 remains PARTIAL because the browser journey is blocked by the mandated client hang, and context-specific crater value, protected landmarks, and cultural extinction are not fully modeled.

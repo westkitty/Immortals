@@ -1,6 +1,6 @@
 # Operational State
 
-CURRENT PHASE: Phase 9 partial.
+CURRENT PHASE: Phase 10 partial.
 
 REMOTE: `origin` configured as `git@github.com:westkitty/Immortals.git`; remote was empty at initialization probe.
 
@@ -10,6 +10,6 @@ CURRENT CAPABILITIES: `src/main.ts` adds a persistent 3D rival, strike/knockback
 
 LAST VALIDATION: `npm run build`, `npm run typecheck`, and `npm test` pass. Playwright captured a post-start city screenshot before the host's browser protocol process began hanging; no console-error artifact was emitted.
 
-NEXT PHASE: Phase 10 — final integrated acceptance and release evidence.
+NEXT PHASE: None defined by the governing directive. Phase 10 is the final release gate.
 
-KNOWN LIMITATIONS: The historical map is an interface-level district landmark strip, not a navigable GIS map. Renderer instrumentation is diagnostic, not a benchmark. Mandated browser client hangs during protocol startup on this host, so text-state end-to-end evidence is pending.
+KNOWN LIMITATIONS: The historical map is an interface-level district landmark strip, not a navigable GIS map. Context-specific crater valuation, protected-landmark significance, and cultural-extinction/recovery are not fully modeled. Renderer instrumentation is diagnostic, not a benchmark. Mandated browser client hangs during protocol startup on this host, so the browser journey remains unproven.

@@ -76,4 +76,50 @@ describe('Phase 0 foundation', () => {
     expect(source).toContain('drawCalls');
     expect(readFileSync(join(root, 'src/style.css'), 'utf8')).toContain('prefers-reduced-motion');
   });
+
+  it('passes the deterministic adversarial history checks that are implemented', () => {
+    const checkpoints = [100, 1000, 10000, 100000];
+    const west = createHistory();
+    const east = createHistory();
+    recordDistrictDamage(west, -1);
+    recordDistrictDamage(east, 1);
+    recordEvent(west, { year: 0, type: 'collapse', siteId: 'west', consequence: 'Western district damaged.', publicAccount: 'A storm damaged the west.', evidenceStrength: .6 });
+    recordEvent(east, { year: 0, type: 'collapse', siteId: 'east', consequence: 'Eastern district damaged.', publicAccount: 'A storm damaged the east.', evidenceStrength: .6 });
+    for (const checkpoint of checkpoints) {
+      while (west.year < checkpoint) advanceHistory(west);
+      while (east.year < checkpoint) advanceHistory(east);
+      expect(west.development.westSafety).not.toBe(east.development.westSafety);
+    }
+
+    const repeated = createHistory();
+    for (let index = 0; index < 4; index += 1) recordEvent(repeated, { year: repeated.year, type: 'collapse', siteId: 'same-crater', consequence: `Layer ${index}`, publicAccount: 'The account is incomplete.', evidenceStrength: .4 });
+    while (repeated.year < 1000) advanceHistory(repeated);
+    expect(repeated.events.filter((event) => event.siteId === 'same-crater')).toHaveLength(4);
+    expect(repeated.development.returnAwareness).toBeGreaterThan(0);
+    expect(repeated.relics.every((relic) => relic.lineage.length >= 2)).toBe(true);
+
+    const strong = createHistory();
+    const strongEvent = recordEvent(strong, { year: 0, type: 'collapse', siteId: 'strong', consequence: 'A well-recorded loss.', publicAccount: 'The archive agrees.', evidenceStrength: 1 });
+    const weakEvent = recordEvent(strong, { year: 0, type: 'collapse', siteId: 'weak', consequence: 'A poorly recorded loss.', publicAccount: 'Only a rumor remains.', evidenceStrength: .2 });
+    while (strong.year < 500) advanceHistory(strong);
+    expect(strongEvent.evidenceStrength).toBeGreaterThan(weakEvent.evidenceStrength);
+    archaeologyRecover(strong, weakEvent.id);
+    expect(weakEvent.evidenceStrength).toBe(1);
+    expect(strong.relics.some((relic) => relic.originEventId === strongEvent.id && relic.lineage.length >= 2)).toBe(true);
+
+    const replay = JSON.parse(JSON.stringify(strong)) as typeof strong;
+    expect(replay.year).toBe(strong.year);
+    expect(replay.events).toHaveLength(strong.events.length);
+    expect(simulateDeepTime(1701).strata).toBeGreaterThan(0);
+  });
+
+  it('keeps the release surface SVG-free and independent of live web APIs', () => {
+    const html = readFileSync(join(root, 'index.html'), 'utf8');
+    const runtime = readFileSync(join(root, 'src/main.ts'), 'utf8');
+    expect(html).not.toMatch(/https?:\/\//);
+    expect(runtime).not.toMatch(/fetch\(|XMLHttpRequest|https?:\/\//);
+    const files = readdirSync(root, { recursive: true }).map(String)
+      .filter((file) => !file.startsWith('node_modules/') && !file.startsWith('.git/'));
+    expect(files.filter((file) => file.toLowerCase().endsWith('.svg'))).toEqual([]);
+  });
 });
