@@ -18,7 +18,7 @@ The Repair 0 browser screenshot was inspected after capture. It confirms that th
 
 ## Repair 1 boundary
 
-The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. A normal-input route now reaches the procedural traversal tower, climbs it, observes `mantling: true`, and reaches roof height. A full multi-wall course and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
+The journey is browser-proven for the implemented traversal slice. The inspected `output/web-game/repair-1-multiwall.png` shows the second mantle transition. The normal-input route reaches both procedural towers, observes both mantle transitions, and reaches second-roof height 32.38. Measured release FPS remains unclaimed. Repair 2 remains outside this checkpoint.
 
 ## Repair 2 incremental boundary
 

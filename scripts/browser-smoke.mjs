@@ -41,6 +41,20 @@ try {
   await page.keyboard.up('w');
   const mantle = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (!mantleSeen || mantle.player.y < 15) throw new Error(`Mantle route failed: ${JSON.stringify({ mantleSeen, mantle })}`);
+  await page.keyboard.down('d');
+  await page.keyboard.down('Space');
+  let secondMantleSeen = false;
+  let secondMantleHeight = 0;
+  let secondMantleCaptured = false;
+  for (let step = 0; step < 70; step += 1) {
+    await page.evaluate(() => window.advanceTime(1000 / 60));
+    const sample = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+    if (sample.traversal.mantling === true && sample.player.x > 15) { secondMantleSeen = true; secondMantleHeight = Math.max(secondMantleHeight, sample.player.y); if (!secondMantleCaptured) { await page.screenshot({ path: 'output/web-game/repair-1-multiwall.png' }); secondMantleCaptured = true; } }
+  }
+  await page.keyboard.up('Space');
+  await page.keyboard.up('d');
+  const multiWall = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (!secondMantleSeen || secondMantleHeight < 20) throw new Error(`Multi-wall route failed: ${JSON.stringify({ secondMantleSeen, secondMantleHeight, multiWall })}`);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
   const sprintJump = await hold(['w', 'Shift', 'Space'], 220);
@@ -127,7 +141,7 @@ try {
   const deepTime = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (!historyOpen.historyInspectorOpen || !historyPanelVisible || !historyPanelText.includes('PUBLIC ACCOUNT:') || archaeology.history.filter((event) => event.publicAccount.startsWith('Recovered evidence confirms')).length < 2 || deepTime.deepTime?.year !== 100000 || errors.length) throw new Error(`History/deep-time journey failed: ${JSON.stringify({ historyOpen, historyPanelVisible, historyPanelText, archaeology, deepTime, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, persisted: { collapsed: structurePersisted.buildings.filter((building) => building.collapsed).length, rubbleCount: structurePersisted.rubbleCount, adaptation: structurePersisted.development.adaptation, districtPolicies: structurePersisted.districtPolicies } }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible }, centuryReturn: { year: centuryReturn.year, rivalHealth: centuryReturn.rival.health, visible: centuryReturn.rival.visible, returnAwareness: centuryReturn.development.returnAwareness, districtPolicies: centuryReturn.districtPolicies } }, history: { inspectorOpen: historyOpen.historyInspectorOpen, panelVisible: historyPanelVisible, recovered: archaeology.history.filter((event) => event.publicAccount.startsWith('Recovered evidence confirms')).length }, deepTime: { year: deepTime.deepTime?.year, hash: deepTime.deepTime?.hash }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, traversalCourse: { firstMantle: mantleSeen, secondMantle: secondMantleSeen, secondRoofHeight: secondMantleHeight }, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, persisted: { collapsed: structurePersisted.buildings.filter((building) => building.collapsed).length, rubbleCount: structurePersisted.rubbleCount, adaptation: structurePersisted.development.adaptation, districtPolicies: structurePersisted.districtPolicies } }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible }, centuryReturn: { year: centuryReturn.year, rivalHealth: centuryReturn.rival.health, visible: centuryReturn.rival.visible, returnAwareness: centuryReturn.development.returnAwareness, districtPolicies: centuryReturn.districtPolicies } }, history: { inspectorOpen: historyOpen.historyInspectorOpen, panelVisible: historyPanelVisible, recovered: archaeology.history.filter((event) => event.publicAccount.startsWith('Recovered evidence confirms')).length }, deepTime: { year: deepTime.deepTime?.year, hash: deepTime.deepTime?.hash }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');
