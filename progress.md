@@ -35,3 +35,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added `src/history.ts` with typed `HistoryEvent` records and a 100-year return clock; 3D strike, collapse, and return actions now emit events into the saved history ledger.
 - Added persistent terrain scar geometry on shockwave, scar save/load, scar text-state output, and an `H` causal inspector for recent events.
 - Added deterministic development state to the event ledger: population, trade, sheltering, and adaptation rise/fall from inherited collapse history and century returns.
+- Made development visible: returns reinforce surviving building materials and derive shelter structures from accumulated sheltering pressure; shockwave updates reapply the same policy.

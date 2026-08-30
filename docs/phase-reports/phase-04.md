@@ -11,6 +11,7 @@ Make future civilization state derive from inherited battle consequences rather 
 - Added typed development state with population, trade, sheltering, and adaptation pressure.
 - Collapse events increase adaptation pressure; century returns update development deterministically.
 - Exposed development state through the 3D observation hook and save envelope.
+- Made adaptation visible through reinforced building materials and derived shelter structures after return cycles.
 
 # Files changed
 
@@ -18,7 +19,7 @@ Make future civilization state derive from inherited battle consequences rather 
 
 # Architecture changes
 
-The 3D event ledger now produces a small causal civilization state. Visual district/building policy is the next increment.
+The 3D event ledger now produces a small causal civilization state and a derived visual policy for reinforcement and shelter infrastructure.
 
 # Tests executed
 
