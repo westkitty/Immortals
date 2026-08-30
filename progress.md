@@ -25,3 +25,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added shockwave-based structure damage and collapse state; collapsed buildings leave the skyline.
 - Added rival health and structure state to `render_game_to_text`.
 - TODO: connect these 3D battle outcomes to the existing historical event model and save/century return flow.
+
+## Phase 3 implementation
+
+- Added a local save envelope for year, player position, rival health, and building collapse state.
+- Added `C` century advance after defeating the rival; collapsed structures remain absent after return.
+- Added load-on-enter and exposed year/history state through `render_game_to_text`.
+- TODO: replace the minimal local envelope with the canonical battle/history event bridge and richer historical inspection.
