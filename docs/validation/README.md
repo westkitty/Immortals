@@ -22,7 +22,7 @@ The journey is browser-proven for the implemented traversal slice. The screensho
 
 ## Repair 2 incremental boundary
 
-Stateful structure integrity/support transitions and rubble creation pass unit coverage. The browser journey also navigates to a building, triggers shockwave, asserts reduced integrity, and captures `output/web-game/repair-2-collapse.png`; full support propagation remains pending.
+Stateful structure integrity/support transitions, bounded combat damage, and rubble creation pass unit coverage. The browser journey navigates to a building, triggers shockwave, asserts reduced integrity, then independently reaches the rival, asserts rival damage and player vitality loss, and captures `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`; full support propagation remains pending.
 
 ## Unverified or incomplete
 

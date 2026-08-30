@@ -85,3 +85,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added unit coverage for non-collapsing impact, support failure, and inert post-collapse behavior.
 - `npm run verify` passes with 13 tests; `npm run test:browser` passes with zero console errors; the journey screenshot was inspected again.
 - Added positive browser structure-impact coverage: the player navigates to a building, shockwave reduces integrity from 100 to 72, and `output/web-game/repair-2-collapse.png` was inspected. Repair 2 remains in progress; bridge/support propagation, full collapse lifecycle, and remaining combat behaviors are pending.
+
+## Repair 2 — combat increment
+
+- Added `src/combat.ts` with bounded damage and defeat results; integrated rival attack cooldown, player vitality, hit feedback, camera kick, recovery, and HUD/state output.
+- Browser combat journey reaches the rival, verifies health 100 → 75 after attack and player vitality 100 → 92 after counterattack, with zero console errors.
+- Captured and inspected `output/web-game/repair-2-combat.png`.
+- `npm run verify` passes with 14 tests. Repair 2 remains in progress; bridge/support propagation, full collapse lifecycle, combat defeat flow, and rigid-body physics remain.
