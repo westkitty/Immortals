@@ -99,3 +99,9 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Fixed the browser harness startup race by waiting for Vite's readiness line before connecting; the full journey now completes with zero console errors.
 - Re-ran the full traversal, pause, structure-impact, collapse/rubble, and combat scenarios; inspected `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`.
 - `npm run verify` passes with 14 tests and `npm run test:browser` passes. Repair 2 remains in progress; bridge/support propagation, debris lifecycle, combat defeat flow, and rigid-body physics remain.
+
+## Repair 2 — combat defeat increment
+
+- Made the in-game defeat transition explicit: the final bounded strike records a battle-won consequence, hides the rival, and persists the defeated health state.
+- Extended the browser journey to land three additional strikes, assert rival health `0`, `visible: false`, and the battle-won history event.
+- Repair 2 remains in progress; bridge/support propagation, debris lifecycle, and rigid-body physics remain.

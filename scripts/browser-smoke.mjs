@@ -73,8 +73,15 @@ try {
   await hold(['s'], 300);
   const combatAfterHit = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatAfterAttack.rival.health >= combatBefore.rival.health || combatAfterHit.playerCombat.health >= 100 || errors.length) throw new Error(`Combat journey failed: ${JSON.stringify({ combatBefore, combatAfterAttack, combatAfterHit, errors })}`);
+  await hold(['w'], 100);
+  for (let strike = 0; strike < 8 && combatAfterAttack.rival.health > 0; strike += 1) {
+    await hold(['w', 'f'], 40);
+    await hold([], 500);
+  }
+  const combatDefeat = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');
