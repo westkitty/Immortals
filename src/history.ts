@@ -7,11 +7,12 @@ export type HistoryEvent = {
   publicAccount: string;
   evidenceStrength: number;
 };
+export type MaterialRelic = { id: string; originEventId: string; material: string; currentUse: string; lineage: { year: number; use: string }[] };
 
 export type DevelopmentState = { population: number; trade: number; sheltering: number; adaptation: number; westSafety: number; eastSafety: number; westTransit: number; eastTransit: number };
-export type CampaignHistory = { year: number; events: HistoryEvent[]; development: DevelopmentState };
+export type CampaignHistory = { year: number; events: HistoryEvent[]; development: DevelopmentState; relics: MaterialRelic[] };
 
-export function createHistory(): CampaignHistory { return { year: 0, events: [], development: { population: 1000, trade: 50, sheltering: 0, adaptation: 0, westSafety: 50, eastSafety: 50, westTransit: 50, eastTransit: 50 } }; }
+export function createHistory(): CampaignHistory { return { year: 0, events: [], relics: [], development: { population: 1000, trade: 50, sheltering: 0, adaptation: 0, westSafety: 50, eastSafety: 50, westTransit: 50, eastTransit: 50 } }; }
 
 export function recordDistrictDamage(history: CampaignHistory, x: number): void {
   if (x < 0) { history.development.westSafety = Math.max(0, history.development.westSafety - 10); history.development.eastTransit = Math.min(100, history.development.eastTransit + 6); }
@@ -22,6 +23,7 @@ export function recordEvent(history: CampaignHistory, event: Omit<HistoryEvent, 
   const next = { ...event, id: `${event.type}-${history.events.length + 1}` };
   history.events.push(next);
   if (event.type === 'collapse') history.development.adaptation = Math.min(100, history.development.adaptation + 8);
+  if (event.type === 'collapse') history.relics.push({ id: `relic-${history.relics.length + 1}`, originEventId: next.id, material: 'pre-return structural stone', currentUse: 'buried at the impact site', lineage: [{ year: event.year, use: 'buried at the impact site' }] });
   return next;
 }
 
@@ -42,6 +44,7 @@ export function advanceHistory(history: CampaignHistory, years = 100): HistoryEv
   if (history.development.westSafety !== history.development.eastSafety) history.development.trade = Math.min(100, history.development.trade + Math.abs(history.development.westSafety - history.development.eastSafety) / 20);
   history.development.westTransit = Math.min(100, history.development.westTransit + (history.development.westSafety > history.development.eastSafety ? 2 : .5));
   history.development.eastTransit = Math.min(100, history.development.eastTransit + (history.development.eastSafety > history.development.westSafety ? 2 : .5));
+  history.relics.forEach((relic) => { if (history.year - relic.lineage[relic.lineage.length - 1].year >= 200 && relic.currentUse === 'buried at the impact site') { relic.currentUse = 'reused in a foundation'; relic.lineage.push({ year: history.year, use: relic.currentUse }); } });
   history.development.population = Math.max(100, Math.round(history.development.population * (1.08 - history.development.sheltering / 2500)));
   return recordEvent(history, { year: history.year, type: 'return', siteId: 'city', consequence: 'Civilization rebuilds around inherited damage.', publicAccount: 'The city claims the return was a natural century turning.', evidenceStrength: .85 });
 }

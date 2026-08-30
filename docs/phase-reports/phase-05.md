@@ -12,6 +12,7 @@ Make history epistemically imperfect while preserving objective causal state.
 - Added evidence decay across century returns; weak accounts become disputed public memory while objective events remain.
 - Added `A` archaeology recovery for the first weakened event.
 - Updated the `H` inspector and text-state output to show objective and public accounts.
+- Added material relic records with origin event IDs, current use, and reuse lineage across returns.
 
 # Files changed
 
@@ -40,7 +41,7 @@ Not measured.
 
 # Known limitations
 
-Archaeology currently recovers one weakened event and material relic/site lineage is not yet modeled.
+Archaeology currently recovers one weakened event; site selection and multiple independent evidence carriers are not yet modeled.
 
 # Completion status
 
