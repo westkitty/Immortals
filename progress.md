@@ -42,3 +42,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added material relic lineage: collapse events mint relics, returns can reuse buried material in foundations, and the full lineage is persisted and exposed in text state.
 - Added `src/deepTime.ts`: deterministic non-rendering projection to Year 100,000 with population, technology, memory, stratigraphy, succession count, and replay hash; `T` exposes it in the 3D runtime.
 - Added return-aware development metrics: recurrence awareness and protective corridor strength grow from repeated collapse/return cycles and persist in the campaign state.
+
+## Phase 8 implementation
+
+- Added a causal-history scrubber that filters the inspector ledger to a selected archive year.
+- Added a compact historical map strip to anchor the three recurring impact landmarks visually.
+- Added a focused regression check for the scrubber, year output, and map contract.
+- TODO: complete the accessibility, presentation, and performance instrumentation pass; browser protocol startup remains blocked on this host.

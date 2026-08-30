@@ -19,5 +19,10 @@ button:hover { background: #c4f7ff; }
 .history-event { padding: 10px 0; border-top: 1px solid rgba(162, 208, 220, .16); color: #b5c1c7; font-size: 12px; line-height: 1.4; }
 .history-event b { color: #84e4f3; font-family: ui-monospace, monospace; }
 .history-event .objective { color: #e6edf0; }
+.scrub-label { display: flex; justify-content: space-between; color: #9bb0b8; font: 700 10px ui-monospace, monospace; letter-spacing: .08em; }
+#timeline { width: 100%; margin: 10px 0 14px; accent-color: #84e4f3; }
+#history-map { position: relative; height: 44px; margin-bottom: 12px; border: 1px solid rgba(162, 208, 220, .2); background: linear-gradient(90deg, #173d48 0 49%, #402f25 49%); overflow: hidden; }
+#history-map i { position: absolute; top: 11px; width: 22px; height: 22px; border-radius: 50%; background: #0a1119; border: 2px solid #84e4f3; }
+#history-map i:nth-child(1) { left: 18%; } #history-map i:nth-child(2) { left: 48%; border-color: #e2b66b; } #history-map i:nth-child(3) { left: 78%; border-color: #ff7187; }
 .hidden { display: none; }
 @media (max-width: 700px) { .hud { gap: 10px; padding: 10px; } .hud > div:nth-child(2) { display: none; } .help { font-size: 8px; } }

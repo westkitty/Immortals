@@ -58,4 +58,12 @@ describe('Phase 0 foundation', () => {
     expect(simulateDeepTime(1701).hash).toBe(first.hash);
     expect(simulateDeepTime(1702).hash).not.toBe(first.hash);
   });
+
+  it('exposes the Phase 8 historical scrubber and map interface', () => {
+    const html = readFileSync(join(root, 'index.html'), 'utf8');
+    expect(html).toContain('id="timeline"');
+    expect(html).toContain('id="timeline-year"');
+    expect(html).toContain('id="history-map"');
+    expect(readFileSync(join(root, 'src/main.ts'), 'utf8')).toContain('historyViewYear');
+  });
 });
