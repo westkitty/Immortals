@@ -28,6 +28,10 @@ Stateful structure integrity/support transitions, bounded neighbor and bridge su
 
 The browser journey reloads after collapse and proves the hidden structure, restored rubble, and saved development adaptation persist. It then defeats the rival, presses `C`, and proves year 100, rival reset, return history, and nonzero return awareness. The localStorage/first-century slice is complete; canonical battle outcome and IndexedDB migration remain outside this boundary.
 
+## Phase 4 incremental boundary
+
+The same browser journey proves a west/east district policy split after western collapse: west safety falls to 10, east remains 50, and the derived route lengths diverge to 1.05 versus 1.29. The runtime exposes these policy values and renders route meshes; the mature civilization simulator and richer district layouts remain unintegrated.
+
 ## Unverified or incomplete
 
 - Wall-to-roof mantle and full multi-wall course completion.

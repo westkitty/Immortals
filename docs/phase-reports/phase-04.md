@@ -25,16 +25,16 @@ The 3D event ledger now produces a small causal civilization state and a derived
 
 # Tests executed
 
-- `npm run verify` — PASS before this documentation update; rerun required after commit.
-- Development event invariant test added.
+- `npm run verify` — PASS with 15 tests.
+- `npm run test:browser` — PASS for persisted west/east policy divergence and first-century return awareness, with zero console errors.
 
 # Browser evidence
 
-Blocked by the known Playwright protocol startup hang on this host.
+The direct browser journey reports west safety 10 versus east safety 50 after western collapse, with derived route lengths 1.05 and 1.29 respectively. It also reports nonzero return awareness after year 100.
 
 # Visual evidence
 
-Pending browser validation of visibly adapted architecture.
+The runtime renders two district route meshes whose lengths and colors are derived from transit and safety state; the browser state assertion confirms their divergent policy values after collapse.
 
 # Performance evidence if relevant
 
@@ -42,8 +42,8 @@ Not measured.
 
 # Known limitations
 
-Development state is not yet rendered as distinct district layouts and is not connected to the mature 2D civilization simulator; transit routing is currently represented by derived route geometry.
+Development state is rendered as derived district route geometry but is not connected to the mature 2D civilization simulator; richer building-layout variation and a broader civic model remain future work.
 
 # Completion status
 
-PARTIAL
+PARTIAL — visible policy increment complete; broader civilization integration remains

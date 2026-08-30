@@ -132,3 +132,9 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Extended the direct browser journey to prove collapse persistence across reload, then rival defeat → `C` → year 100 with rival reset and return awareness.
 - Exposed deterministic civilization development state through `render_game_to_text`; the verified return reports nonzero return awareness and the persistence path reports adaptation 40.
 - `npm run verify` passes with 15 tests and `npm run test:browser` passes with zero console errors. Phase 3 is complete for the bounded localStorage/first-century slice; Phase 4 visible civilization consequences are next.
+
+## Phase 4 — visible district policy increment
+
+- Added two derived district route meshes whose length and color respond to west/east safety and transit state.
+- Extended `render_game_to_text` with district policy values and the browser journey with a west/east divergence assertion after western collapse: safety 10 versus 50 and route length 1.05 versus 1.29.
+- `npm run test:browser` passes with zero console errors; Phase 4 remains partial because the mature civilization simulator and richer district layouts are not integrated.
