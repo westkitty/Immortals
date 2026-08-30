@@ -34,8 +34,13 @@ try {
   await hold(['Space'], 300);
   const dive = await hold(['Space', 'v'], 100);
   const openAirWallRun = await hold(['w', 'Space'], 180);
-  if (sprintJump.mode !== 'explore' || sprintJump.player.y <= 2.2 || dash.traversal.dashCooldown <= 0 || !glide.traversal.gliding || !dive.traversal.diving || openAirWallRun.traversal.wallRun || errors.length) {
-    throw new Error(`Traversal browser journey failed: ${JSON.stringify({ sprintJump, dash, glide, dive, openAirWallRun, errors })}`);
+  const debrisActive = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  await page.evaluate(() => window.advanceTime(27500));
+  const debrisExpired = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  await page.evaluate(() => window.advanceTime(1500));
+  const debrisRespawned = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (sprintJump.mode !== 'explore' || sprintJump.player.y <= 2.2 || !debrisActive.traversal.debris.every((item) => item.active) || !debrisExpired.traversal.debris.some((item) => !item.active) || !debrisRespawned.traversal.debris.every((item) => item.active) || dash.traversal.dashCooldown <= 0 || !glide.traversal.gliding || !dive.traversal.diving || openAirWallRun.traversal.wallRun || errors.length) {
+    throw new Error(`Traversal browser journey failed: ${JSON.stringify({ checks: { mode: sprintJump.mode, airborne: sprintJump.player.y > 2.2, active: debrisActive.traversal.debris.every((item) => item.active), expired: debrisExpired.traversal.debris.some((item) => !item.active), respawned: debrisRespawned.traversal.debris.every((item) => item.active), dash: dash.traversal.dashCooldown > 0, glide: glide.traversal.gliding, dive: dive.traversal.diving, openAirWallRun: !openAirWallRun.traversal.wallRun, errors: errors.length === 0 }, sprintJump, debrisActive, debrisExpired, debrisRespawned, dash, glide, dive, openAirWallRun, errors })}`);
   }
   await page.keyboard.press('Escape');
   await page.evaluate(() => window.advanceTime(500));
@@ -61,7 +66,7 @@ try {
   const collapse = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   const collapsed = collapse.buildings.filter((building) => building.collapsed);
   const supportAffected = collapse.buildings.filter((building) => building.id !== 'building-1-1' && building.integrity < 100);
-  if (!collapsed.length || !supportAffected.length || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, supportAffected, rubbleCount: collapse.rubbleCount, errors })}`);
+  if (!collapsed.length || !supportAffected.length || collapse.bridge.integrity >= 160 || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
@@ -82,7 +87,7 @@ try {
   const combatDefeat = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

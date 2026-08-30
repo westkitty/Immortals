@@ -112,3 +112,16 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Made collapse rubble idempotent so later shockwaves cannot duplicate chunks for an already hidden building.
 - Added unit and browser assertions for a neighbor taking support load without immediate collapse; the browser run reports neighbor integrity 91/support 0.82 and four rubble chunks while continuing to prove collapse, combat, defeat, and zero console errors.
 - Repair 2 remains in progress; bridge-wide propagation, debris lifecycle, and rigid-body physics remain.
+
+## Repair 2 — debris lifecycle increment
+
+- Added deterministic active, expiry, cooldown, and respawn states for moving debris; surfing ignores inactive pieces and resumes after reset.
+- Exposed debris `active` and `age` through `render_game_to_text` and extended the browser journey to prove active → expired → respawned behavior.
+- The full browser run passes traversal, lifecycle, support propagation, collapse/rubble, combat defeat, and zero console errors; Repair 2 now retains bridge-wide propagation and rigid-body physics as the explicit remaining gaps.
+
+## Repair 2 — completion boundary
+
+- Added bridge structure state and bounded bridge support propagation; browser evidence reports bridge integrity 151/support 0.89 after collapse.
+- Added bounded rubble-body gravity, bounce, spin, and settling motion; the inspected collapse screenshot still shows the visible rubble field.
+- Final gates pass: `npm run verify` reports 15 tests, `npm run test:browser` passes the complete traversal/destruction/combat journey with zero console errors, and local/remote SHA verification is pending this commit.
+- Repair 2 is complete for the bounded runtime slice. A general-purpose rigid-body solver, environmental enemy damage, and later campaign systems remain outside this phase boundary.

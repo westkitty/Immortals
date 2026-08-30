@@ -22,12 +22,12 @@ The journey is browser-proven for the implemented traversal slice. The screensho
 
 ## Repair 2 incremental boundary
 
-Stateful structure integrity/support transitions, bounded neighbor support-load propagation, bounded combat damage, and rubble creation pass unit coverage. The browser journey navigates to a building, triggers shockwave, repeats the impact until the building collapses, asserts a neighboring structure took bounded support load, reports visible rubble, then independently reaches the rival, asserts rival damage, player vitality loss, and final defeat/hide state, and captures `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`; bridge-wide propagation remains pending.
+Stateful structure integrity/support transitions, bounded neighbor and bridge support-load propagation, bounded combat damage, dynamic rubble creation, and debris lifecycle pass unit/browser coverage. The browser journey proves active debris expiry at age 30 and respawn, then navigates to a building, triggers shockwave, repeats the impact until the building collapses, asserts neighboring and bridge support load, reports visible dynamic rubble, and independently reaches the rival to assert damage, player vitality loss, and final defeat/hide state. Repair 2 is complete for this bounded runtime slice; a general-purpose rigid-body solver remains outside the boundary.
 
 ## Unverified or incomplete
 
 - Wall-to-roof mantle and full multi-wall course completion.
-- Structural bridge/support propagation, interactive debris, environmental enemy damage, and debris lifecycle.
+- Interactive debris riding under lifecycle reset and environmental enemy damage.
 - Canonical `BattleOutcome`, IndexedDB persistence/migration/corruption handling, and world reconstruction.
 - Spatial civilization, carrier-based memory, campaign-integrated deep time, adaptive policy consequences, and geographic historical UX.
 - Release-grade performance measurements and the full adversarial A–Q gate.

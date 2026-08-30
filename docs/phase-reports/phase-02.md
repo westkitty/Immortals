@@ -12,6 +12,8 @@ Prove that the 3D city is physically vulnerable to immortal combat.
 - Added player strike input (`F`) and shockwave input (`R`).
 - Added nearby building damage with explicit integrity/support state, support-failure collapse, bounded neighbor support-load propagation, removal from the skyline, and visible rubble chunks; repeated impacts now prove the complete collapse transition in the browser journey.
 - Added bounded combat damage, rival melee pressure, player vitality, cooldowns, hit feedback, explicit rival defeat/hide behavior, and live combat state output.
+- Added deterministic debris expiry and respawn lifecycle with active state and age exposed through `render_game_to_text`.
+- Added bridge support state and bounded propagation from collapsed structures; rubble now has gravity, bounce, spin, and settling behavior.
 - Exposed rival and building state through `render_game_to_text`.
 
 # Files changed
@@ -24,13 +26,13 @@ The 3D runtime now owns explicit structure integrity, support, collapse, and rub
 
 # Tests executed
 
-- `npm run verify` — PASS (build, typecheck, 14 unit tests).
-- `npm run test:browser` — PASS for the preserved Repair 1 journey, structure impact/full collapse-rubble journey, and rival defeat journey, with zero console errors.
+- `npm run verify` — PASS (build, typecheck, 15 unit tests).
+- `npm run test:browser` — PASS for the preserved Repair 1 journey, debris lifecycle, structure impact/full collapse-rubble journey, and rival defeat journey, with zero console errors.
 - Browser combat journey — PASS: rival health 100 → 75 and player vitality 100 → 92.
 
 # Browser evidence
 
-The direct browser journey includes positive structure-impact, full collapse/rubble, bounded combat, and rival defeat scenarios, capturing `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`; both screenshots were inspected after the passing run. The collapse observation reports the building hidden at zero height, a neighboring structure at integrity 91/support 0.82, and four visible rubble chunks; the combat observation reports rival health 75 and player vitality 92 before the final strikes reduce health to zero and hide the rival.
+The direct browser journey includes positive structure-impact, full collapse/rubble, bounded combat, and rival defeat scenarios, capturing `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`; both screenshots were inspected after the passing run. The collapse observation reports the building hidden at zero height, a neighboring structure at integrity 91/support 0.82, bridge integrity 151/support 0.89, and four visible dynamic rubble chunks; the combat observation reports rival health 75 and player vitality 92 before the final strikes reduce health to zero and hide the rival.
 
 # Visual evidence
 
@@ -42,8 +44,8 @@ Not measured.
 
 # Known limitations
 
-Bridge-wide support propagation, debris lifecycle, and rigid-body physics remain incomplete.
+The runtime uses bounded kinematic motion and dynamic rubble velocities rather than a general-purpose rigid-body solver; full engine physics is outside this repair boundary.
 
 # Completion status
 
-IN PROGRESS
+COMPLETE
