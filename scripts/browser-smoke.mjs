@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const client = process.env.WEB_GAME_CLIENT ?? `${process.env.HOME}/.codex/skills/develop-web-game/scripts/web_game_playwright_client.js`;
 const server = spawn('npm', ['run', 'dev', '--', '--host', '127.0.0.1', '--port', '4173'], { cwd: root, stdio: ['ignore', 'pipe', 'inherit'] });
 let output = '';
 server.stdout.on('data', (chunk) => { output += chunk; });
@@ -12,12 +12,23 @@ await new Promise((resolve, reject) => {
   server.once('error', reject);
 });
 console.log(output.trim());
-const actions = JSON.stringify({ steps: [
-  { buttons: ['right'], frames: 10 },
-  { buttons: ['space'], frames: 4 },
-  { buttons: [], frames: 12 },
-] });
-const result = spawn(process.execPath, [client, '--url', 'http://127.0.0.1:4173', '--click-selector', '#enter', '--actions-json', actions, '--iterations', '2', '--pause-ms', '250'], { cwd: root, stdio: 'inherit' });
-const exitCode = await new Promise((resolve) => result.once('exit', (code) => resolve(code ?? 1)));
-server.kill('SIGTERM');
-if (exitCode !== 0) process.exit(exitCode);
+let browser;
+try {
+  browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const errors = [];
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  await page.keyboard.down('w');
+  await page.waitForTimeout(250);
+  await page.keyboard.up('w');
+  await page.waitForTimeout(100);
+  const state = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (state.mode !== 'explore' || !state.player || errors.length) throw new Error(`Browser smoke failed: ${JSON.stringify({ state, errors })}`);
+  await page.screenshot({ path: 'output/web-game/browser-smoke.png' });
+  console.log(JSON.stringify({ mode: state.mode, player: state.player, errors }, null, 2));
+} finally {
+  await browser?.close();
+  server.kill('SIGTERM');
+}

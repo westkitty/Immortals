@@ -13,6 +13,17 @@ describe('Phase 0 foundation', () => {
     expect(readFileSync(join(root, 'index.html'), 'utf8')).toContain('/src/main.ts');
   });
 
+  it('keeps Repair 0 authority documents aligned with the active runtime', () => {
+    expect(existsSync(join(root, 'README.md'))).toBe(true);
+    expect(existsSync(join(root, 'docs/validation/README.md'))).toBe(true);
+    expect(existsSync(join(root, 'docs/adr/0002-threejs-runtime-transition.md'))).toBe(true);
+    expect(existsSync(join(root, 'docs/phase-reports/RECONCILIATION.md'))).toBe(true);
+    const architecture = JSON.parse(readFileSync(join(root, 'architecture.project.json'), 'utf8'));
+    expect(architecture.runtime.entry).toBe('src/main.ts');
+    expect(architecture.runtime.renderer).toBe('Three.js WebGL');
+    expect(readFileSync(join(root, 'docs/requirements-traceability.md'), 'utf8')).not.toContain('world/history engine in `century1.html`');
+  });
+
   it('contains no authored SVG assets', () => {
     const files = readdirSync(root, { recursive: true }).map(String)
       .filter((file) => !file.startsWith('node_modules/') && !file.startsWith('.git/'));

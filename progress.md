@@ -1,5 +1,12 @@
 Original prompt: Build the repository-bound game Every Fight Is Followed By A Century through the phase-gated 100,000-year implementation contract in the attached directive.
 
+## Repair 0 — truth reconciliation
+
+- Verified `src/main.ts` is the active Three.js/WebGL runtime; the three standalone HTML files remain preserved prototypes.
+- Reconciled authority documents, traceability, architecture metadata, and ADRs with inspected source and direct browser startup evidence.
+- Replaced the failing custom browser-helper smoke route with ordinary local Playwright.
+- Canonical Phase 1 is the earliest incomplete phase. Do not advance past it until the full traversal journey is browser- and visually proven.
+
 ## Phase 0
 
 - Preserved the three existing HTML prototypes.

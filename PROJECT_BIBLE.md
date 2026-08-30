@@ -6,7 +6,9 @@ Every fight is followed by a century. Physical damage is not reset: it enters a 
 
 ## Current playable slice
 
-The package entry `src/main.ts` now provides a Three.js/WebGL 3D traversal slice with a procedural city, third-person camera, sprint, jump, wall traversal, dash, grapple, shockwave launch, resize, pause, and deterministic observation hooks. `century1.html` remains the richer 2D combat/history prototype and is preserved as a fallback.
+The package entry `src/main.ts` is the active experimental Three.js/WebGL runtime. It provides a compact procedural city, simple third-person chase camera, sprint, jump, approximate airborne wall traversal, dash, grapple, shockwave, rival health, height-based building damage, localStorage campaign save, short event ledger, and deterministic observation hooks. It does not yet meet the canonical Phase 1 traversal contract.
+
+`century1.html`, `EVERY_FIGHT.html`, and `every-fight-is-followed-by-a-century.html` are preserved prototypes. They contain useful canvas-era experiments but are not integrated with the active runtime and cannot supply active-runtime completion evidence.
 
 ## Protected requirements
 
@@ -18,8 +20,8 @@ The package entry `src/main.ts` now provides a Three.js/WebGL 3D traversal slice
 
 ## Current non-goals
 
-The repository does not yet claim a Three.js 3D renderer, IndexedDB persistence, Rapier physics, or a complete 100,000-year release build. Those claims require implementation and evidence in later phases.
+The repository does not claim rigid-body physics, IndexedDB persistence, a canonical `BattleOutcome`, spatial civilization simulation, carrier-based memory, campaign-integrated Year 100,000 world reconstruction, or a complete release build. The standalone deep-time projection is experimental only.
 
 ## Phase discipline
 
-Each completed phase has a report, an updated operational state, one coherent commit, and remote SHA verification.
+Canonical Phase 0 is reconciled by Repair 0. Canonical Phase 1 is the earliest incomplete phase. Later Phase 4–10 code remains experimental scaffolding until its actual completion contracts have browser and visual evidence.

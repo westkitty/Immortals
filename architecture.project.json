@@ -6,15 +6,22 @@
     "devServer": "Vite",
     "renderer": "Three.js WebGL",
     "webgl": true,
-    "physics": "application-owned deterministic 3D traversal prototype; rigid-body physics not activated",
-    "persistence": "localStorage save envelope",
+    "timing": "requestAnimationFrame with variable delta capped at 50ms; window.advanceTime exposes fixed 60Hz stepping for observation",
+    "input": "DOM keyboard events interpreted directly in src/main.ts; no logical action layer yet",
+    "camera": "simple third-person chase camera; no collision avoidance, sensitivity settings, or shake setting",
+    "physics": "application-owned kinematic approximation; no rigid-body physics or structure solver",
+    "combat": "player strike/shockwave and a pursuing rival; no player damage or environmental enemy destruction",
+    "destruction": "building-height reduction/visibility changes and visual scar discs; no support graph, bridge failure, or active debris",
+    "persistence": "localStorage campaign envelope; no schema migration, corruption handling, or IndexedDB",
     "workers": false,
     "postprocessing": false,
     "instancing": false,
     "lod": false,
     "generatedAssets": "procedural Three.js geometry",
     "gamepad": false,
-    "spatialAudio": false
+    "spatialAudio": false,
+    "tests": "Vitest source/helper checks and direct Playwright startup smoke; no complete player-journey evidence"
   },
-  "truthBoundary": "This checkpoint records the existing 2D prototype; 3D traversal and expanded deep-time capabilities are later phase work."
+  "prototypes": ["century1.html", "EVERY_FIGHT.html", "every-fight-is-followed-by-a-century.html"],
+  "truthBoundary": "The active entry is an experimental Three.js/WebGL slice. Its compact history and deep-time helpers are not the canonical 100,000-year campaign world; all later phase systems remain provisional until their completion contracts are proven."
 }
