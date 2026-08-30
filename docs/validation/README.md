@@ -38,7 +38,7 @@ The browser journey presses `H` to open the visible objective ledger, clicks a s
 
 ## Phase 6 incremental boundary
 
-The browser journey presses `T` and proves deterministic deep-time state at Year 100,000 with replay hash `1701:100000:199248:100.0000:88.9204:560:10`. The projection is exposed in runtime text and is not yet full campaign-event, snapshot, or mature-simulator integration.
+The browser journey presses `T` and proves deterministic deep-time state at Year 100,000 with a replay hash derived from the live campaign summary. The projection is exposed in runtime text and is not yet full event-payload, snapshot, or mature-simulator integration.
 
 ## Unverified or incomplete
 
