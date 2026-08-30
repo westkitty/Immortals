@@ -33,3 +33,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added load-on-enter and exposed year/history state through `render_game_to_text`.
 - TODO: replace the minimal local envelope with the canonical battle/history event bridge and richer historical inspection.
 - Added `src/history.ts` with typed `HistoryEvent` records and a 100-year return clock; 3D strike, collapse, and return actions now emit events into the saved history ledger.
+- Added persistent terrain scar geometry on shockwave, scar save/load, scar text-state output, and an `H` causal inspector for recent events.

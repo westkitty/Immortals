@@ -12,6 +12,7 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 - Added a 100-year `C` transition after the rival is defeated.
 - Preserved collapsed structures across the return and exposed state through the deterministic text hook.
 - Added typed `HistoryEvent` records for strikes, collapses, and returns; saved history is restored with the campaign.
+- Added persistent terrain scar geometry and an `H` causal inspector that renders recent event records.
 
 # Files changed
 
@@ -19,7 +20,7 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 
 # Architecture changes
 
-The 3D runtime now owns a typed causal event ledger and persistent return envelope. The mature `century1.html` event/history engine remains separate until the shared inspector bridge is implemented.
+The 3D runtime now owns a typed causal event ledger, persistent terrain scars, and persistent return envelope. The mature `century1.html` event/history engine remains separate until the shared inspector bridge is implemented.
 
 # Tests executed
 
@@ -40,7 +41,7 @@ Not measured.
 
 # Known limitations
 
-No canonical `BattleOutcome`/`HistoryEvent` bridge, terrain scars, IndexedDB persistence, or history inspector integration in the 3D runtime yet.
+No canonical `BattleOutcome` bridge or IndexedDB persistence yet; the 3D inspector is currently limited to recent local events.
 
 # Completion status
 
