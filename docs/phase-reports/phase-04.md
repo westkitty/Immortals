@@ -13,6 +13,7 @@ Make future civilization state derive from inherited battle consequences rather 
 - Exposed development state through the 3D observation hook and save envelope.
 - Made adaptation visible through reinforced building materials and derived shelter structures after return cycles.
 - Added west/east safety pressure from impact location, allowing trade and visual reinforcement to diverge geographically.
+- Added transit capacity shifts away from the damaged district, visible district routes, and a pure west/east counterfactual divergence proof.
 
 # Files changed
 
@@ -41,7 +42,7 @@ Not measured.
 
 # Known limitations
 
-Development state is not yet rendered as distinct district layouts and is not connected to the mature 2D civilization simulator.
+Development state is not yet rendered as distinct district layouts and is not connected to the mature 2D civilization simulator; transit routing is currently represented by derived route geometry.
 
 # Completion status
 

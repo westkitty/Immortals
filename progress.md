@@ -37,3 +37,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added deterministic development state to the event ledger: population, trade, sheltering, and adaptation rise/fall from inherited collapse history and century returns.
 - Made development visible: returns reinforce surviving building materials and derive shelter structures from accumulated sheltering pressure; shockwave updates reapply the same policy.
 - Added west/east safety pressure derived from impact location; return-time trade updates and material policy now diverge by district.
+- Added west/east transit capacity, counterfactual divergence helper, and visible district transit routes derived from safety pressure.
