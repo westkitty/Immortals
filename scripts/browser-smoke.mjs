@@ -118,12 +118,16 @@ try {
     await hold([], 500);
   }
   const combatDefeat = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
+  if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || combatDefeat.battleOutcome?.winner !== 'immortal' || combatDefeat.battleOutcome?.eventIds.length < 4 || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click();
+  const persistedOutcome = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (persistedOutcome.saveVersion !== 2 || persistedOutcome.battleOutcome?.winner !== 'immortal' || persistedOutcome.rival.health !== 0 || errors.length) throw new Error(`Battle outcome persistence failed: ${JSON.stringify({ persistedOutcome, errors })}`);
   await page.keyboard.down('c');
   await page.evaluate(() => window.advanceTime(80));
   await page.keyboard.up('c');
   const centuryReturn = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (centuryReturn.year !== 100 || centuryReturn.rival.health !== 100 || centuryReturn.rival.visible !== true || centuryReturn.development.returnAwareness <= 0 || !centuryReturn.history.some((event) => event.type === 'return' && event.year === 100) || errors.length) throw new Error(`Century return journey failed: ${JSON.stringify({ centuryReturn, errors })}`);
+  if (centuryReturn.year !== 100 || centuryReturn.saveVersion !== 2 || centuryReturn.rival.health !== 100 || centuryReturn.rival.visible !== true || centuryReturn.battleOutcome?.winner !== 'immortal' || centuryReturn.development.returnAwareness <= 0 || !centuryReturn.history.some((event) => event.type === 'return' && event.year === 100) || errors.length) throw new Error(`Century return journey failed: ${JSON.stringify({ centuryReturn, errors })}`);
   await page.keyboard.down('h');
   await page.evaluate(() => window.advanceTime(80));
   await page.keyboard.up('h');

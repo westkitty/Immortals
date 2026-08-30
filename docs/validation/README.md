@@ -26,7 +26,7 @@ Stateful structure integrity/support transitions, bounded neighbor and bridge su
 
 ## Phase 3 incremental boundary
 
-The browser journey reloads after collapse and proves the hidden structure, restored rubble, and saved development adaptation persist. It then defeats the rival, presses `C`, and proves year 100, rival reset, return history, and nonzero return awareness. The localStorage/first-century slice is complete; canonical battle outcome and IndexedDB migration remain outside this boundary.
+The browser journey reloads after collapse and proves the hidden structure, restored rubble, and saved development adaptation persist. It then defeats the rival, verifies a sealed version-1 `BattleOutcome`, reloads to prove it persists in localStorage save version 2, presses `C`, and proves year 100, rival reset, return history, and nonzero return awareness. IndexedDB, corruption fixtures, full migration coverage, and world reconstruction remain outside this boundary.
 
 ## Phase 4 incremental boundary
 
@@ -42,8 +42,7 @@ The browser journey presses `T` and proves deterministic deep-time state at Year
 
 ## Unverified or incomplete
 
-- Wall-to-roof mantle and full multi-wall course completion.
 - Interactive debris riding under lifecycle reset and environmental enemy damage.
-- Canonical `BattleOutcome`, IndexedDB persistence/migration/corruption handling, and world reconstruction.
+- IndexedDB persistence/migration/corruption handling and world reconstruction.
 - Spatial civilization, carrier-based memory, campaign-integrated deep time, adaptive policy consequences, and geographic historical UX.
 - Release-grade performance measurements and the full adversarial A–Q gate.

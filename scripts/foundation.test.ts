@@ -6,6 +6,7 @@ import { simulateDeepTime } from '../src/deepTime';
 import { Action, createInputState } from '../src/input';
 import { applyStructureImpact, applySupportLoad, createStructureState } from '../src/destruction';
 import { applyDamage } from '../src/combat';
+import { createBattleOutcome } from '../src/battleOutcome';
 
 const root = join(import.meta.dirname, '..');
 
@@ -79,6 +80,12 @@ describe('Phase 0 foundation', () => {
     expect(applyDamage(rival, 25)).toMatchObject({ accepted: true, remaining: 25, defeated: false });
     expect(applyDamage(rival, 50)).toMatchObject({ accepted: true, damage: 25, remaining: 0, defeated: true });
     expect(applyDamage(rival, 10).accepted).toBe(false);
+  });
+
+  it('seals a versioned battle outcome with causal references', () => {
+    const outcome = createBattleOutcome({ year: 100, playerVitality: 92, collapsedStructureIds: ['bridge-west'], scarCount: 2, eventIds: ['collapse-1', 'strike-2'] });
+    expect(outcome).toMatchObject({ version: 1, winner: 'immortal', year: 100, scarCount: 2 });
+    expect(outcome.eventIds).toEqual(['collapse-1', 'strike-2']);
   });
 
   it('records causal events and advances the return clock', () => {

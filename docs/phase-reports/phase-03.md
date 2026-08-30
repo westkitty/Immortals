@@ -13,23 +13,25 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 - Preserved collapsed structures across the return and exposed state through the deterministic text hook.
 - Added typed `HistoryEvent` records for strikes, collapses, and returns; saved history is restored with the campaign.
 - Added persistent terrain scar geometry and an `H` causal inspector that renders recent event records.
+- Added a versioned `BattleOutcome` sealed on rival defeat with the victory year, player vitality, collapsed structures, scar count, and causal event identifiers.
+- Migrated the local save envelope to version 2 and proved the sealed outcome survives a browser reload before the `C` century return.
 
 # Files changed
 
-`src/main.ts`, `index.html`, and phase documentation.
+`src/battleOutcome.ts`, `src/main.ts`, browser coverage, and phase documentation.
 
 # Architecture changes
 
-The 3D runtime now owns a typed causal event ledger, persistent terrain scars, and persistent return envelope. The mature `century1.html` event/history engine remains separate until the shared inspector bridge is implemented.
+The 3D runtime now owns a typed causal event ledger, persistent terrain scars, a versioned battle-outcome contract, and a versioned persistent return envelope. The mature `century1.html` event/history engine remains separate until the shared inspector bridge is implemented.
 
 # Tests executed
 
-- `npm run verify` — PASS (build, typecheck, 15 unit tests).
-- `npm run test:browser` — PASS for collapse persistence across reload and the first-century return, with zero console errors.
+- `npm run verify` — PASS (build, typecheck, 16 unit tests).
+- `npm run test:browser` — PASS for collapse persistence, sealed battle-outcome persistence across reload, and the first-century return, with zero console errors.
 
 # Browser evidence
 
-The browser journey captures the existing Repair 2 screenshots after verifying persistence and the century return; the return screenshot shows `YEAR 100`, rival health 100, and `YEAR 100 // THE CITY REMEMBERS`.
+The browser journey defeats the rival, confirms the sealed immortal `BattleOutcome`, reloads to confirm save version 2 and the retained outcome, then reaches year 100. The final screenshot shows `YEAR 100` and the causal inspector.
 
 # Visual evidence
 
@@ -41,7 +43,7 @@ Not measured.
 
 # Known limitations
 
-No canonical `BattleOutcome` bridge or IndexedDB persistence yet; the 3D inspector is currently limited to recent local events. The browser-proven save boundary is the localStorage envelope.
+The browser-proven save boundary is a versioned localStorage envelope, not IndexedDB. The 3D inspector is currently limited to recent local events; full outcome reconstruction and corruption/migration fixtures remain outside this increment.
 
 # Completion status
 

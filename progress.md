@@ -133,6 +133,12 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Exposed deterministic civilization development state through `render_game_to_text`; the verified return reports nonzero return awareness and the persistence path reports adaptation 40.
 - `npm run verify` passes with 15 tests and `npm run test:browser` passes with zero console errors. Phase 3 is complete for the bounded localStorage/first-century slice; Phase 4 visible civilization consequences are next.
 
+## Phase 3 — versioned battle-outcome increment
+
+- Added `src/battleOutcome.ts`: victory seals a typed version-1 outcome with victory year, player vitality, collapsed structure IDs, scar count, and causal event IDs.
+- Migrated the localStorage save envelope to version 2; browser coverage now proves the outcome persists across a reload before the Year 100 transition.
+- Final gates pass: `npm run verify` reports 16 tests, and `npm run test:browser` passes the full traversal/destruction/combat/history/deep-time journey with zero console errors.
+
 ## Phase 4 — visible district policy increment
 
 - Added two derived district route meshes whose length and color respond to west/east safety and transit state.
