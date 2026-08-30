@@ -36,3 +36,4 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added persistent terrain scar geometry on shockwave, scar save/load, scar text-state output, and an `H` causal inspector for recent events.
 - Added deterministic development state to the event ledger: population, trade, sheltering, and adaptation rise/fall from inherited collapse history and century returns.
 - Made development visible: returns reinforce surviving building materials and derive shelter structures from accumulated sheltering pressure; shockwave updates reapply the same policy.
+- Added west/east safety pressure derived from impact location; return-time trade updates and material policy now diverge by district.

@@ -12,6 +12,7 @@ Make future civilization state derive from inherited battle consequences rather 
 - Collapse events increase adaptation pressure; century returns update development deterministically.
 - Exposed development state through the 3D observation hook and save envelope.
 - Made adaptation visible through reinforced building materials and derived shelter structures after return cycles.
+- Added west/east safety pressure from impact location, allowing trade and visual reinforcement to diverge geographically.
 
 # Files changed
 

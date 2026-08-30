@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { advanceHistory, createHistory, recordEvent } from '../src/history';
+import { advanceHistory, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
 
 const root = join(import.meta.dirname, '..');
 
@@ -34,5 +34,7 @@ describe('Phase 0 foundation', () => {
     expect(history.events.map((event) => event.type)).toEqual(['collapse', 'return']);
     expect(history.development.adaptation).toBeGreaterThan(0);
     expect(history.development.sheltering).toBeGreaterThan(0);
+    recordDistrictDamage(history, -20);
+    expect(history.development.westSafety).toBeLessThan(history.development.eastSafety);
   });
 });
