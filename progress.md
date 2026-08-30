@@ -125,3 +125,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Added bounded rubble-body gravity, bounce, spin, and settling motion; the inspected collapse screenshot still shows the visible rubble field.
 - Final gates pass: `npm run verify` reports 15 tests, `npm run test:browser` passes the complete traversal/destruction/combat journey with zero console errors, and local/remote SHA verification is pending this commit.
 - Repair 2 is complete for the bounded runtime slice. A general-purpose rigid-body solver, environmental enemy damage, and later campaign systems remain outside this phase boundary.
+
+## Phase 3 — persistence and first-century browser increment
+
+- Fixed load restoration for bridge and building integrity/support/collapse state; collapsed rubble is recreated after reload.
+- Extended the direct browser journey to prove collapse persistence across reload, then rival defeat → `C` → year 100 with rival reset and return awareness.
+- Exposed deterministic civilization development state through `render_game_to_text`; the verified return reports nonzero return awareness and the persistence path reports adaptation 40.
+- `npm run verify` passes with 15 tests and `npm run test:browser` passes with zero console errors. Phase 3 is complete for the bounded localStorage/first-century slice; Phase 4 visible civilization consequences are next.

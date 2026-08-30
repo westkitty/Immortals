@@ -68,6 +68,10 @@ try {
   const supportAffected = collapse.buildings.filter((building) => building.id !== 'building-1-1' && building.integrity < 100);
   if (!collapsed.length || !supportAffected.length || collapse.bridge.integrity >= 160 || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  const structurePersisted = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (!structurePersisted.buildings.some((building) => building.collapsed && building.visible === false && building.integrity < 18) || structurePersisted.rubbleCount <= 0 || structurePersisted.development.adaptation <= 0 || errors.length) throw new Error(`Structure persistence journey failed: ${JSON.stringify({ structurePersisted, errors })}`);
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
@@ -86,8 +90,13 @@ try {
   }
   const combatDefeat = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatDefeat.rival.health !== 0 || combatDefeat.rival.visible !== false || !combatDefeat.history.some((event) => event.consequence.includes('battle is won')) || errors.length) throw new Error(`Combat defeat journey failed: ${JSON.stringify({ combatDefeat, errors })}`);
+  await page.keyboard.down('c');
+  await page.evaluate(() => window.advanceTime(80));
+  await page.keyboard.up('c');
+  const centuryReturn = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (centuryReturn.year !== 100 || centuryReturn.rival.health !== 100 || centuryReturn.rival.visible !== true || centuryReturn.development.returnAwareness <= 0 || !centuryReturn.history.some((event) => event.type === 'return' && event.year === 100) || errors.length) throw new Error(`Century return journey failed: ${JSON.stringify({ centuryReturn, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible } }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, persisted: { collapsed: structurePersisted.buildings.filter((building) => building.collapsed).length, rubbleCount: structurePersisted.rubbleCount, adaptation: structurePersisted.development.adaptation } }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible }, centuryReturn: { year: centuryReturn.year, rivalHealth: centuryReturn.rival.health, visible: centuryReturn.rival.visible, returnAwareness: centuryReturn.development.returnAwareness } }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

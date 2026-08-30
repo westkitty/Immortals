@@ -24,6 +24,10 @@ The journey is browser-proven for the implemented traversal slice. The screensho
 
 Stateful structure integrity/support transitions, bounded neighbor and bridge support-load propagation, bounded combat damage, dynamic rubble creation, and debris lifecycle pass unit/browser coverage. The browser journey proves active debris expiry at age 30 and respawn, then navigates to a building, triggers shockwave, repeats the impact until the building collapses, asserts neighboring and bridge support load, reports visible dynamic rubble, and independently reaches the rival to assert damage, player vitality loss, and final defeat/hide state. Repair 2 is complete for this bounded runtime slice; a general-purpose rigid-body solver remains outside the boundary.
 
+## Phase 3 incremental boundary
+
+The browser journey reloads after collapse and proves the hidden structure, restored rubble, and saved development adaptation persist. It then defeats the rival, presses `C`, and proves year 100, rival reset, return history, and nonzero return awareness. The localStorage/first-century slice is complete; canonical battle outcome and IndexedDB migration remain outside this boundary.
+
 ## Unverified or incomplete
 
 - Wall-to-roof mantle and full multi-wall course completion.

@@ -24,16 +24,16 @@ The 3D runtime now owns a typed causal event ledger, persistent terrain scars, a
 
 # Tests executed
 
-- `npm run verify` — PASS (build, typecheck, 3 unit tests).
-- Browser journey — BLOCKED by Playwright protocol startup hang on this host.
+- `npm run verify` — PASS (build, typecheck, 15 unit tests).
+- `npm run test:browser` — PASS for collapse persistence across reload and the first-century return, with zero console errors.
 
 # Browser evidence
 
-No new browser artifact; the mandated client remains blocked during protocol startup.
+The browser journey captures the existing Repair 2 screenshots after verifying persistence and the century return; the return screenshot shows `YEAR 100`, rival health 100, and `YEAR 100 // THE CITY REMEMBERS`.
 
 # Visual evidence
 
-The implementation retains the same 3D geography and removes collapsed buildings from the rendered skyline on return; fresh screenshot evidence is pending browser validation.
+The inspected screenshot shows the active 3D city after the first return with the year and remembered-city status visible. The collapse screenshot shows the persisted skyline gap and rubble restored after reload.
 
 # Performance evidence if relevant
 
@@ -41,8 +41,8 @@ Not measured.
 
 # Known limitations
 
-No canonical `BattleOutcome` bridge or IndexedDB persistence yet; the 3D inspector is currently limited to recent local events.
+No canonical `BattleOutcome` bridge or IndexedDB persistence yet; the 3D inspector is currently limited to recent local events. The browser-proven save boundary is the localStorage envelope.
 
 # Completion status
 
-PARTIAL
+COMPLETE for the bounded localStorage/first-century runtime slice
