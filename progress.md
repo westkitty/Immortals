@@ -68,3 +68,12 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 
 - Added deterministic adversarial checks for west/east divergence at Year 100, 1,000, 10,000, and 100,000; repeated destruction; evidence quality and archaeology; relic lineage; save/load shape; deep-time strata; no-SVG; and offline runtime dependency boundaries.
 - Phase 10 remains PARTIAL because the browser journey is blocked by the mandated client hang, and context-specific crater value, protected landmarks, and cultural extinction are not fully modeled.
+
+## Repair 1 expanded traversal pass
+
+- Replaced the compressed traversal loop with explicit traversal state: wall contact and surface eligibility, wall run, wall climb, rebound, glide, dive, hard-landing recovery, moving surfable debris, grapple targeting, and camera collision handling.
+- Added pointer-lock yaw/pitch with clamp, speed-aware FOV, sensitivity and reduced-shake settings, momentum-preserving acceleration, long jump, directional dash cooldown, and deterministic input-edge consumption.
+- Extended `scripts/browser-smoke.mjs` into a direct Playwright journey covering sprint-jump, dash, glide, dive, open-air wall-run negative control, pause freeze, screenshot, and console errors.
+- Fixed two discovered defects during validation: vector speed clamping was incorrectly calling numeric `Vector3.set`, and glide/dive observations were sampled after key release. Added a logical action edge unit test.
+- `npm run verify` passes; `npm run test:browser` passes; inspected `output/web-game/repair-1-journey.png`.
+- Remaining bounded limitations: wall-to-roof mantle, complete multi-wall course, and release-grade FPS measurement are not claimed. Repair 2 has not started.

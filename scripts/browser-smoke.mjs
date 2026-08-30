@@ -20,14 +20,29 @@ try {
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
-  await page.keyboard.down('w');
-  await page.waitForTimeout(250);
-  await page.keyboard.up('w');
-  await page.waitForTimeout(100);
-  const state = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (state.mode !== 'explore' || !state.player || errors.length) throw new Error(`Browser smoke failed: ${JSON.stringify({ state, errors })}`);
-  await page.screenshot({ path: 'output/web-game/browser-smoke.png' });
-  console.log(JSON.stringify({ mode: state.mode, player: state.player, errors }, null, 2));
+  const hold = async (keys, ms) => {
+    for (const key of keys) await page.keyboard.down(key);
+    await page.evaluate((duration) => window.advanceTime(duration), ms);
+    const active = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+    for (const key of keys) await page.keyboard.up(key);
+    await page.evaluate(() => window.advanceTime(50));
+    return active;
+  };
+  const sprintJump = await hold(['w', 'Shift', 'Space'], 220);
+  const dash = await hold(['q'], 80);
+  const glide = await hold(['g'], 100);
+  await hold(['Space'], 300);
+  const dive = await hold(['Space', 'v'], 100);
+  const openAirWallRun = await hold(['w', 'Space'], 180);
+  if (sprintJump.mode !== 'explore' || sprintJump.player.y <= 2.2 || dash.traversal.dashCooldown <= 0 || !glide.traversal.gliding || !dive.traversal.diving || openAirWallRun.traversal.wallRun || errors.length) {
+    throw new Error(`Traversal browser journey failed: ${JSON.stringify({ sprintJump, dash, glide, dive, openAirWallRun, errors })}`);
+  }
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => window.advanceTime(500));
+  const paused = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  if (paused.mode !== 'paused' || errors.length) throw new Error(`Pause journey failed: ${JSON.stringify({ paused, errors })}`);
+  await page.screenshot({ path: 'output/web-game/repair-1-journey.png' });
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

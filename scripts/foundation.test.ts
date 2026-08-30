@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { advanceHistory, archaeologyRecover, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
 import { simulateDeepTime } from '../src/deepTime';
+import { Action, createInputState } from '../src/input';
 
 const root = join(import.meta.dirname, '..');
 
@@ -36,6 +37,19 @@ describe('Phase 0 foundation', () => {
     expect(source).toContain('window.render_game_to_text');
     expect(source).toContain('window.advanceTime');
     expect(readFileSync(join(root, 'index.html'), 'utf8')).toContain('id="enter"');
+  });
+
+  it('keeps logical action edges separate from held state', () => {
+    const input = createInputState();
+    input.keyDown('q');
+    expect(input.down.has(Action.Dash)).toBe(true);
+    expect(input.pressed.has(Action.Dash)).toBe(true);
+    input.consumeFrame();
+    expect(input.down.has(Action.Dash)).toBe(true);
+    expect(input.pressed.has(Action.Dash)).toBe(false);
+    input.keyUp('q');
+    expect(input.released.has(Action.Dash)).toBe(true);
+    expect(input.down.has(Action.Dash)).toBe(false);
   });
 
   it('records causal events and advances the return clock', () => {

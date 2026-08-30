@@ -21,7 +21,8 @@ Open `http://127.0.0.1:5173/`.
 
 - `WASD` / arrow keys: move
 - `Shift`: sprint
-- `Space`: jump; hold while airborne for the current wall-traversal prototype
+- `Space`: jump; hold while airborne near a valid wall to wall-run or climb
+- `Z`: rebound from a contacted wall
 - `Q`: air dash
 - `E`: grapple
 - `F`: strike
@@ -47,7 +48,7 @@ See [the validation index](docs/validation/README.md) for the current evidence b
 ## Architecture
 
 - Rendering: Three.js/WebGL
-- Gameplay, input, camera, combat, and rendering: currently concentrated in `src/main.ts`
+- Gameplay remains in `src/main.ts`, with browser input isolated behind logical held/pressed/released actions in `src/input.ts`; traversal contacts, grapple visibility, camera collision, and observation state are explicit runtime boundaries.
 - Short-term campaign/history: `src/history.ts`
 - Experimental deep-time benchmark: `src/deepTime.ts`
 - Persistence: localStorage campaign envelope
@@ -58,4 +59,4 @@ The scene graph is currently too authoritative and the history/civilization mode
 
 - Branch: `main`
 - Remote: `git@github.com:westkitty/Immortals.git`
-- Status: Repair 0 reconciles the repository with verified implementation. The first incomplete canonical phase is Phase 1: superhuman traversal.
+- Status: Repair 1 traversal implementation and browser gate are complete locally; publication is complete only after the final commit and remote SHA verification.

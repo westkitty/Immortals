@@ -9,7 +9,7 @@ Create a genuinely playable city traversal slice with superhuman movement and a 
 # Implemented
 
 - Added a real Three.js/WebGL procedural 3D city entry in `src/main.ts`.
-- Added a player and third-person camera with sprint, jump, wall traversal, air dash, grapple, shockwave launch, pause, resize, and deterministic observation hooks.
+- Added a player and third-person camera with sprint, long jump, momentum carry, explicit wall contact/surface classification, wall run, wall climb, rebound, directional air dash cooldown, line-of-sight grapple pull, glide, dive, hard-landing recovery, moving rideable debris, pause, resize, pointer lock, camera collision pull-in, and deterministic observation hooks.
 - Preserved the existing `century1.html` combat/history runtime and other prototypes.
 
 # Files changed
@@ -18,18 +18,18 @@ The package entry and architecture metadata now point to the new 3D traversal ru
 
 # Architecture changes
 
-The package renderer is now Three.js/WebGL with procedural geometry. Rigid-body physics, combat, and historical persistence remain deferred to later phases.
+The package renderer remains Three.js/WebGL with procedural geometry. Keyboard input now terminates at the logical action layer in `src/input.ts`; the runtime exposes traversal state rather than relying on screenshots. The controller remains kinematic. Combat/history scaffolding is preserved and Repair 2 is not started.
 
 # Tests executed
 
 - Source inspection of traversal and input paths — PASS.
 - Phase 0 build/typecheck/unit checks remain passing.
 - Three.js entry build and hook regression test — PASS.
-- Browser journey — BLOCKED by Playwright protocol startup hang.
+- `npm run test:browser` — PASS: deterministic sprint-jump, dash, glide, dive, open-air wall-run negative control, pause freeze, screenshot, and zero console errors.
 
 # Browser evidence
 
-Earlier mandated-client capture reached a rendered post-start city scene. A new deterministic text-state capture could not complete because the browser protocol process hangs on this host.
+Direct local Playwright reached the rendered post-start city scene and completed the traversal journey. The inspected journey screenshot shows the city, player, updated state HUD, and pause overlay.
 
 # Visual evidence
 
@@ -37,12 +37,12 @@ The inspected gameplay screenshot shows the player, buildings, bridge, roadway, 
 
 # Performance evidence if relevant
 
-Not measured.
+The browser observation reported device pixel ratio and draw-call count; a release FPS baseline is not claimed.
 
 # Known limitations
 
-No 3D renderer, third-person 3D camera, or independently verified browser journey yet.
+Wall-to-roof mantle, full multi-wall course completion, and release-grade performance measurement remain bounded follow-up work.
 
 # Completion status
 
-PARTIAL
+COMPLETE FOR REPAIR 1 TRAVERSAL GATE

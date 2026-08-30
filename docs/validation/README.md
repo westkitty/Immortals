@@ -8,7 +8,7 @@ These checks do not prove the player-visible traversal, combat, destruction, per
 
 ## Browser-tested
 
-`npm run test:browser` uses ordinary local Playwright. It launches Chromium, opens the active Vite application, force-clicks the entry control, performs a short movement burst, reads `window.render_game_to_text`, checks for console errors, and captures `output/web-game/browser-smoke.png`.
+`npm run test:browser` uses ordinary local Playwright. It launches Chromium, enters the active Vite application, performs deterministic sprint-jump, dash, glide, dive, open-air wall-run negative-control, and pause sequences, reads `window.render_game_to_text` while held actions are active, checks console errors, and captures `output/web-game/repair-1-journey.png`.
 
 The Repair 0 manual Playwright probe was run at 1280×800 and captured `output/web-game/repair-0-playwright.png`. The scene showed the active 3D player, rival, procedural streets/buildings, and HUD. It is evidence of startup only, not the required Phase 1 or later browser journeys.
 
@@ -16,9 +16,13 @@ The Repair 0 manual Playwright probe was run at 1280×800 and captured `output/w
 
 The Repair 0 browser screenshot was inspected after capture. It confirms that the current runtime is a minimal, readable 3D slice. It does not show wall contact traversal, structural failure, a century reconstruction, or historical world differences.
 
+## Repair 1 boundary
+
+The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. Wall-to-roof mantle, a full multi-wall course, and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
+
 ## Unverified or incomplete
 
-- Full Phase 1 traversal journey, including real wall contact, climb, glide, dive, rebound, and debris surfing.
+- Wall-to-roof mantle and full multi-wall course completion.
 - Structural support failure, bridge failure, interactive debris, environmental enemy damage, and rubble lifecycle.
 - Canonical `BattleOutcome`, IndexedDB persistence/migration/corruption handling, and world reconstruction.
 - Spatial civilization, carrier-based memory, campaign-integrated deep time, adaptive policy consequences, and geographic historical UX.

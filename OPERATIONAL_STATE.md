@@ -1,15 +1,15 @@
 # Operational State
 
-CURRENT PHASE: Repair 0 complete; canonical Phase 1 is the earliest incomplete phase.
+CURRENT PHASE: Repair 1 implementation complete locally; publication gate pending final commit and remote SHA verification.
 
 REMOTE: `origin` configured as `git@github.com:westkitty/Immortals.git`; remote was empty at initialization probe.
 
 CORE LOOP: The active package entry launches a Three.js/WebGL 3D traversal/combat slice with a localStorage envelope, visual scars, compact event ledger, and 100-year return. The older canvas prototypes contain separate experiments and are not integrated into this runtime.
 
-CURRENT CAPABILITIES: `src/main.ts` adds a persistent 3D rival, strike/knockback, rival health, shockwave structure damage, collapse state, persistent terrain scars, typed causal events, local save/load, century advance, return-state reconstruction, an `H` causal inspector, objective/public history separation, evidence decay, archaeology recovery, material relic lineage, deterministic development pressure, west/east safety and transit divergence, reinforced materials, derived shelter structures, visible district transit routes, `T` deep-time projection to Year 100,000, return-awareness/corridor state, a historical scrubber/map interface that filters the causal ledger by archive year, accessible live status/controls, reduced-motion CSS, responsive mobile layout, and render pixel-ratio/draw-call instrumentation. Three original HTML prototypes remain preserved.
+CURRENT CAPABILITIES: Repair 1 adds logical held/pressed/released actions, pointer-lock yaw/pitch, speed-aware chase camera with obstruction pull-in, responsive acceleration and momentum carry, long jump, wall-contact classification, wall run, wall climb, rebound, air dash cooldown, line-of-sight grapple, glide, dive, hard-landing recovery, moving surfable debris, explicit traversal state output, deterministic frame consumption, and a direct browser journey. Existing history/combat scaffolding remains preserved; Repair 2 is not started.
 
-LAST VALIDATION: `npm run verify` passes. Direct local Playwright launches Chromium, enters the active runtime, reads explore-mode state, and captures a startup screenshot without console errors. The previous custom helper was the failing component; it has been replaced with direct Playwright smoke coverage.
+LAST VALIDATION: `npm run verify` passes with 12 tests. `npm run test:browser` passes the deterministic Repair 1 journey, pause freeze, negative wall-run control, screenshot, and zero console errors.
 
-NEXT PHASE: Repair 1 / canonical Phase 1 — complete real superhuman traversal. Do not advance until its full browser journey and visual requirements pass.
+NEXT PHASE: Repair 2 — only after the Repair 1 commit is pushed and local/remote SHA equality is verified.
 
-KNOWN LIMITATIONS: Later Phase 4–10 code is preserved as experimental scaffolding, not completion evidence. The active runtime lacks several Phase 1 mechanics and browser journey proof; it also lacks structural support failure, canonical battle outcomes, IndexedDB, spatial civilization, carrier-based memory, campaign-integrated deep time, and release performance measurements.
+KNOWN LIMITATIONS: The active runtime remains kinematic; wall-to-roof mantle, full multi-wall course completion, and measured release performance remain limited. Later Phase 4–10 code is preserved as experimental scaffolding. Repair 2 systems—combat overhaul, structural destruction, and historical simulation—have not begun.
