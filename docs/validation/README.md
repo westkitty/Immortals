@@ -18,7 +18,7 @@ The Repair 0 browser screenshot was inspected after capture. It confirms that th
 
 ## Repair 1 boundary
 
-The journey is browser-proven for the implemented traversal slice. The inspected `output/web-game/repair-1-multiwall.png` shows the second mantle transition. The normal-input route reaches both procedural towers, observes both mantle transitions, and reaches second-roof height 32.38. Measured release FPS remains unclaimed. Repair 2 remains outside this checkpoint.
+The journey is browser-proven for the implemented traversal slice. The inspected `output/web-game/repair-1-multiwall.png` shows the second mantle transition. The normal-input route reaches both procedural towers, observes both mantle transitions, reaches second-roof height 32.38, and positively latches a reachable grapple. `npm run test:browser:phase1` passes and records a Chromium-headless 1280×800/DPR 1 baseline: 22 draw calls and 7.3–9.1 FPS across ordinary, sprint, grapple, and multi-block routes. This is not a release-device performance claim.
 
 ## Repair 2 incremental boundary
 
@@ -45,4 +45,4 @@ The browser journey presses `T` and proves deterministic deep-time state at Year
 - Interactive debris riding under lifecycle reset and environmental enemy damage.
 - IndexedDB persistence, full migration compatibility coverage, and world reconstruction.
 - Spatial civilization, carrier-based memory, campaign-integrated deep time, adaptive policy consequences, and geographic historical UX.
-- Release-grade performance measurements and the full adversarial A–Q gate.
+- Release-grade desktop/device performance measurements and the full adversarial A–Q gate.

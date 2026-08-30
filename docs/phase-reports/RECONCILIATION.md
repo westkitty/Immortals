@@ -13,9 +13,9 @@ The active runtime is the Vite/Three.js entry at `src/main.ts`, not the preserve
 | Phase | Required behavior | Exists | Tested | Browser proven | Visual proven | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0 | Repository foundation and truthful authority | Yes | Build/typecheck/unit docs checks | Startup only | Startup scene | COMPLETE after Repair 0 |
-| 1 | Full superhuman traversal | Partial | Source/unit hooks only | No full journey | No mechanic evidence | PARTIAL |
-| 2 | Structural combat, bridge failure, debris | Partial | Source/unit assertions | No | No | PARTIAL |
-| 3 | `BattleOutcome`, versioned persistence, reconstructed return | Partial | Ledger helpers only | No | No changed-world proof | PARTIAL |
+| 1 | Full superhuman traversal | Yes | Action tests, complete journey, performance baseline | Two-tower mantle, dash, reachable grapple, glide/dive, pause and negative control | Mantle screenshot | COMPLETE FOR BOUNDED GATE |
+| 2 | Structural combat, bridge failure, debris | Partial | Source/unit assertions | Collapse, rubble, bridge support, and combat journey | Collapse screenshot | PARTIAL |
+| 3 | `BattleOutcome`, versioned persistence, reconstructed return | Partial | BattleOutcome helper and save migration coverage | Outcome reload and first-century journey | Year-100 inspector screenshot | PARTIAL |
 | 4 | Spatial civilization model | No | No | No | No | NOT IMPLEMENTED |
 | 5 | Carrier-based memory and archaeology | No | Scalar helper checks only | No | No | NOT IMPLEMENTED |
 | 6 | Campaign-integrated Year 100,000 world | No | Projection determinism only | No | No | NOT IMPLEMENTED |
@@ -26,4 +26,4 @@ The active runtime is the Vite/Three.js entry at `src/main.ts`, not the preserve
 
 ## Earliest incomplete phase
 
-Canonical Phase 1 is the earliest incomplete phase after Repair 0. Repairs must stop at any partial phase; later code remains preserved as experimental scaffolding and must not be promoted by filename, commit order, or unrelated tests.
+Canonical Phase 2 is the earliest incomplete phase after Repair 1. Later code remains preserved as experimental scaffolding and must not be promoted by filename, commit order, or unrelated tests.

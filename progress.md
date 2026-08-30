@@ -144,6 +144,12 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Versionless localStorage envelopes are now rewritten as version 2 after a successful load; malformed and unsupported future envelopes are removed before they can partially apply.
 - The direct browser journey proves both migration and corruption recovery before continuing through the full game path.
 
+## Repair 1 — canonical performance and grapple checkpoint
+
+- Lowered grapple anchors into the grounded look-cone and added a positive latch assertion to the browser journey.
+- Added `npm run test:performance` and `npm run test:browser:phase1`; the complete Phase 1 command records real request-animation-frame samples for ordinary traversal, sprint, grapple, and multi-block travel.
+- The verified Chromium-headless baseline at 1280×800/DPR 1 is 22 draw calls and 7.3–9.1 FPS. It is a host-bound baseline, not release-device performance approval.
+
 ## Phase 4 — visible district policy increment
 
 - Added two derived district route meshes whose length and color respond to west/east safety and transit state.

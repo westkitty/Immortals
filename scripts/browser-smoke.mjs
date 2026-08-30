@@ -74,14 +74,15 @@ try {
   const glide = await hold(['g'], 100);
   await hold(['Space'], 300);
   const dive = await hold(['Space', 'v'], 100);
+  const grapple = await hold(['e'], 160);
   const openAirWallRun = await hold(['w', 'Space'], 180);
   const debrisActive = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   await page.evaluate(() => window.advanceTime(27500));
   const debrisExpired = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   await page.evaluate(() => window.advanceTime(1500));
   const debrisRespawned = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (sprintJump.mode !== 'explore' || sprintJump.player.y <= 2.2 || !debrisActive.traversal.debris.every((item) => item.active) || !debrisExpired.traversal.debris.some((item) => !item.active) || !debrisRespawned.traversal.debris.every((item) => item.active) || dash.traversal.dashCooldown <= 0 || !glide.traversal.gliding || !dive.traversal.diving || openAirWallRun.traversal.wallRun || errors.length) {
-    throw new Error(`Traversal browser journey failed: ${JSON.stringify({ checks: { mode: sprintJump.mode, airborne: sprintJump.player.y > 2.2, active: debrisActive.traversal.debris.every((item) => item.active), expired: debrisExpired.traversal.debris.some((item) => !item.active), respawned: debrisRespawned.traversal.debris.every((item) => item.active), dash: dash.traversal.dashCooldown > 0, glide: glide.traversal.gliding, dive: dive.traversal.diving, openAirWallRun: !openAirWallRun.traversal.wallRun, errors: errors.length === 0 }, sprintJump, debrisActive, debrisExpired, debrisRespawned, dash, glide, dive, openAirWallRun, errors })}`);
+  if (sprintJump.mode !== 'explore' || sprintJump.player.y <= 2.2 || !debrisActive.traversal.debris.every((item) => item.active) || !debrisExpired.traversal.debris.some((item) => !item.active) || !debrisRespawned.traversal.debris.every((item) => item.active) || dash.traversal.dashCooldown <= 0 || !grapple.traversal.grapple || !glide.traversal.gliding || !dive.traversal.diving || openAirWallRun.traversal.wallRun || errors.length) {
+    throw new Error(`Traversal browser journey failed: ${JSON.stringify({ checks: { mode: sprintJump.mode, airborne: sprintJump.player.y > 2.2, active: debrisActive.traversal.debris.every((item) => item.active), expired: debrisExpired.traversal.debris.some((item) => !item.active), respawned: debrisRespawned.traversal.debris.every((item) => item.active), dash: dash.traversal.dashCooldown > 0, grapple: grapple.traversal.grapple, glide: glide.traversal.gliding, dive: dive.traversal.diving, openAirWallRun: !openAirWallRun.traversal.wallRun, errors: errors.length === 0 }, sprintJump, debrisActive, debrisExpired, debrisRespawned, dash, grapple, glide, dive, openAirWallRun, errors })}`);
   }
   await page.keyboard.press('Escape');
   await page.evaluate(() => window.advanceTime(500));

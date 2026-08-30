@@ -25,7 +25,8 @@ The package renderer remains Three.js/WebGL with procedural geometry. Keyboard i
 - Source inspection of traversal and input paths — PASS.
 - Phase 0 build/typecheck/unit checks remain passing.
 - Three.js entry build and hook regression test — PASS.
-- `npm run test:browser` — PASS: normal-input two-tower climb → mantle → mantle route, deterministic sprint-jump, dash, glide, dive, open-air wall-run negative control, pause freeze, screenshots, and zero console errors.
+- `npm run test:browser` — PASS: normal-input two-tower climb → mantle → mantle route, deterministic sprint-jump, dash, reachable grapple, glide, dive, open-air wall-run negative control, pause freeze, screenshots, and zero console errors.
+- `npm run test:browser:phase1` — PASS: reruns the complete browser journey and measures four real request-animation-frame scenarios.
 
 # Browser evidence
 
@@ -37,12 +38,12 @@ The inspected gameplay screenshot shows the player, buildings, bridge, roadway, 
 
 # Performance evidence if relevant
 
-The browser observation reported device pixel ratio and draw-call count; a release FPS baseline is not claimed.
+Chromium headless at 1280×800, device scale factor 1, measured 22 draw calls and 7.3 FPS ordinary traversal, 8.3 FPS sprint, 8.5 FPS reachable grapple, and 9.1 FPS multi-block travel. This is a reproducible headless baseline, not a release performance claim.
 
 # Known limitations
 
-Release-grade performance measurement remains bounded follow-up work.
+Release-grade desktop/device performance measurement remains follow-up work; the required Phase 1 headless baseline is recorded.
 
 # Completion status
 
-COMPLETE FOR REPAIR 1 TRAVERSAL GATE
+COMPLETE FOR REPAIR 1 / CANONICAL PHASE 1 TRAVERSAL GATE

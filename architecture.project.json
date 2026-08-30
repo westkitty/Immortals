@@ -9,10 +9,10 @@
     "timing": "requestAnimationFrame with variable delta capped at 50ms; window.advanceTime exposes fixed 60Hz stepping for observation",
     "input": "Logical action state in src/input.ts with held, pressed, released, pointer-lock look, and deterministic frame consumption",
     "camera": "Third-person chase camera with yaw/pitch clamp, speed FOV, pointer lock, obstruction pull-in, shake reduction, and sensitivity settings",
-    "physics": "application-owned kinematic approximation; no rigid-body physics or structure solver",
-    "combat": "player strike/shockwave and a pursuing rival; no player damage or environmental enemy destruction",
-    "destruction": "building-height reduction/visibility changes and visual scar discs; no support graph, bridge failure, or active debris",
-    "persistence": "localStorage campaign envelope; no schema migration, corruption handling, or IndexedDB",
+    "physics": "application-owned kinematic traversal plus bounded rubble velocities; no general-purpose rigid-body solver",
+    "combat": "bounded player strike/shockwave, pursuing rival, and player vitality; no environmental enemy destruction",
+    "destruction": "stateful building/bridge integrity and support propagation, visible rubble, and terrain scars; no general-purpose structural solver",
+    "persistence": "version-2 localStorage campaign envelope with versionless-save rewrite and malformed/future-save recovery; no IndexedDB",
     "workers": false,
     "postprocessing": false,
     "instancing": false,
@@ -20,8 +20,8 @@
     "generatedAssets": "procedural Three.js geometry",
     "gamepad": false,
     "spatialAudio": false,
-    "tests": "Vitest source/helper checks and direct Playwright traversal journey with deterministic text state, pause freeze, negative control, screenshot, and console capture"
+    "tests": "16 Vitest checks, direct Playwright traversal/destruction/combat journey, and a request-animation-frame Phase 1 performance baseline"
   },
   "prototypes": ["century1.html", "EVERY_FIGHT.html", "every-fight-is-followed-by-a-century.html"],
-  "truthBoundary": "The active entry is an experimental Three.js/WebGL slice. Its compact history and deep-time helpers are not the canonical 100,000-year campaign world; all later phase systems remain provisional until their completion contracts are proven."
+  "truthBoundary": "The active entry completes the bounded Phase 1 traversal gate but is not the canonical 100,000-year campaign world. Its compact history and deep-time helpers, and all later phase systems, remain provisional until their completion contracts are proven."
 }

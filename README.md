@@ -39,9 +39,10 @@ Open `http://127.0.0.1:5173/`.
 ```bash
 npm run verify
 npm run test:browser
+npm run test:browser:phase1
 ```
 
-`verify` runs the build, TypeScript check, and unit tests. `test:browser` now uses direct local Playwright, starts the game, performs a short movement input, captures a screenshot, and checks the exposed game state. It is a smoke test, not proof of the full player journey.
+`verify` runs the build, TypeScript check, and unit tests. `test:browser` uses direct local Playwright and proves the current traversal/destruction/combat/history journey. `test:browser:phase1` adds a four-scenario request-animation-frame baseline: ordinary traversal, sprint, reachable grapple, and multi-block travel.
 
 See [the validation index](docs/validation/README.md) for the current evidence boundary.
 
@@ -53,10 +54,10 @@ See [the validation index](docs/validation/README.md) for the current evidence b
 - Experimental deep-time benchmark: `src/deepTime.ts`
 - Persistence: localStorage campaign envelope
 
-The scene graph is currently too authoritative and the history/civilization model is too small for the final thesis. Repair work resumes at canonical Phase 1 after Repair 0; later Phase 4–10 code is preserved as experimental scaffolding, not completion evidence.
+The scene graph is currently too authoritative and the history/civilization model is too small for the final thesis. The bounded canonical Phase 1 traversal gate is complete; Canonical Phase 2 is next. Later Phase 4–10 code is preserved as experimental scaffolding, not completion evidence.
 
 ## Repository
 
 - Branch: `main`
 - Remote: `git@github.com:westkitty/Immortals.git`
-- Status: Repair 1 traversal implementation and browser gate are complete locally; publication is complete only after the final commit and remote SHA verification.
+- Status: Repair 1 traversal implementation, browser gate, and reproducible headless baseline are complete locally; publication is complete only after the final commit and remote SHA verification.
