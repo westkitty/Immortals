@@ -34,7 +34,7 @@ The same browser journey proves a west/east district policy split after western 
 
 ## Phase 5 incremental boundary
 
-The browser journey presses `H` to open the visible objective ledger and `A` to recover the first weakened event. It proves that objective history remains present while the public account changes to recovered evidence, and checks the rendered panel text. The inspected combat screenshot shows the panel with archive controls; site-specific recovery and richer evidence-carrier workflow remain outside the boundary.
+The browser journey presses `H` to open the visible objective ledger, clicks a site-level recovery button, and presses `A` to recover the next weakened event. It proves that objective history remains present while public accounts change to recovered evidence, and checks the rendered panel text. Multiple independent evidence-carrier types and archaeology provenance remain outside the boundary.
 
 ## Phase 6 incremental boundary
 

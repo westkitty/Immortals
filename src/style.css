@@ -20,6 +20,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffcf70; outline-
 .history-event { padding: 10px 0; border-top: 1px solid rgba(162, 208, 220, .16); color: #b5c1c7; font-size: 12px; line-height: 1.4; }
 .history-event b { color: #84e4f3; font-family: ui-monospace, monospace; }
 .history-event .objective { color: #e6edf0; }
+.recover-evidence { margin-top: 8px; padding: 8px 10px; font-size: 9px; }
 .scrub-label { display: flex; justify-content: space-between; color: #9bb0b8; font: 700 10px ui-monospace, monospace; letter-spacing: .08em; }
 #timeline { width: 100%; margin: 10px 0 14px; accent-color: #84e4f3; }
 #history-map { position: relative; height: 44px; margin-bottom: 12px; border: 1px solid rgba(162, 208, 220, .2); background: linear-gradient(90deg, #173d48 0 49%, #402f25 49%); overflow: hidden; }

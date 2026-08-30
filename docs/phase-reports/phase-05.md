@@ -25,11 +25,11 @@ History now separates objective event records from public interpretation and sup
 # Tests executed
 
 - `npm run verify` — PASS (build, typecheck, 15 tests).
-- `npm run test:browser` — PASS: history toggle, archaeology recovery, persistence, traversal, destruction, combat, and zero console errors.
+- `npm run test:browser` — PASS: visible history toggle, site-level evidence recovery, persistence, traversal, destruction, combat, and zero console errors.
 
 # Browser evidence
 
-The direct Playwright journey opens the ledger with `H`, recovers the first weakened objective event with `A`, and reports the recovered public account while preserving the objective event. The same run proves the previously recorded collapse and return paths after reload and defeat.
+The direct Playwright journey opens the ledger with `H`, recovers one weakened event through its site-specific button and a second with `A`, and reports both recovered public accounts while preserving the objective events. The same run proves the previously recorded collapse and return paths after reload and defeat.
 
 # Visual evidence
 
@@ -41,7 +41,7 @@ Not measured.
 
 # Known limitations
 
-Archaeology currently recovers the first weakened event; site selection and multiple independent evidence carriers are not yet modeled. The visible H inspector is browser-covered with objective consequence, public account, evidence percentage, and archive controls.
+Archaeology now supports site-level recovery buttons plus keyboard recovery of the next weakened event. Multiple independent evidence-carrier types and archaeology provenance are not yet modeled. The visible H inspector is browser-covered with objective consequence, public account, evidence percentage, and archive controls.
 
 # Completion status
 

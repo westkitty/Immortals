@@ -144,6 +144,7 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Fixed the archaeology control binding so `A` preserves movement-left while also exposing the intended archaeology action.
 - Extended the browser journey to prove `H` opens the objective ledger, `A` recovers a weakened public account, and objective event records remain intact.
 - Made the H ledger visibly render objective consequence, public account, evidence percentage, and archive-year filtering; the browser gate checks panel visibility and content.
+- Added site-specific `RECOVER SITE EVIDENCE` controls; browser coverage now recovers one selected site and the next weakened event through `A`.
 - Extended the browser journey to prove `T` exposes the deterministic Year 100,000 projection and replay hash `1701:100000:199248:100.0000:88.9204:560:10`.
 - Inspected the collapse and deep-time screenshots; the browser run reports zero console errors. `npm run verify` passes with 15 tests.
-- Phase 5 and Phase 6 remain partial: richer evidence carriers, site-specific recovery, campaign-event coupling, snapshots, and mature simulator integration are not complete.
+- Phase 5 and Phase 6 remain partial: richer evidence-carrier types, archaeology provenance, campaign-event coupling, snapshots, and mature simulator integration are not complete.
