@@ -20,6 +20,8 @@ The Repair 0 browser screenshot was inspected after capture. It confirms that th
 
 The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. Wall-to-roof mantle, a full multi-wall course, and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
 
+The runtime now contains an explicit mantle transition and HUD/text observation state. The current browser journey provides regression coverage but does not yet claim a positive normal-input wall-to-roof route.
+
 ## Repair 2 incremental boundary
 
 Stateful structure integrity/support transitions, bounded neighbor and bridge support-load propagation, bounded combat damage, dynamic rubble creation, and debris lifecycle pass unit/browser coverage. The browser journey proves active debris expiry at age 30 and respawn, then navigates to a building, triggers shockwave, repeats the impact until the building collapses, asserts neighboring and bridge support load, reports visible dynamic rubble, and independently reaches the rival to assert damage, player vitality loss, and final defeat/hide state. Repair 2 is complete for this bounded runtime slice; a general-purpose rigid-body solver remains outside the boundary.
