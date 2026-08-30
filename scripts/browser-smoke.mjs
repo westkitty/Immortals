@@ -8,7 +8,7 @@ let output = '';
 server.stdout.on('data', (chunk) => { output += chunk; });
 await new Promise((resolve, reject) => {
   const timer = setTimeout(resolve, 8000);
-  server.stdout.on('data', (chunk) => { if (String(chunk).includes('4173')) { clearTimeout(timer); resolve(); } });
+  server.stdout.on('data', (chunk) => { if (String(chunk).includes('Local:')) { clearTimeout(timer); resolve(); } });
   server.once('error', reject);
 });
 console.log(output.trim());
@@ -53,6 +53,14 @@ try {
   await page.keyboard.up('r');
   const damaged = structureImpact.buildings.filter((building) => building.integrity < 100 || building.collapsed);
   if (!damaged.length || structureImpact.rubbleCount < 0 || errors.length) throw new Error(`Structure impact journey failed: ${JSON.stringify({ damaged, rubbleCount: structureImpact.rubbleCount, errors })}`);
+  for (let impact = 0; impact < 3; impact += 1) {
+    await page.keyboard.down('r');
+    await page.evaluate(() => window.advanceTime(80));
+    await page.keyboard.up('r');
+  }
+  const collapse = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  const collapsed = collapse.buildings.filter((building) => building.collapsed);
+  if (!collapsed.length || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, rubbleCount: collapse.rubbleCount, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
@@ -66,7 +74,7 @@ try {
   const combatAfterHit = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatAfterAttack.rival.health >= combatBefore.rival.health || combatAfterHit.playerCombat.health >= 100 || errors.length) throw new Error(`Combat journey failed: ${JSON.stringify({ combatBefore, combatAfterAttack, combatAfterHit, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, rubbleCount: structureImpact.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat }, errors }, null, 2));
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, rubbleCount: collapse.rubbleCount }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

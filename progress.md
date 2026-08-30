@@ -92,3 +92,10 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Browser combat journey reaches the rival, verifies health 100 → 75 after attack and player vitality 100 → 92 after counterattack, with zero console errors.
 - Captured and inspected `output/web-game/repair-2-combat.png`.
 - `npm run verify` passes with 14 tests. Repair 2 remains in progress; bridge/support propagation, full collapse lifecycle, combat defeat flow, and rigid-body physics remain.
+
+## Repair 2 — collapse lifecycle increment
+
+- Extended the browser journey to repeat shockwave impacts until a building reaches zero height, becomes hidden, and reports eight visible rubble chunks.
+- Fixed the browser harness startup race by waiting for Vite's readiness line before connecting; the full journey now completes with zero console errors.
+- Re-ran the full traversal, pause, structure-impact, collapse/rubble, and combat scenarios; inspected `output/web-game/repair-2-collapse.png` and `output/web-game/repair-2-combat.png`.
+- `npm run verify` passes with 14 tests and `npm run test:browser` passes. Repair 2 remains in progress; bridge/support propagation, debris lifecycle, combat defeat flow, and rigid-body physics remain.
