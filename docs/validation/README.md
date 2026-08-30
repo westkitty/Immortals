@@ -20,6 +20,10 @@ The Repair 0 browser screenshot was inspected after capture. It confirms that th
 
 The journey is browser-proven for the implemented traversal slice. The screenshot was opened and visually inspected after the passing run. Wall-to-roof mantle, a full multi-wall course, and measured release FPS remain unclaimed. Repair 2 remains outside this checkpoint.
 
+## Repair 2 incremental boundary
+
+Stateful structure integrity/support transitions and rubble creation pass unit coverage. The browser journey also navigates to a building, triggers shockwave, asserts reduced integrity, and captures `output/web-game/repair-2-collapse.png`; full support propagation remains pending.
+
 ## Unverified or incomplete
 
 - Wall-to-roof mantle and full multi-wall course completion.

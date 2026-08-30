@@ -42,7 +42,18 @@ try {
   const paused = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (paused.mode !== 'paused' || errors.length) throw new Error(`Pause journey failed: ${JSON.stringify({ paused, errors })}`);
   await page.screenshot({ path: 'output/web-game/repair-1-journey.png' });
-  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, errors }, null, 2));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  await hold(['a'], 1600);
+  await hold(['w'], 1500);
+  await page.keyboard.down('r');
+  await page.evaluate(() => window.advanceTime(50));
+  const structureImpact = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  await page.keyboard.up('r');
+  const damaged = structureImpact.buildings.filter((building) => building.integrity < 100 || building.collapsed);
+  if (!damaged.length || structureImpact.rubbleCount < 0 || errors.length) throw new Error(`Structure impact journey failed: ${JSON.stringify({ damaged, rubbleCount: structureImpact.rubbleCount, errors })}`);
+  await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
+  console.log(JSON.stringify({ mode: paused.mode, sprintJump: sprintJump.traversal, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, rubbleCount: structureImpact.rubbleCount }, errors }, null, 2));
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

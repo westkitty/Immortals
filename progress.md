@@ -77,3 +77,11 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Fixed two discovered defects during validation: vector speed clamping was incorrectly calling numeric `Vector3.set`, and glide/dive observations were sampled after key release. Added a logical action edge unit test.
 - `npm run verify` passes; `npm run test:browser` passes; inspected `output/web-game/repair-1-journey.png`.
 - Remaining bounded limitations: wall-to-roof mantle, complete multi-wall course, and release-grade FPS measurement are not claimed. Repair 2 has not started.
+
+## Repair 2 — structural integrity increment
+
+- Added `src/destruction.ts` with explicit structure integrity, support, collapse, and support-failure transitions.
+- Integrated building structure state into the shockwave path and added four visible rubble chunks on collapse; exposed integrity, support, collapsed state, and rubble count through `render_game_to_text`.
+- Added unit coverage for non-collapsing impact, support failure, and inert post-collapse behavior.
+- `npm run verify` passes with 13 tests; `npm run test:browser` passes with zero console errors; the journey screenshot was inspected again.
+- Added positive browser structure-impact coverage: the player navigates to a building, shockwave reduces integrity from 100 to 72, and `output/web-game/repair-2-collapse.png` was inspected. Repair 2 remains in progress; bridge/support propagation, full collapse lifecycle, and remaining combat behaviors are pending.

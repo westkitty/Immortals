@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { advanceHistory, archaeologyRecover, counterfactualDivergence, createHistory, recordDistrictDamage, recordEvent } from '../src/history';
 import { simulateDeepTime } from '../src/deepTime';
 import { Action, createInputState } from '../src/input';
+import { applyStructureImpact, createStructureState } from '../src/destruction';
 
 const root = join(import.meta.dirname, '..');
 
@@ -50,6 +51,17 @@ describe('Phase 0 foundation', () => {
     input.keyUp('q');
     expect(input.released.has(Action.Dash)).toBe(true);
     expect(input.down.has(Action.Dash)).toBe(false);
+  });
+
+  it('models impact damage and support failure as stateful structure behavior', () => {
+    const structure = createStructureState('tower-1', 100);
+    const first = applyStructureImpact(structure, 28);
+    expect(first.damage).toBe(28);
+    expect(first.collapsed).toBe(false);
+    const collapse = applyStructureImpact(structure, 90);
+    expect(collapse.collapsed).toBe(true);
+    expect(structure.support).toBeLessThan(0.12);
+    expect(applyStructureImpact(structure, 100).damage).toBe(0);
   });
 
   it('records causal events and advances the return clock', () => {
