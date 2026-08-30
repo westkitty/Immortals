@@ -139,6 +139,11 @@ Original prompt: Build the repository-bound game Every Fight Is Followed By A Ce
 - Migrated the localStorage save envelope to version 2; browser coverage now proves the outcome persists across a reload before the Year 100 transition.
 - Final gates pass: `npm run verify` reports 16 tests, and `npm run test:browser` passes the full traversal/destruction/combat/history/deep-time journey with zero console errors.
 
+## Phase 3 — migration and corrupt-save increment
+
+- Versionless localStorage envelopes are now rewritten as version 2 after a successful load; malformed and unsupported future envelopes are removed before they can partially apply.
+- The direct browser journey proves both migration and corruption recovery before continuing through the full game path.
+
 ## Phase 4 — visible district policy increment
 
 - Added two derived district route meshes whose length and color respond to west/east safety and transit state.

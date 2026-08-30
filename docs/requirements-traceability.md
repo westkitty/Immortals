@@ -8,7 +8,7 @@
 | REQ-MOVE-001 | Superhuman traversal | `src/main.ts`, `src/input.ts` | 1 | Direct Playwright journey, deterministic observation state, negative wall-run control, screenshot, and action-edge unit test | COMPLETE FOR REPAIR 1 SLICE |
 | REQ-DEST-001 | Structural failure behavior | `src/main.ts` | 2 | Browser journey proves repeated impact, collapse, rubble, neighbor support propagation, and destructible bridge support; general-purpose physics remains absent | PARTIAL |
 | REQ-HIST-001 | Objective and believed history differ | `src/history.ts`, inspector UI | 5 | Scalar evidence/public-account helper tests; no evidence-carrier model | PARTIAL |
-| REQ-PERSIST-001 | Campaign survives save/load | `src/main.ts` localStorage v2 envelope | 3 | Browser journey proves collapse state and versioned `BattleOutcome` across reload; no IndexedDB or corruption fixture | PARTIAL |
+| REQ-PERSIST-001 | Campaign survives save/load | `src/main.ts` localStorage v2 envelope | 3 | Browser journey proves v1-to-v2 rewrite, malformed-save reset, collapse state, and versioned `BattleOutcome` across reload; no IndexedDB | PARTIAL |
 | REQ-ARCH-001 | Civilization adapts architecture | `src/history.ts`, derived meshes | 4/7 | Scalar adaptation and visual policy exist; no spatial civilization model | PARTIAL |
 | REQ-DIVERGE-001 | Different early actions create different futures | `src/history.ts` helper | 4/10 | Deterministic scalar safety divergence; no spatial-world counterfactual | PARTIAL |
 | REQ-ASSET-001 | No SVG artwork | repository asset contract | 0 | Automated source scan | COMPLETE |

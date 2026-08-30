@@ -55,6 +55,18 @@ try {
   await page.keyboard.up('d');
   const multiWall = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (!secondMantleSeen || secondMantleHeight < 20) throw new Error(`Multi-wall route failed: ${JSON.stringify({ secondMantleSeen, secondMantleHeight, multiWall })}`);
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('immortals-3d-history-v1', JSON.stringify({ rivalHealth: 67, player: [12, 2.2, -9] })); });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  const migratedSave = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  const migratedEnvelope = await page.evaluate(() => JSON.parse(localStorage.getItem('immortals-3d-history-v1') ?? '{}'));
+  if (migratedSave.rival.health !== 67 || Math.abs(migratedSave.player.x - 12) > 3 || migratedSave.player.z !== -9 || migratedEnvelope.version !== 2 || migratedEnvelope.player[0] !== 12 || errors.length) throw new Error(`Legacy save migration failed: ${JSON.stringify({ migratedSave, migratedEnvelope, errors })}`);
+  await page.evaluate(() => localStorage.setItem('immortals-3d-history-v1', '{bad-save'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  const recoveredSave = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  const corruptEnvelope = await page.evaluate(() => localStorage.getItem('immortals-3d-history-v1'));
+  if (recoveredSave.rival.health !== 100 || recoveredSave.year !== 0 || corruptEnvelope !== null || errors.length) throw new Error(`Corrupt save recovery failed: ${JSON.stringify({ recoveredSave, corruptEnvelope, errors })}`);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
   const sprintJump = await hold(['w', 'Shift', 'Space'], 220);

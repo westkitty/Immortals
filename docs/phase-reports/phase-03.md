@@ -15,6 +15,7 @@ Connect the 3D battle slice to persistent state and prove that a return does not
 - Added persistent terrain scar geometry and an `H` causal inspector that renders recent event records.
 - Added a versioned `BattleOutcome` sealed on rival defeat with the victory year, player vitality, collapsed structures, scar count, and causal event identifiers.
 - Migrated the local save envelope to version 2 and proved the sealed outcome survives a browser reload before the `C` century return.
+- Legacy versionless saves are rewritten as version 2; malformed and future-version envelopes are discarded rather than partially applied.
 
 # Files changed
 
@@ -27,11 +28,11 @@ The 3D runtime now owns a typed causal event ledger, persistent terrain scars, a
 # Tests executed
 
 - `npm run verify` — PASS (build, typecheck, 16 unit tests).
-- `npm run test:browser` — PASS for collapse persistence, sealed battle-outcome persistence across reload, and the first-century return, with zero console errors.
+- `npm run test:browser` — PASS for legacy-save migration, corrupt-save recovery, collapse persistence, sealed battle-outcome persistence across reload, and the first-century return, with zero console errors.
 
 # Browser evidence
 
-The browser journey defeats the rival, confirms the sealed immortal `BattleOutcome`, reloads to confirm save version 2 and the retained outcome, then reaches year 100. The final screenshot shows `YEAR 100` and the causal inspector.
+The browser journey upgrades a versionless envelope, rejects a malformed envelope, defeats the rival, confirms the sealed immortal `BattleOutcome`, reloads to confirm save version 2 and the retained outcome, then reaches year 100. The final screenshot shows `YEAR 100` and the causal inspector.
 
 # Visual evidence
 
@@ -43,7 +44,7 @@ Not measured.
 
 # Known limitations
 
-The browser-proven save boundary is a versioned localStorage envelope, not IndexedDB. The 3D inspector is currently limited to recent local events; full outcome reconstruction and corruption/migration fixtures remain outside this increment.
+The browser-proven save boundary is a versioned localStorage envelope, not IndexedDB. The 3D inspector is currently limited to recent local events; full outcome reconstruction and IndexedDB migration remain outside this increment.
 
 # Completion status
 
