@@ -4,7 +4,11 @@ An experimental browser game about immortal combat, persistent damage, and the h
 
 ## Current truthful state
 
-The active application is a Three.js/WebGL prototype in `src/main.ts`. It provides a compact procedural city, a controllable player, one rival, lightweight combat, building-height damage, terrain-scar markers, a local campaign save, a 100-year return, and a causal inspector. It is not yet the complete 100,000-year game described by the project thesis.
+The active application is a Three.js/WebGL prototype in `src/main.ts`. It provides a denser, instanced-rendered procedural city (traffic, pedestrians, and street-level detail via `InstancedMesh`), a controllable player, one rival, lightweight combat, building-height damage, terrain-scar markers, a local campaign save, a 100-year return, and a causal inspector. It is not yet the complete 100,000-year game described by the project thesis, and this pass does not itself constitute completion of Canonical Phase 2.
+
+Input is unified across keyboard, mouse, touch, and gamepad (`src/input.ts`): the same logical actions drive movement, camera look, and every ability, with a touch movement joystick, look zone, and contextual action cluster for mobile, and standard-layout gamepad stick/button mapping. Settings — key bindings, quality tier, camera sensitivity, haptics, and accessibility flags (reduced camera shake, reduced hit-flash) — persist in a versioned, migrated `localStorage` envelope (`src/settings.ts`). A frame-budget governor (`src/quality.ts`) adapts rendering density (AUTO/LOW/MEDIUM/HIGH) to sustained frame time with hysteresis, while a manual quality-tier choice always overrides it. The HUD switches between FULL, MINIMAL, CONTEXT_ALERT, and hidden-exploration modes depending on recent player activity, and world-space labels (e.g. over the landmark) replace some earlier fixed-position prompts.
+
+The city fabric (`src/city.ts`) tracks per-parcel land use and district identity, a landmark with a stable id that can be damaged and later rebuilt, and public-memory markers projected from real collapse events — the public account can diverge from the objective event ledger, but the objective `history.ts` event itself is never rewritten to make a public story true. Every public-memory marker (collapse, landmark damage, and archaeology-recovery corrective markers) also spawns a small plaque mesh in the world at the site, and a rebuilt parcel that reuses relic material gets a distinct lineage marker. Century advancement evolves land use, rebuilds/re-colors a damaged landmark, and runs a visible multi-second reconstruction (a rebuilt parcel grows from near-zero height and eases its color toward its new land use rather than snapping instantly). Buildings are spatially partitioned (`src/spatialGrid.ts`) for wall/grapple/shockwave queries, and `activeChunkCount` in the observation hook reports the real occupied-cell count. Traffic uses three distinct `InstancedMesh` vehicle types (sedan/van/bus) instead of one repeated box. Rubble and terrain-scar meshes are capped with oldest-first disposal so long sessions cannot leak GPU resources, without ever trimming the underlying objective history or save data.
 
 The three standalone HTML prototypes are preserved as historical experiments. `century1.html` contains richer older canvas logic, but it is not integrated with the active runtime and is not production authority.
 
@@ -34,6 +38,8 @@ Open `http://127.0.0.1:5173/`.
 - `T`: experimental deep-time projection
 - `Esc`: pause
 
+All of the above are also available as rebindable logical actions (see the in-game settings gear icon), and are reachable via touch controls (movement joystick, look zone, and a contextual action cluster) or a standard-layout gamepad.
+
 ## Validation
 
 ```bash
@@ -48,13 +54,16 @@ See [the validation index](docs/validation/README.md) for the current evidence b
 
 ## Architecture
 
-- Rendering: Three.js/WebGL
-- Gameplay remains in `src/main.ts`, with browser input isolated behind logical held/pressed/released actions in `src/input.ts`; traversal contacts, grapple visibility, camera collision, and observation state are explicit runtime boundaries.
+- Rendering: Three.js/WebGL, with traffic, pedestrians, and street-level detail drawn via `InstancedMesh` rather than one mesh per object.
+- Gameplay remains in `src/main.ts`, with browser/touch/gamepad input isolated behind logical held/pressed/released actions in `src/input.ts`; traversal contacts, grapple visibility, camera collision, and observation state are explicit runtime boundaries.
+- Settings persistence: `src/settings.ts` (versioned, migrated, independent of the campaign save envelope).
+- Adaptive quality governor: `src/quality.ts` (frame-budget AUTO/LOW/MEDIUM/HIGH with hysteresis; manual override always wins).
+- City fabric (district identity, land use, landmark lifecycle, public memory): `src/city.ts`.
 - Short-term campaign/history: `src/history.ts`
 - Experimental deep-time benchmark: `src/deepTime.ts`
-- Persistence: localStorage campaign envelope
+- Persistence: versioned/migrated localStorage campaign envelope (`SAVE_VERSION` in `src/main.ts`), separate from the settings envelope in `src/settings.ts`.
 
-The scene graph is currently too authoritative and the history/civilization model is too small for the final thesis. The bounded canonical Phase 1 traversal gate is complete; Canonical Phase 2 is next. Later Phase 4–10 code is preserved as experimental scaffolding, not completion evidence.
+The scene graph is currently too authoritative and the history/civilization model is too small for the final thesis. The bounded canonical Phase 1 traversal gate is complete; Canonical Phase 2 (expanding structural combat and destruction beyond the current bounded browser-proven slice) is still next and is not claimed as complete by this pass. Later Phase 4–10 code is preserved as experimental scaffolding, not completion evidence.
 
 ## Repository
 

@@ -27,5 +27,47 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffcf70; outline-
 #history-map i { position: absolute; top: 11px; width: 22px; height: 22px; border-radius: 50%; background: #0a1119; border: 2px solid #84e4f3; }
 #history-map i:nth-child(1) { left: 18%; } #history-map i:nth-child(2) { left: 48%; border-color: #e2b66b; } #history-map i:nth-child(3) { left: 78%; border-color: #ff7187; }
 .hidden { display: none; }
+.secondary-button { margin-top: 10px; margin-left: 10px; background: transparent; border: 1px solid rgba(162, 208, 220, .4); color: #c4f7ff; }
+.secondary-button:hover { background: rgba(132, 228, 243, .12); }
+.hud-icon-button { pointer-events: auto; margin-left: 8px; background: rgba(6,10,15,.6); border: 1px solid rgba(162,208,220,.35); color: #c4f7ff; width: 30px; height: 30px; border-radius: 50%; font-size: 15px; cursor: pointer; }
+
+/* Context-aware HUD modes: FULL shows the whole status strip, MINIMAL shows only vitals,
+   CONTEXT_ALERT briefly surfaces regardless of mode for an urgent event, HIDDEN_EXPLORATION
+   removes the strip almost entirely so nothing but world-space affordances remain on screen. */
+.hud-minimal > div:not(:first-child):not(:nth-last-child(2)) { display: none; }
+.hud-hidden-exploration { opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+.hud-hidden-exploration.hud-context-alert { opacity: 1; pointer-events: auto; }
+.hud-context-alert #status { color: #ffcf70; font-weight: 800; }
+
+.world-affordances { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.world-affordance-label { position: absolute; transform: translate(-50%, -50%); padding: 4px 9px; background: rgba(6,10,15,.72); border: 1px solid rgba(162,208,220,.35); color: #c4f7ff; font: 700 9px/1 ui-monospace, monospace; letter-spacing: .06em; white-space: nowrap; border-radius: 3px; }
+
+.onboarding { position: fixed; z-index: 4; left: 50%; top: 14%; transform: translateX(-50%); max-width: 420px; padding: 12px 16px; background: rgba(6,10,15,.88); border: 1px solid rgba(255, 207, 112, .4); color: #ffe6b0; font: 600 11px/1.4 ui-monospace, monospace; text-align: center; }
+
+.settings-dialog { position: fixed; margin: auto; max-width: 460px; width: min(92vw, 460px); max-height: 82vh; overflow: auto; color: #e6edf0; border: 1px solid rgba(162,208,220,.28); background: rgba(8,12,17,.97); }
+.settings-dialog::backdrop { background: rgba(2,4,6,.65); }
+.settings-dialog section { margin: 14px 0; }
+.settings-dialog label { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; color: #c8d3d8; }
+.settings-dialog select { background: #0d151b; color: #e6edf0; border: 1px solid rgba(162,208,220,.3); padding: 6px; width: 100%; margin-top: 6px; }
+#binding-list { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; margin-top: 8px; font: 600 11px ui-monospace, monospace; }
+#binding-list button { padding: 4px 8px; font-size: 10px; background: #14232a; color: #c4f7ff; }
+#binding-list button.listening { background: #ffcf70; color: #061015; }
+
+/* Touch controls: a movement zone (virtual joystick), a look zone (drag to orbit the camera),
+   and a contextual action cluster. Hidden by default; main.ts reveals this whenever the most
+   recent meaningful interaction was a touch/pointer event, per the input-mode tracking contract. */
+.touch-controls { position: fixed; inset: 0; z-index: 3; touch-action: none; }
+.touch-zone { position: absolute; pointer-events: auto; }
+.touch-move-zone { left: 0; bottom: 0; width: 46vw; height: 52vh; max-width: 320px; }
+.touch-look-zone { right: 0; bottom: 0; width: 54vw; height: 68vh; }
+.touch-stick { position: absolute; left: 46px; bottom: 46px; width: 84px; height: 84px; border-radius: 50%; background: rgba(132, 228, 243, .14); border: 1px solid rgba(162,208,220,.4); }
+.touch-stick::after { content: ''; position: absolute; inset: 26px; border-radius: 50%; background: rgba(196, 247, 255, .5); }
+.touch-actions { position: absolute; right: 14px; bottom: 14px; display: grid; grid-template-columns: repeat(3, 58px); gap: 8px; pointer-events: auto; }
+.touch-button { width: 58px; height: 58px; border-radius: 50%; background: rgba(20, 35, 42, .78); border: 1px solid rgba(162,208,220,.4); color: #c4f7ff; font: 800 9px/1 ui-monospace, monospace; }
+.touch-button-primary { background: rgba(132, 228, 243, .28); grid-row: span 2; height: auto; border-radius: 16px; }
+.touch-button:active, .touch-button.active { background: rgba(132, 228, 243, .45); }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 @media (max-width: 700px) { .hud { gap: 10px; padding: 10px; flex-wrap: wrap; } .hud > div:nth-child(2), .hud > div:nth-child(3) { display: none; } #status { width: 100%; margin-left: 0; } .help { left: 10px; right: 10px; transform: none; overflow: hidden; font-size: 8px; text-overflow: ellipsis; } .history { top: 58px; right: 10px; width: calc(100vw - 20px); } }
+@media (max-width: 700px) and (orientation: portrait) { .touch-move-zone { height: 38vh; } .touch-actions { grid-template-columns: repeat(2, 54px); right: 10px; bottom: 10px; } .touch-button { width: 54px; height: 54px; } }
+@media (max-width: 900px) and (orientation: landscape) { .touch-move-zone { height: 70vh; max-width: 240px; } .touch-actions { grid-template-columns: repeat(3, 48px); gap: 6px; } .touch-button { width: 48px; height: 48px; font-size: 8px; } }

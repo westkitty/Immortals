@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Every Fight Is Followed By A Century</title>
   </head>
   <body>
@@ -12,11 +12,66 @@
         <h1>EVERY FIGHT IS<br />FOLLOWED BY A CENTURY</h1>
         <p>You are immortal. The city is not. Enter the first battlefield and learn how to move through it.</p>
         <button id="enter">ENTER THE CITY</button>
+        <button id="open-settings" class="secondary-button" type="button" aria-haspopup="dialog" aria-controls="settings">SETTINGS &amp; CONTROLS</button>
       </div>
-      <div id="hud" class="hud hidden" aria-label="Game status"><div><span class="label">YEAR</span><strong id="year">0</strong></div><div><span class="label">DISTRICT</span><strong id="district">WESTERN QUARTER</strong></div><div><span class="label">VELOCITY</span><strong id="velocity">0</strong></div><div><span class="label">STATE</span><strong id="state">GROUND</strong></div><div><span class="label">VITALITY</span><strong id="vitality">100</strong></div><div><span class="label">RIVAL</span><strong id="rival">100</strong></div><div id="status" role="status" aria-live="polite">TRAVERSAL ONLINE</div></div>
+      <div id="hud" class="hud hud-full hidden" aria-label="Game status">
+        <div><span class="label">YEAR</span><strong id="year">0</strong></div>
+        <div><span class="label">DISTRICT</span><strong id="district">WESTERN QUARTER</strong></div>
+        <div><span class="label">VELOCITY</span><strong id="velocity">0</strong></div>
+        <div><span class="label">STATE</span><strong id="state">GROUND</strong></div>
+        <div><span class="label">VITALITY</span><strong id="vitality">100</strong></div>
+        <div><span class="label">RIVAL</span><strong id="rival">100</strong></div>
+        <div><span class="label">QUALITY</span><strong id="quality-tier">HIGH</strong></div>
+        <button id="settings-toggle" class="hud-icon-button" type="button" aria-haspopup="dialog" aria-controls="settings" aria-label="Open settings">⚙</button>
+        <div id="status" role="status" aria-live="polite">TRAVERSAL ONLINE</div>
+      </div>
+      <div id="world-affordances" class="world-affordances hidden" aria-hidden="true"></div>
+      <div id="onboarding" class="onboarding hidden" role="status" aria-live="polite"></div>
       <div id="help" class="help hidden" aria-label="Keyboard controls">WASD move · SHIFT sprint · SPACE jump / wall run / climb · Z rebound · Q dash · E grapple · G glide · V dive · X surf debris · F strike · R shockwave · H history · A archaeology · T deep time · [ ] camera · M calm camera · ESC pause</div>
       <div id="pause" class="panel pause hidden"><p class="eyebrow">CITY PAUSED</p><h2>THE CENTURY WAITS</h2><p>Press Escape to resume.</p></div>
       <aside id="history" class="history hidden" aria-label="Causal history inspector"><p class="eyebrow">CAUSAL INSPECTOR</p><h2>WHAT HAPPENED HERE</h2><label class="scrub-label" for="timeline">ARCHIVE YEAR <output id="timeline-year">0</output></label><input id="timeline" type="range" min="0" max="100000" step="100" value="0" aria-label="Archive year" /><div id="history-map" role="img" aria-label="Historical map with west, center, and east impact landmarks"><i></i><i></i><i></i></div><div id="history-list" aria-live="polite">No recorded consequences yet.</div></aside>
+
+      <dialog id="settings" class="panel settings-dialog" aria-label="Settings and controls">
+        <p class="eyebrow">SETTINGS</p>
+        <h2>CONTROLS &amp; ACCESSIBILITY</h2>
+        <section aria-label="Quality">
+          <label class="scrub-label" for="quality-select">RENDER QUALITY</label>
+          <select id="quality-select">
+            <option value="auto">AUTO (adaptive)</option>
+            <option value="low">LOW</option>
+            <option value="medium">MEDIUM</option>
+            <option value="high">HIGH</option>
+          </select>
+        </section>
+        <section aria-label="Accessibility">
+          <label><input id="setting-reduced-shake" type="checkbox" /> Reduce camera shake</label>
+          <label><input id="setting-reduced-flash" type="checkbox" /> Reduce hit-flash intensity</label>
+          <label><input id="setting-high-contrast" type="checkbox" /> High-contrast HUD text</label>
+          <label><input id="setting-hold-toggle" type="checkbox" /> Hold-to-toggle assist (grapple/glide)</label>
+          <label><input id="setting-haptics" type="checkbox" /> Haptic feedback (touch/gamepad)</label>
+        </section>
+        <section aria-label="Bindings">
+          <p class="scrub-label">KEY BINDINGS</p>
+          <div id="binding-list"></div>
+          <button id="reset-bindings" class="secondary-button" type="button">RESET TO DEFAULTS</button>
+        </section>
+        <button id="close-settings" type="button">DONE</button>
+      </dialog>
+
+      <div id="touch-controls" class="touch-controls hidden" aria-hidden="true">
+        <div id="touch-move-zone" class="touch-zone touch-move-zone">
+          <div id="touch-move-stick" class="touch-stick"></div>
+        </div>
+        <div id="touch-look-zone" class="touch-zone touch-look-zone"></div>
+        <div id="touch-actions" class="touch-actions">
+          <button id="touch-jump" class="touch-button touch-button-primary" type="button" aria-label="Jump">JUMP</button>
+          <button id="touch-attack" class="touch-button" type="button" aria-label="Attack">HIT</button>
+          <button id="touch-sprint" class="touch-button" type="button" aria-label="Sprint">RUN</button>
+          <button id="touch-dash" class="touch-button" type="button" aria-label="Dash">DASH</button>
+          <button id="touch-grapple" class="touch-button" type="button" aria-label="Grapple">HOOK</button>
+          <button id="touch-glide" class="touch-button" type="button" aria-label="Glide">GLIDE</button>
+        </div>
+      </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

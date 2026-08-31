@@ -14,6 +14,7 @@
     "verify": "npm run build && npm run typecheck && npm test"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "^149.0.0",
     "@types/node": "^26.4.0",
     "playwright": "^1.62.1",
     "typescript": "7.0.2",

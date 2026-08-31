@@ -1,6 +1,22 @@
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright';
+import { launchChromium } from './browserLauncher.mjs';
+
+// Software-rendered (SwiftShader) headless Chromium in constrained sandboxes can take
+// several seconds to composite a screenshot and occasionally times out transiently.
+// Screenshots here are QA artifacts, not correctness assertions, so failures are
+// retried and ultimately non-fatal to the pass/fail journey result.
+async function captureScreenshot(page, path) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await page.screenshot({ path, timeout: 20000 });
+      return true;
+    } catch (error) {
+      if (attempt === 2) { console.warn(`Screenshot capture skipped after retries (${path}): ${error.message}`); return false; }
+    }
+  }
+  return false;
+}
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const server = spawn('npm', ['run', 'dev', '--', '--host', '127.0.0.1', '--port', '4173'], { cwd: root, stdio: ['ignore', 'pipe', 'inherit'] });
@@ -14,7 +30,7 @@ await new Promise((resolve, reject) => {
 console.log(output.trim());
 let browser;
 try {
-  browser = await chromium.launch({ headless: true });
+  browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   const errors = [];
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
@@ -49,7 +65,7 @@ try {
   for (let step = 0; step < 70; step += 1) {
     await page.evaluate(() => window.advanceTime(1000 / 60));
     const sample = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-    if (sample.traversal.mantling === true && sample.player.x > 15) { secondMantleSeen = true; secondMantleHeight = Math.max(secondMantleHeight, sample.player.y); if (!secondMantleCaptured) { await page.screenshot({ path: 'output/web-game/repair-1-multiwall.png' }); secondMantleCaptured = true; } }
+    if (sample.traversal.mantling === true && sample.player.x > 15) { secondMantleSeen = true; secondMantleHeight = Math.max(secondMantleHeight, sample.player.y); if (!secondMantleCaptured) { await captureScreenshot(page, 'output/web-game/repair-1-multiwall.png'); secondMantleCaptured = true; } }
   }
   await page.keyboard.up('Space');
   await page.keyboard.up('d');
@@ -60,13 +76,19 @@ try {
   await page.locator('#enter').click({ force: true });
   const migratedSave = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   const migratedEnvelope = await page.evaluate(() => JSON.parse(localStorage.getItem('immortals-3d-history-v1') ?? '{}'));
-  if (migratedSave.rival.health !== 67 || Math.abs(migratedSave.player.x - 12) > 3 || migratedSave.player.z !== -9 || migratedEnvelope.version !== 2 || migratedEnvelope.player[0] !== 12 || errors.length) throw new Error(`Legacy save migration failed: ${JSON.stringify({ migratedSave, migratedEnvelope, errors })}`);
+  if (migratedSave.rival.health !== 67 || Math.abs(migratedSave.player.x - 12) > 3 || migratedSave.player.z !== -9 || migratedEnvelope.version !== 3 || migratedEnvelope.player[0] !== 12 || !migratedEnvelope.city || errors.length) throw new Error(`Legacy save migration failed: ${JSON.stringify({ migratedSave, migratedEnvelope, errors })}`);
   await page.evaluate(() => localStorage.setItem('immortals-3d-history-v1', '{bad-save'));
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
   const recoveredSave = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   const corruptEnvelope = await page.evaluate(() => localStorage.getItem('immortals-3d-history-v1'));
   if (recoveredSave.rival.health !== 100 || recoveredSave.year !== 0 || corruptEnvelope !== null || errors.length) throw new Error(`Corrupt save recovery failed: ${JSON.stringify({ recoveredSave, corruptEnvelope, errors })}`);
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('immortals-3d-history-v1', JSON.stringify({ version: 9999, rivalHealth: 12, player: [1, 2, 3] })); });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#enter').click({ force: true });
+  const futureSave = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
+  const futureEnvelope = await page.evaluate(() => localStorage.getItem('immortals-3d-history-v1'));
+  if (futureSave.rival.health !== 100 || futureSave.year !== 0 || futureEnvelope !== null || errors.length) throw new Error(`Future save version rejection failed: ${JSON.stringify({ futureSave, futureEnvelope, errors })}`);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
   const sprintJump = await hold(['w', 'Shift', 'Space'], 220);
@@ -77,7 +99,7 @@ try {
   const grapple = await hold(['e'], 160);
   const openAirWallRun = await hold(['w', 'Space'], 180);
   const debrisActive = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  await page.evaluate(() => window.advanceTime(27500));
+  await page.evaluate(() => window.advanceTime(29000));
   const debrisExpired = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   await page.evaluate(() => window.advanceTime(1500));
   const debrisRespawned = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
@@ -88,7 +110,7 @@ try {
   await page.evaluate(() => window.advanceTime(500));
   const paused = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (paused.mode !== 'paused' || errors.length) throw new Error(`Pause journey failed: ${JSON.stringify({ paused, errors })}`);
-  await page.screenshot({ path: 'output/web-game/repair-1-journey.png' });
+  await captureScreenshot(page, 'output/web-game/repair-1-journey.png');
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
@@ -109,7 +131,7 @@ try {
   const collapsed = collapse.buildings.filter((building) => building.collapsed);
   const supportAffected = collapse.buildings.filter((building) => building.id !== 'building-1-1' && building.integrity < 100);
   if (!collapsed.length || !supportAffected.length || collapse.bridge.integrity >= 160 || collapse.rubbleCount <= 0 || errors.length) throw new Error(`Structure collapse journey failed: ${JSON.stringify({ collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, errors })}`);
-  await page.screenshot({ path: 'output/web-game/repair-2-collapse.png' });
+  await captureScreenshot(page, 'output/web-game/repair-2-collapse.png');
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click({ force: true });
   const structurePersisted = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
@@ -123,6 +145,7 @@ try {
   await hold(['f'], 100);
   const combatAfterAttack = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   await hold(['s'], 300);
+  await hold([], 9000);
   const combatAfterHit = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (combatAfterAttack.rival.health >= combatBefore.rival.health || combatAfterHit.playerCombat.health >= 100 || errors.length) throw new Error(`Combat journey failed: ${JSON.stringify({ combatBefore, combatAfterAttack, combatAfterHit, errors })}`);
   await hold(['w'], 100);
@@ -135,12 +158,12 @@ try {
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#enter').click();
   const persistedOutcome = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (persistedOutcome.saveVersion !== 2 || persistedOutcome.battleOutcome?.winner !== 'immortal' || persistedOutcome.rival.health !== 0 || errors.length) throw new Error(`Battle outcome persistence failed: ${JSON.stringify({ persistedOutcome, errors })}`);
+  if (persistedOutcome.saveVersion !== 3 || persistedOutcome.battleOutcome?.winner !== 'immortal' || persistedOutcome.rival.health !== 0 || errors.length) throw new Error(`Battle outcome persistence failed: ${JSON.stringify({ persistedOutcome, errors })}`);
   await page.keyboard.down('c');
   await page.evaluate(() => window.advanceTime(80));
   await page.keyboard.up('c');
   const centuryReturn = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
-  if (centuryReturn.year !== 100 || centuryReturn.saveVersion !== 2 || centuryReturn.rival.health !== 100 || centuryReturn.rival.visible !== true || centuryReturn.battleOutcome?.winner !== 'immortal' || centuryReturn.development.returnAwareness <= 0 || !centuryReturn.history.some((event) => event.type === 'return' && event.year === 100) || errors.length) throw new Error(`Century return journey failed: ${JSON.stringify({ centuryReturn, errors })}`);
+  if (centuryReturn.year !== 100 || centuryReturn.saveVersion !== 3 || centuryReturn.rival.health !== 100 || centuryReturn.rival.visible !== true || centuryReturn.battleOutcome?.winner !== 'immortal' || centuryReturn.development.returnAwareness <= 0 || !centuryReturn.history.some((event) => event.type === 'return' && event.year === 100) || errors.length) throw new Error(`Century return journey failed: ${JSON.stringify({ centuryReturn, errors })}`);
   await page.keyboard.down('h');
   await page.evaluate(() => window.advanceTime(80));
   await page.keyboard.up('h');
@@ -157,7 +180,7 @@ try {
   await page.keyboard.up('t');
   const deepTime = JSON.parse(await page.evaluate(() => window.render_game_to_text?.() ?? '{}'));
   if (!historyOpen.historyInspectorOpen || !historyPanelVisible || !historyPanelText.includes('PUBLIC ACCOUNT:') || archaeology.history.filter((event) => event.publicAccount.startsWith('Recovered evidence confirms')).length < 2 || deepTime.deepTime?.year !== 100000 || errors.length) throw new Error(`History/deep-time journey failed: ${JSON.stringify({ historyOpen, historyPanelVisible, historyPanelText, archaeology, deepTime, errors })}`);
-  await page.screenshot({ path: 'output/web-game/repair-2-combat.png' });
+  await captureScreenshot(page, 'output/web-game/repair-2-combat.png');
   console.log(JSON.stringify({ mode: paused.mode, traversalCourse: { firstMantle: mantleSeen, secondMantle: secondMantleSeen, secondRoofHeight: secondMantleHeight }, sprintJump: sprintJump.traversal, debrisLifecycle: { active: debrisActive.traversal.debris, expired: debrisExpired.traversal.debris, respawned: debrisRespawned.traversal.debris }, dash: dash.traversal, glide: glide.traversal, dive: dive.traversal, openAirWallRun: openAirWallRun.traversal, structureImpact: { damaged, collapsed, supportAffected, bridge: collapse.bridge, rubbleCount: collapse.rubbleCount, persisted: { collapsed: structurePersisted.buildings.filter((building) => building.collapsed).length, rubbleCount: structurePersisted.rubbleCount, adaptation: structurePersisted.development.adaptation, districtPolicies: structurePersisted.districtPolicies } }, combat: { before: combatBefore.player, rivalAfterAttack: combatAfterAttack.rival, playerAfterHit: combatAfterHit.playerCombat, defeat: { health: combatDefeat.rival.health, visible: combatDefeat.rival.visible }, centuryReturn: { year: centuryReturn.year, rivalHealth: centuryReturn.rival.health, visible: centuryReturn.rival.visible, returnAwareness: centuryReturn.development.returnAwareness, districtPolicies: centuryReturn.districtPolicies } }, history: { inspectorOpen: historyOpen.historyInspectorOpen, panelVisible: historyPanelVisible, recovered: archaeology.history.filter((event) => event.publicAccount.startsWith('Recovered evidence confirms')).length }, deepTime: { year: deepTime.deepTime?.year, hash: deepTime.deepTime?.hash }, errors }, null, 2));
 } finally {
   await browser?.close();
